@@ -15,8 +15,7 @@
         "type": "credit",
         "amount": 500000
       }
-    ],
-    "highlight": "yellow"
+    ]
   },
   {
     "id": "txn_2",
@@ -34,8 +33,7 @@
         "type": "credit",
         "amount": 25000
       }
-    ],
-    "highlight": "blue"
+    ]
   },
   {
     "id": "txn_3",
@@ -53,8 +51,7 @@
         "type": "credit",
         "amount": 100000
       }
-    ],
-    "highlight": "green"
+    ]
   },
   {
     "id": "txn_4",
@@ -77,8 +74,7 @@
         "type": "credit",
         "amount": 125000
       }
-    ],
-    "highlight": "blue"
+    ]
   },
   {
     "id": "txn_5",
@@ -96,8 +92,7 @@
         "type": "credit",
         "amount": 200000
       }
-    ],
-    "highlight": "yellow"
+    ]
   },
   {
     "id": "txn_bg_1",

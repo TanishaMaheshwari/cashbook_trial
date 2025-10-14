@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { BookProvider } from '@/context/BookContext';
 import { getBooks } from '@/lib/data';
+import AppShell from '@/components/AppShell';
 
 export const metadata: Metadata = {
   title: 'LedgerBalance',
@@ -14,7 +14,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Always fetch all books for the provider
   const initialBooks = await getBooks();
 
   return (
@@ -25,9 +24,9 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <BookProvider initialBooks={initialBooks}>
+        <AppShell initialBooks={initialBooks}>
           {children}
-        </BookProvider>
+        </AppShell>
         <Toaster />
       </body>
     </html>

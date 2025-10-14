@@ -205,7 +205,7 @@ export const deleteCategory = async (bookId: string, id: string): Promise<void> 
     }
     const [deletedCategory] = allCategories.splice(index, 1);
     await addToRecycleBin({ ...deletedCategory, type: 'category' });
-    await writeData<Category>(allCategories, allCategories);
+    await writeData<Category>(categoriesFilePath, allCategories);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
@@ -219,14 +219,22 @@ export const deleteTransaction = async (bookId: string, id: string): Promise<voi
   await writeData<Transaction>(transactionsFilePath, allTransactions);
 };
 
-export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId'>): Promise<Account> => {
+export const addAccount = async (bookId: string, accountData: Omit<Account, 'id' | 'bookId'>): Promise<Account> => {
     const allAccounts = await readData<Account>(accountsFilePath);
+    
+    // Check for duplicate account name within the same book
+    const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === accountData.name.toLowerCase());
+    if (existingAccount) {
+        throw new Error(`An account named "${accountData.name}" already exists in this book.`);
+    }
+
     const newAccount: Account = {
-        name: account.name,
-        categoryId: account.categoryId,
         id: `acc_${Date.now()}`,
         bookId: bookId,
+        name: accountData.name,
+        categoryId: accountData.categoryId,
     };
+
     allAccounts.push(newAccount);
     await writeData<Account>(accountsFilePath, allAccounts);
 
@@ -266,10 +274,9 @@ export const deleteAccount = async (bookId: string, id: string): Promise<void> =
 export const deleteMultipleAccounts = async (bookId: string, accountIds: string[]): Promise<void> => {
     const transactions = await getTransactions(bookId);
     const allAccounts = await readData<Account>(accountsFilePath);
-    const bookAccounts = allAccounts.filter(acc => acc.bookId === bookId);
-
-    let accountsToDelete = bookAccounts.filter(acc => accountIds.includes(acc.id));
     
+    let accountsToDelete = allAccounts.filter(acc => acc.bookId === bookId && accountIds.includes(acc.id));
+
     for (const account of accountsToDelete) {
         const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === account.id));
         if (hasTransactions) {
@@ -277,7 +284,7 @@ export const deleteMultipleAccounts = async (bookId: string, accountIds: string[
         }
         await addToRecycleBin({ ...account, type: 'account' });
     }
-
-    const remainingAccounts = allAccounts.filter(acc => !accountIds.includes(acc.id));
+    
+    const remainingAccounts = allAccounts.filter(acc => !accountIds.includes(acc.id) || acc.bookId !== bookId);
     await writeData<Account>(accountsFilePath, remainingAccounts);
 };
