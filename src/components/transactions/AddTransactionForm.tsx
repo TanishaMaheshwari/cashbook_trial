@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -21,6 +20,7 @@ import AddAccountForm from '@/components/accounts/AddAccountForm';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent } from '../ui/card';
+import { Combobox } from '@/components/ui/combobox';
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
@@ -50,7 +50,7 @@ const formSchema = z.object({
 type AddTransactionFormProps = {
   accounts: Account[];
   onFinished: () => void;
-  initialData?: Transaction;
+  initialData?: Transaction | null;
 };
 
 export default function AddTransactionForm({ accounts, onFinished, initialData }: AddTransactionFormProps) {
@@ -62,11 +62,7 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
-      ...initialData,
-      date: new Date(initialData.date),
-      useSeparateNarration: initialData.entries.some(e => e.description)
-    } : {
+    defaultValues: {
       description: '',
       date: new Date(),
       entries: [
@@ -77,12 +73,12 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
     },
   });
   
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'entries',
   });
 
-  const [isSplit, setIsSplit] = useState(isEditMode && initialData.entries.length > 2);
+  const [isSplit, setIsSplit] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -95,6 +91,17 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
       if (initialData.entries.length > 2) {
         setIsSplit(true);
       }
+    } else {
+        form.reset({
+            description: '',
+            date: new Date(),
+            entries: [
+                { accountId: '', type: 'credit', amount: 0, description: '' },
+                { accountId: '', type: 'debit', amount: 0, description: '' },
+            ],
+            useSeparateNarration: false,
+        });
+        setIsSplit(false);
     }
   }, [initialData, form]);
 
@@ -127,11 +134,9 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
   }, [watchedEntries]);
 
   const handleAmountSync = (index: number, amount: number) => {
-    if (!isSplit) {
-      const otherIndex = fields.findIndex((field, i) => i !== index && field.type !== fields[index].type);
-      if (otherIndex !== -1) {
-          form.setValue(`entries.${otherIndex}.amount`, amount);
-      }
+    if (!isSplit && fields.length === 2) {
+        const otherIndex = index === 0 ? 1 : 0;
+        form.setValue(`entries.${otherIndex}.amount`, amount);
     }
   }
 
@@ -139,6 +144,9 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
   const debitFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'debit');
   
   const dummyCategories: Category[] = [];
+
+  const accountOptions = useMemo(() => accounts.map(acc => ({ value: acc.id, label: acc.name })), [accounts]);
+
 
   const EntryCard = ({ index, type }: { index: number, type: 'credit' | 'debit' }) => (
     <Card className={cn("w-full", type === 'credit' ? 'bg-blue-50' : 'bg-green-50')}>
@@ -152,18 +160,16 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
           render={({ field }) => (
             <FormItem>
               <FormLabel>{type === 'credit' ? 'From Account' : 'To Account'}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select an account" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {accounts.map(acc => (
-                      <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                    <Combobox
+                        options={accountOptions}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an account"
+                        searchPlaceholder="Search accounts..."
+                        notFoundPlaceholder="No account found."
+                    />
+                </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -181,8 +187,9 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
                   placeholder="0.00"
                   {...formField}
                   onChange={(e) => {
-                      formField.onChange(e);
-                      handleAmountSync(index, parseFloat(e.target.value) || 0);
+                      const amount = parseFloat(e.target.value) || 0;
+                      formField.onChange(amount);
+                      handleAmountSync(index, amount);
                   }}
                   className="bg-white"
                 />
@@ -300,7 +307,7 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
                     </div>
                 </div>
 
-                {!isSplit && (
+                {!isSplit && !isEditMode && (
                     <div className="flex items-center space-x-2">
                         <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} checked={isSplit} />
                         <label htmlFor="enable-split" className="text-sm font-medium leading-none">Enable Split Entry</label>
