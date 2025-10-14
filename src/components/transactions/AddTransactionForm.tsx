@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, MinusCircle, PlusCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, Check, ChevronsUpDown, MinusCircle, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Account, Category } from '@/lib/types';
@@ -20,6 +20,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import AddAccountForm from '@/components/accounts/AddAccountForm';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 
 
 const transactionEntrySchema = z.object({
@@ -186,16 +194,58 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
                     control={form.control}
                     name={`entries.${index}.accountId`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel className="sr-only">Account</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between w-full",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? accounts.find(
+                                      (acc) => acc.id === field.value
+                                    )?.name
+                                  : "Select account"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search account..." />
+                              <CommandList>
+                                <CommandEmpty>No account found.</CommandEmpty>
+                                <CommandGroup>
+                                  {accounts.map((acc) => (
+                                    <CommandItem
+                                      value={acc.name}
+                                      key={acc.id}
+                                      onSelect={() => {
+                                        form.setValue(`entries.${index}.accountId`, acc.id)
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          acc.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {acc.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -254,7 +304,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
               )}
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0 })}>
+          <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0, description: '' })}>
             <PlusCircle className="mr-2 h-4 w-4" /> Add Entry
           </Button>
           {form.formState.errors.entries?.message && <FormMessage>{form.formState.errors.entries.message}</FormMessage>}
