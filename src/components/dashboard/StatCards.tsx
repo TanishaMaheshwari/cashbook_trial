@@ -9,7 +9,7 @@ type StatCardsProps = {
     totalDebit: number;
     totalCredit: number;
     difference: number;
-    categoryBalances: { id: string; name: string; balance: number }[];
+    selectedCategoryBalance?: { id: string; name: string; balance: number };
   };
 };
 
@@ -29,13 +29,13 @@ export default function StatCards({ stats }: StatCardsProps) {
   return (
     <div>
       <h2 className="text-2xl font-headline mb-4">Dashboard Overview</h2>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Debits" value={formatCurrency(stats.totalDebit)} icon={ArrowDownCircle} colorClass="text-chart-3" />
         <StatCard title="Total Credits" value={formatCurrency(stats.totalCredit)} icon={ArrowUpCircle} colorClass="text-chart-2" />
         <StatCard title="Difference" value={formatCurrency(stats.difference)} icon={Scale} colorClass={stats.difference !== 0 ? 'text-destructive' : 'text-chart-2'} />
-        {stats.categoryBalances.map(cat => (
-          <StatCard key={cat.id} title={cat.name} value={formatCurrency(cat.balance)} icon={Scale} />
-        ))}
+        {stats.selectedCategoryBalance && (
+          <StatCard key={stats.selectedCategoryBalance.id} title={stats.selectedCategoryBalance.name} value={formatCurrency(stats.selectedCategoryBalance.balance)} icon={Scale} />
+        )}
       </div>
     </div>
   );

@@ -8,8 +8,16 @@ import { Logo } from '@/components/icons/Logo';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import StatCards from './StatCards';
-import RecentTransactions from './RecentTransactions';
 import ManageCategories from './ManageCategories';
+import RecentTransactions from './RecentTransactions';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from '../ui/label';
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -19,6 +27,7 @@ type DashboardClientProps = {
 
 export default function DashboardClient({ initialTransactions, accounts, categories }: DashboardClientProps) {
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(categories[0]?.id);
 
   const stats = useMemo(() => {
     const totalDebit = initialTransactions.flatMap(t => t.entries).filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
@@ -38,14 +47,17 @@ export default function DashboardClient({ initialTransactions, accounts, categor
       }, 0);
       return { ...category, balance };
     }).filter(cat => cat.balance !== 0);
+    
+    const selectedCategoryBalance = selectedCategoryId ? categoryBalances.find(c => c.id === selectedCategoryId) : undefined;
 
     return {
       totalDebit,
       totalCredit,
       difference: totalDebit - totalCredit,
       categoryBalances,
+      selectedCategoryBalance,
     };
-  }, [initialTransactions, accounts, categories]);
+  }, [initialTransactions, accounts, categories, selectedCategoryId]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -66,6 +78,23 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="space-y-8">
+          <div className="flex justify-end">
+            <div className="w-full max-w-xs space-y-2">
+              <Label htmlFor="category-select">Select Category</Label>
+              <Select onValueChange={setSelectedCategoryId} defaultValue={selectedCategoryId}>
+                <SelectTrigger id="category-select">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <StatCards stats={stats} />
           <RecentTransactions transactions={initialTransactions.slice(0, 5)} accounts={accounts} />
         </div>
