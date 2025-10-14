@@ -1,10 +1,16 @@
-
 [
   {
     "id": "acc_equity_opening",
     "name": "Opening Balance Equity",
     "categoryId": "cat_capital",
     "type": "equity",
+    "bookId": "book_default"
+  },
+  {
+    "name": "HMS",
+    "categoryId": "cat_capital",
+    "type": "asset",
+    "id": "acc_1760482126852",
     "bookId": "book_default"
   }
 ]

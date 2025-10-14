@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { Account, AccountType } from '@/lib/types';
+import type { Account } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useBooks } from '@/context/BookContext';
@@ -32,9 +32,11 @@ type LedgerEntry = {
 type AccountLedgerClientProps = {
   account: Account;
   ledgerEntries: LedgerEntry[];
+  finalBalance: number;
+  categoryName: string;
 };
 
-export default function AccountLedgerClient({ account, ledgerEntries }: AccountLedgerClientProps) {
+export default function AccountLedgerClient({ account, ledgerEntries, finalBalance, categoryName }: AccountLedgerClientProps) {
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
   const { activeBook } = useBooks();
@@ -50,8 +52,7 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
   }, [activeBook]);
 
 
-  const isDebitAccount = account.type === 'asset' || account.type === 'expense';
-  const finalBalance = ledgerEntries.length > 0 ? ledgerEntries[0].balance : 0;
+  const isDebitBalance = finalBalance >= 0;
 
   if (!isMounted) {
     return null; // Or a loading skeleton
@@ -86,14 +87,14 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
         </CardHeader>
         <CardContent className="grid md:grid-cols-3 gap-4 text-sm">
             <div>
-                <p className="text-muted-foreground">Account Type</p>
-                <p><Badge variant="secondary" className="capitalize">{account.type}</Badge></p>
+                <p className="text-muted-foreground">Category</p>
+                <p><Badge variant="secondary" className="capitalize">{categoryName}</Badge></p>
             </div>
              <div>
                 <p className="text-muted-foreground">Final Balance</p>
                 <p className="font-bold text-lg">
-                    {formatCurrency(finalBalance)}
-                    <span className="text-xs text-muted-foreground ml-1">{isDebitAccount ? 'Dr' : 'Cr'}</span>
+                    {formatCurrency(Math.abs(finalBalance))}
+                    <span className="text-xs text-muted-foreground ml-1">{isDebitBalance ? 'Dr' : 'Cr'}</span>
                 </p>
             </div>
         </CardContent>
@@ -111,8 +112,8 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="text-right">{transactionView === 'dr_cr' ? 'Debit' : 'To'}</TableHead>
-                <TableHead className="text-right">{transactionView === 'dr_cr' ? 'Credit' : 'From'}</TableHead>
+                <TableHead className="text-right">Debit</TableHead>
+                <TableHead className="text-right">Credit</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
@@ -128,7 +129,8 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
                     {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatCurrency(entry.balance)}
+                    {formatCurrency(Math.abs(entry.balance))}
+                     <span className="text-xs text-muted-foreground ml-1">{entry.balance >= 0 ? 'Dr' : 'Cr'}</span>
                   </TableCell>
                 </TableRow>
               ))}

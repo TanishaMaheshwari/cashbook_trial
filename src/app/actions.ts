@@ -81,7 +81,7 @@ export async function deleteTransactionAction(bookId: string, transactionId: str
   }
 }
 
-export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'>) {
+export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'> & { openingDebit?: number, openingCredit?: number }) {
     try {
         await addAccount(bookId, data);
         revalidatePath('/accounts');

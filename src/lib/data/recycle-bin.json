@@ -1,5 +1,25 @@
 [
   {
+    "date": "2025-10-14T22:48:46.859Z",
+    "description": "Opening balance for HMS",
+    "entries": [
+      {
+        "accountId": "acc_1760482126852",
+        "type": "debit",
+        "amount": 500000
+      },
+      {
+        "accountId": "acc_equity_opening",
+        "type": "credit",
+        "amount": 500000
+      }
+    ],
+    "id": "txn_1760482126860",
+    "bookId": "book_default",
+    "type": "transaction",
+    "deletedAt": "2025-10-14T22:49:16.167Z"
+  },
+  {
     "id": "cat_revenue",
     "name": "Revenue",
     "type": "category",

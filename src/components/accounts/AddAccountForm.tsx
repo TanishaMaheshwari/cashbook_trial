@@ -13,14 +13,17 @@ import { createAccountAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
 
-const accountTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
-
 const formSchema = z.object({
   name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
-  type: z.enum(accountTypes, { required_error: 'Account type is required.' }),
-  openingBalance: z.coerce.number().min(0, 'Opening balance cannot be negative.').optional(),
+  openingDebit: z.coerce.number().min(0).optional(),
+  openingCredit: z.coerce.number().min(0).optional(),
+})
+.refine(data => !(data.openingDebit && data.openingCredit), {
+    message: "Opening balance can be either a debit or a credit, not both.",
+    path: ["openingDebit"],
 });
+
 
 type AddAccountFormProps = {
   categories: Category[];
@@ -37,8 +40,8 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     defaultValues: {
       name: '',
       categoryId: '',
-      type: undefined,
-      openingBalance: 0,
+      openingDebit: 0,
+      openingCredit: 0
     },
   });
 
@@ -95,46 +98,38 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
           )}
         />
 
-        <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Account Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Select a type" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {accountTypes.map(type => (
-                                <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <FormDescription>
-                        Asset/Expense increase with Debits. Liability/Equity/Revenue increase with Credits.
-                    </FormDescription>
+        <div>
+            <FormLabel>Opening Balance (Optional)</FormLabel>
+            <FormDescription>If this account has a starting balance, enter it here.</FormDescription>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+                <FormField
+                control={form.control}
+                name="openingDebit"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Debit (Dr)</FormLabel>
+                    <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    </FormControl>
                     <FormMessage />
-                </FormItem>
-            )}
-        />
-
-        <FormField
-          control={form.control}
-          name="openingBalance"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Opening Balance (Optional)</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" placeholder="e.g., 10000" {...field} />
-              </FormControl>
-              <FormDescription>
-                If this account has a starting balance, enter it here.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="openingCredit"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Credit (Cr)</FormLabel>
+                    <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
+        </div>
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>

@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, TrendingDown, TrendingUp, ArrowUpDown, MoreVertical, Filter, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -27,7 +27,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import AddAccountForm from './AddAccountForm';
@@ -55,7 +54,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [filter, setFilter] = useState('all');
   const { activeBook } = useBooks();
 
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = (categoryId?: string) => {
+    if (!categoryId) return 'Uncategorized';
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
   };
   
@@ -97,16 +97,14 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     console.log("Editing account:", account);
   };
   
-  const isDebitAccount = (type: Account['type']) => ['asset', 'expense'].includes(type);
-
   const filteredAndSortedAccounts = useMemo(() => {
     let accounts = [...initialAccounts];
     
     if (filter !== 'all') {
         if (filter === 'debit') {
-            accounts = accounts.filter(a => isDebitAccount(a.type));
+            accounts = accounts.filter(a => a.balance >= 0);
         } else if (filter === 'credit') {
-            accounts = accounts.filter(a => !isDebitAccount(a.type));
+            accounts = accounts.filter(a => a.balance < 0);
         } else {
             accounts = accounts.filter(a => a.categoryId === filter);
         }
@@ -119,7 +117,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       );
     }
     
-    const [sortField, sortDirection] = sortDescriptor.split('-') as ['name' | 'balance' | 'type' | 'category', 'asc' | 'desc'];
+    const [sortField, sortDirection] = sortDescriptor.split('-') as ['name' | 'balance' | 'category', 'asc' | 'desc'];
 
 
     accounts.sort((a, b) => {
@@ -131,13 +129,9 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
           bValue = getCategoryName(b.categoryId);
           break;
         case 'balance':
-          aValue = a.balance;
-          bValue = b.balance;
+          aValue = Math.abs(a.balance);
+          bValue = Math.abs(b.balance);
           break;
-        case 'type':
-            aValue = a.type;
-            bValue = b.type;
-            break;
         default: // name
           aValue = a.name;
           bValue = b.name;
@@ -167,14 +161,6 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     } else {
       setSelectedAccounts([]);
     }
-  }
-
-  const accountTypeColors: { [key: string]: string } = {
-    asset: 'bg-green-100 text-green-800',
-    liability: 'bg-red-100 text-red-800',
-    equity: 'bg-purple-100 text-purple-800',
-    revenue: 'bg-blue-100 text-blue-800',
-    expense: 'bg-yellow-100 text-yellow-800',
   }
 
   return (
@@ -241,7 +227,6 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                             <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                             <SelectItem value="balance-desc">Balance (Highest First)</SelectItem>
                             <SelectItem value="balance-asc">Balance (Lowest First)</SelectItem>
-                            <SelectItem value="type-asc">Type</SelectItem>
                             <SelectItem value="category-asc">Category</SelectItem>
                         </SelectContent>
                     </Select>
@@ -317,18 +302,18 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                             </Link>
                         </TableCell>
                         <TableCell>
-                             <Badge variant="secondary" className={cn(accountTypeColors[account.type] || 'bg-gray-100 text-gray-800', 'capitalize text-xs')}>
+                             <Badge variant="secondary" className='capitalize text-xs'>
                                 {getCategoryName(account.categoryId)}
                             </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                             {isDebitAccount(account.type) ? (
+                             {account.balance >= 0 ? (
                                 <span className="text-green-600 font-semibold">{formatCurrency(account.balance)}</span>
                             ) : '-'}
                         </TableCell>
                         <TableCell className="text-right">
-                             {!isDebitAccount(account.type) ? (
-                                <span className="text-red-600 font-semibold">{formatCurrency(account.balance)}</span>
+                             {account.balance < 0 ? (
+                                <span className="text-red-600 font-semibold">{formatCurrency(Math.abs(account.balance))}</span>
                             ) : '-'}
                         </TableCell>
                         <TableCell className="text-right">

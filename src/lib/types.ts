@@ -13,7 +13,6 @@ export type Account = {
   id: string;
   name: string;
   categoryId: string;
-  type: AccountType;
   bookId: string;
   openingBalance?: number;
 };

@@ -111,12 +111,12 @@ export const getCategories = async (bookId: string): Promise<Category[]> => {
   const categories = await readData<Category>(categoriesFilePath);
   const bookCategories = categories.filter(c => c.bookId === bookId);
 
-  if (bookCategories.length === 0) {
+  if (bookCategories.length === 0 && bookId === 'book_default') {
       const defaultCategories: Category[] = [
-        { id: `cat_cash_${bookId}`, name: 'Cash', bookId },
-        { id: `cat_capital_${bookId}`, name: 'Capital', bookId },
-        { id: `cat_party_${bookId}`, name: 'Parties', bookId },
-        { id: `cat_expense_${bookId}`, name: 'Expenses', bookId },
+        { id: 'cat_cash', name: 'Cash', bookId },
+        { id: 'cat_capital', name: 'Capital', bookId },
+        { id: 'cat_party', name: 'Parties', bookId },
+        { id: 'cat_expense', name: 'Expenses', bookId },
       ];
       const allCategories = [...categories, ...defaultCategories];
       await writeData<Category>(categoriesFilePath, allCategories);
@@ -129,16 +129,15 @@ export const getAccounts = async (bookId: string): Promise<Account[]> => {
     const allAccounts = await readData<Account>(accountsFilePath);
     const bookAccounts = allAccounts.filter(a => a.bookId === bookId);
 
-    if (bookAccounts.length === 0) {
+    if (bookAccounts.length === 0 && bookId === 'book_default') {
         // Ensure default categories exist for this book first
         const bookCategories = await getCategories(bookId);
         const capitalCategory = bookCategories.find(c => c.name === 'Capital');
 
         const defaultAccount: Account = {
-            id: `acc_equity_opening_${bookId}`,
+            id: 'acc_equity_opening',
             name: 'Opening Balance Equity',
-            categoryId: capitalCategory?.id || `cat_capital_${bookId}`,
-            type: 'equity',
+            categoryId: capitalCategory?.id || 'cat_capital',
             bookId: bookId,
         };
         const allAccountsWithNew = [...allAccounts, defaultAccount];
@@ -232,20 +231,21 @@ export const deleteTransaction = async (bookId: string, id: string): Promise<voi
   await writeData<Transaction>(transactionsFilePath, allTransactions);
 };
 
-export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId' | 'openingBalance'> & { openingBalance?: number }): Promise<Account> => {
+export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId'> & { openingDebit?: number, openingCredit?: number }): Promise<Account> => {
     const allAccounts = await readData<Account>(accountsFilePath);
     const newAccount: Account = {
         name: account.name,
         categoryId: account.categoryId,
-        type: account.type,
         id: `acc_${Date.now()}`,
         bookId: bookId,
     };
     allAccounts.push(newAccount);
     await writeData<Account>(accountsFilePath, allAccounts);
 
-    if (account.openingBalance && account.openingBalance > 0) {
-      const isDebitAccount = ['asset', 'expense'].includes(account.type);
+    const openingBalance = account.openingDebit || account.openingCredit;
+    if (openingBalance && openingBalance > 0) {
+      const balanceType = account.openingDebit ? 'debit' : 'credit';
+      
       const bookAccounts = await getAccounts(bookId);
       const openingBalanceAccount = bookAccounts.find(a => a.name === 'Opening Balance Equity');
       if (!openingBalanceAccount) {
@@ -258,13 +258,13 @@ export const addAccount = async (bookId: string, account: Omit<Account, 'id' | '
         entries: [
           {
             accountId: newAccount.id,
-            type: isDebitAccount ? 'debit' : 'credit',
-            amount: account.openingBalance,
+            type: balanceType,
+            amount: openingBalance,
           },
           {
             accountId: openingBalanceAccount.id,
-            type: isDebitAccount ? 'credit' : 'debit',
-            amount: account.openingBalance,
+            type: balanceType === 'debit' ? 'credit' : 'debit',
+            amount: openingBalance,
           },
         ],
       };

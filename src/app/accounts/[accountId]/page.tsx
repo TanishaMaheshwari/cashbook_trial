@@ -1,4 +1,4 @@
-import { getAccounts, getTransactions } from '@/lib/data';
+import { getAccounts, getTransactions, getCategories } from '@/lib/data';
 import type { Account, Transaction, TransactionEntry } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import AccountLedgerClient from '@/components/accounts/AccountLedgerClient';
@@ -18,9 +18,10 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
   const { accountId } = params;
   const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
 
-  const [accounts, transactions] = await Promise.all([
+  const [accounts, transactions, categories] = await Promise.all([
     getAccounts(activeBookId),
     getTransactions(activeBookId),
+    getCategories(activeBookId),
   ]);
 
   const account = accounts.find((a) => a.id === accountId);
@@ -29,23 +30,20 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
     notFound();
   }
 
+  const categoryName = categories.find(c => c.id === account.categoryId)?.name || 'Uncategorized';
+
   const relevantTransactions = transactions
     .filter((t) => t.entries.some((e) => e.accountId === accountId))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   let runningBalance = 0;
-  const isDebitAccount = account.type === 'asset' || account.type === 'expense';
 
   const ledgerEntries: LedgerEntry[] = relevantTransactions.map((tx) => {
     const entry = tx.entries.find((e) => e.accountId === accountId)!;
     const debit = entry.type === 'debit' ? entry.amount : 0;
     const credit = entry.type === 'credit' ? entry.amount : 0;
 
-    if (isDebitAccount) {
-      runningBalance += debit - credit;
-    } else {
-      runningBalance += credit - debit;
-    }
+    runningBalance += debit - credit;
 
     return {
       transactionId: tx.id,
@@ -60,6 +58,8 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
   
   // Reverse for display purposes (most recent first)
   const displayEntries = ledgerEntries.reverse();
+  const finalBalance = displayEntries.length > 0 ? displayEntries[0].balance : 0;
 
-  return <AccountLedgerClient account={account} ledgerEntries={displayEntries} />;
+
+  return <AccountLedgerClient account={account} ledgerEntries={displayEntries} finalBalance={finalBalance} categoryName={categoryName}/>;
 }
