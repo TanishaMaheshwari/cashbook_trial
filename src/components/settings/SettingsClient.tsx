@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Moon, Sun, Trash2, Book, PaintBrush, Repeat } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Trash2, Book, Paintbrush, Repeat } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -70,7 +70,7 @@ export default function SettingsClient() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
-            <PaintBrush className="w-8 h-8 text-primary" />
+            <Paintbrush className="w-8 h-8 text-primary" />
             <div>
               <CardTitle>Appearance</CardTitle>
               <CardDescription>Customize the look and feel.</CardDescription>
