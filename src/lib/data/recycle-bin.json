@@ -1,1 +1,59 @@
-[]
+[
+  {
+    "name": "NEERAJ",
+    "categoryId": "cat_expense",
+    "id": "acc_1760482855447",
+    "bookId": "book_default",
+    "openingBalance": 25000,
+    "type": "account",
+    "deletedAt": "2025-10-14T23:02:14.136Z"
+  },
+  {
+    "name": "Prakaha Hinger",
+    "categoryId": "cat_party",
+    "id": "acc_1760482509843",
+    "bookId": "book_default",
+    "type": "account",
+    "deletedAt": "2025-10-14T23:02:14.134Z"
+  },
+  {
+    "name": "LALIT JI",
+    "categoryId": "cat_capital",
+    "id": "acc_1760482495322",
+    "bookId": "book_default",
+    "type": "account",
+    "deletedAt": "2025-10-14T23:02:14.128Z"
+  },
+  {
+    "name": "HMS",
+    "categoryId": "cat_capital",
+    "type": "account",
+    "id": "acc_1760482126852",
+    "bookId": "book_default",
+    "deletedAt": "2025-10-14T23:02:14.125Z"
+  },
+  {
+    "name": "Prakaha Hinger",
+    "categoryId": "cat_party",
+    "id": "acc_1760482509843",
+    "bookId": "book_default",
+    "type": "account",
+    "deletedAt": "2025-10-14T23:02:06.023Z"
+  },
+  {
+    "name": "LALIT JI",
+    "categoryId": "cat_capital",
+    "id": "acc_1760482495322",
+    "bookId": "book_default",
+    "type": "account",
+    "deletedAt": "2025-10-14T23:02:06.018Z"
+  },
+  {
+    "name": "HMS",
+    "categoryId": "cat_capital",
+    "type": "account",
+    "id": "acc_1760482126852",
+    "bookId": "book_default",
+    "deletedAt": "2025-10-14T23:02:06.015Z"
+  }
+]

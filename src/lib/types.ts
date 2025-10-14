@@ -15,7 +15,6 @@ export type Account = {
   name: string;
   categoryId: string;
   bookId: string;
-  openingBalance?: number;
 };
 
 export type TransactionEntry = {

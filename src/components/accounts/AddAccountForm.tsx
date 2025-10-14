@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Category } from '@/lib/types';
@@ -17,7 +17,6 @@ import { useBooks } from '@/context/BookContext';
 const formSchema = z.object({
   name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
-  openingBalance: z.coerce.number().min(0).optional(),
 });
 
 
@@ -36,7 +35,6 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     defaultValues: {
       name: '',
       categoryId: '',
-      openingBalance: 0,
     },
   });
 
@@ -92,25 +90,7 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="openingBalance"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Opening Balance (Optional)</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is for informational purposes only and does not create a transaction.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         
-
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>
             {isPending ? 'Creating...' : 'Create Account'}

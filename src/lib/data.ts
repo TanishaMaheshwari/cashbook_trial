@@ -187,7 +187,7 @@ export const addCategory = async (bookId: string, name: string): Promise<Categor
     throw new Error('Category already exists in this book.');
   }
   allCategories.push(newCategory);
-  await writeData<Category>(categoriesFilePath, allCategories);
+await writeData<Category>(categoriesFilePath, allCategories);
   return newCategory;
 };
 
@@ -226,13 +226,9 @@ export const addAccount = async (bookId: string, account: Omit<Account, 'id' | '
         categoryId: account.categoryId,
         id: `acc_${Date.now()}`,
         bookId: bookId,
-        openingBalance: account.openingBalance
     };
     allAccounts.push(newAccount);
     await writeData<Account>(accountsFilePath, allAccounts);
-
-    // The logic for creating an opening balance transaction has been removed.
-    // Opening balances should be set via a journal entry by the user.
 
     return newAccount;
 };
