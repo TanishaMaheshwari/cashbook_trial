@@ -1,5 +1,5 @@
 import type { Account, Category, Transaction, AccountType, Book } from '@/lib/types';
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 // This file contains functions to read and write data from the local filesystem.
@@ -13,48 +13,47 @@ const accountsFilePath = path.join(dataDir, 'accounts.json');
 const transactionsFilePath = path.join(dataDir, 'transactions.json');
 const recycleBinFilePath = path.join(dataDir, 'recycle-bin.json');
 
-const readData = <T>(filePath: string): T[] => {
+
+const readData = async <T>(filePath: string): Promise<T[]> => {
   try {
-    if (!fs.existsSync(filePath)) {
-        // If the file doesn't exist, create it with an empty array.
-        fs.writeFileSync(filePath, '[]', 'utf8');
-        return [];
-    }
-    const jsonString = fs.readFileSync(filePath, 'utf8');
-    // If the file is empty, return an empty array.
+    await fs.access(filePath);
+    const jsonString = await fs.readFile(filePath, 'utf8');
     if (!jsonString) {
         return [];
     }
     return JSON.parse(jsonString) as T[];
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'ENOENT') { // File does not exist
+        await fs.writeFile(filePath, '[]', 'utf8');
+        return [];
+    }
     console.error(`Error reading ${filePath}:`, error);
-    // In case of a parsing error or other issue, return an empty array to prevent crashes.
     return [];
   }
 };
 
-const writeData = <T>(filePath: string, data: T[]): void => {
+const writeData = async <T>(filePath: string, data: T[]): Promise<void> => {
   try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
   } catch (error) {
     console.error(`Error writing to ${filePath}:`, error);
   }
 };
 
-export const addToRecycleBin = (item: any) => {
-    const bin = readData<any>(recycleBinFilePath);
+export const addToRecycleBin = async (item: any) => {
+    const bin = await readData<any>(recycleBinFilePath);
     item.deletedAt = new Date().toISOString();
     bin.unshift(item); // Add to the beginning of the array
-    writeData<any>(recycleBinFilePath, bin);
+    await writeData<any>(recycleBinFilePath, bin);
 }
 
 // --- Book Functions ---
 
 export const getBooks = async (): Promise<Book[]> => {
-  const books = readData<Book>(booksFilePath);
+  const books = await readData<Book>(booksFilePath);
   if (books.length === 0) {
       const defaultBook = { id: 'book_default', name: 'CASHBOOK' };
-      writeData<Book>(booksFilePath, [defaultBook]);
+      await writeData<Book>(booksFilePath, [defaultBook]);
       return [defaultBook];
   }
   return books;
@@ -67,7 +66,7 @@ export const addBook = async (name: string): Promise<Book> => {
   }
   const newBook: Book = { id: `book_${Date.now()}`, name };
   books.push(newBook);
-  writeData<Book>(booksFilePath, books);
+  await writeData<Book>(booksFilePath, books);
   return newBook;
 };
 
@@ -78,7 +77,7 @@ export const updateBook = async (id: string, name: string): Promise<Book> => {
     throw new Error('Book not found.');
   }
   books[index].name = name;
-  writeData<Book>(booksFilePath, books);
+  await writeData<Book>(booksFilePath, books);
   return books[index];
 };
 
@@ -92,141 +91,168 @@ export const deleteBook = async (id: string): Promise<void> => {
     throw new Error('Book not found.');
   }
   const [deletedBook] = books.splice(index, 1);
-  addToRecycleBin({ ...deletedBook, type: 'book' });
-  writeData<Book>(booksFilePath, books);
+  await addToRecycleBin({ ...deletedBook, type: 'book' });
+  await writeData<Book>(booksFilePath, books);
+  
+  // Also delete associated data
+  let allTransactions = await readData<Transaction>(transactionsFilePath);
+  let allAccounts = await readData<Account>(accountsFilePath);
+  let allCategories = await readData<Category>(categoriesFilePath);
+
+  await writeData(transactionsFilePath, allTransactions.filter(t => t.bookId !== id));
+  await writeData(accountsFilePath, allAccounts.filter(a => a.bookId !== id));
+  await writeData(categoriesFilePath, allCategories.filter(c => c.bookId !== id));
+
 };
 
 
 // --- Other Data Functions ---
-export const getCategories = async (): Promise<Category[]> => {
-  const categories = readData<Category>(categoriesFilePath);
-  if (categories.length === 0) {
+export const getCategories = async (bookId: string): Promise<Category[]> => {
+  const categories = await readData<Category>(categoriesFilePath);
+  const bookCategories = categories.filter(c => c.bookId === bookId);
+
+  if (bookCategories.length === 0) {
       const defaultCategories: Category[] = [
-        { id: 'cat_cash', name: 'Cash' },
-        { id: 'cat_capital', name: 'Capital' },
-        { id: 'cat_party', name: 'Parties' },
-        { id: 'cat_revenue', name: 'Revenue' },
-        { id: 'cat_expense', name: 'Expenses' },
+        { id: `cat_cash_${bookId}`, name: 'Cash', bookId },
+        { id: `cat_capital_${bookId}`, name: 'Capital', bookId },
+        { id: `cat_party_${bookId}`, name: 'Parties', bookId },
+        { id: `cat_expense_${bookId}`, name: 'Expenses', bookId },
       ];
-      writeData<Category>(categoriesFilePath, defaultCategories);
+      const allCategories = [...categories, ...defaultCategories];
+      await writeData<Category>(categoriesFilePath, allCategories);
       return defaultCategories;
   }
-  return categories;
+  return bookCategories;
 };
 
-export const getAccounts = async (): Promise<Account[]> => {
-  const accounts = readData<Account>(accountsFilePath);
-    if (accounts.length === 0) {
-        const defaultAccount: Account = { 
-            id: 'acc_equity_opening', 
-            name: 'Opening Balance Equity', 
-            categoryId: 'cat_capital', 
-            type: 'equity' 
+export const getAccounts = async (bookId: string): Promise<Account[]> => {
+    const allAccounts = await readData<Account>(accountsFilePath);
+    const bookAccounts = allAccounts.filter(a => a.bookId === bookId);
+
+    if (bookAccounts.length === 0) {
+        // Ensure default categories exist for this book first
+        const bookCategories = await getCategories(bookId);
+        const capitalCategory = bookCategories.find(c => c.name === 'Capital');
+
+        const defaultAccount: Account = {
+            id: `acc_equity_opening_${bookId}`,
+            name: 'Opening Balance Equity',
+            categoryId: capitalCategory?.id || `cat_capital_${bookId}`,
+            type: 'equity',
+            bookId: bookId,
         };
-        writeData<Account>(accountsFilePath, [defaultAccount]);
+        const allAccountsWithNew = [...allAccounts, defaultAccount];
+        await writeData<Account>(accountsFilePath, allAccountsWithNew);
         return [defaultAccount];
     }
-    return accounts;
+    return bookAccounts;
 };
 
-export const getTransactions = async (): Promise<Transaction[]> => {
-  const transactions = readData<Transaction>(transactionsFilePath);
+export const getTransactions = async (bookId: string): Promise<Transaction[]> => {
+  const transactions = await readData<Transaction>(transactionsFilePath);
+  const bookTransactions = transactions.filter(t => t.bookId === bookId);
   // Return sorted by date descending
-  return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return bookTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-export const addTransaction = async (transaction: Omit<Transaction, 'id'>): Promise<Transaction> => {
-  const transactions = await getTransactions();
+export const addTransaction = async (bookId: string, transaction: Omit<Transaction, 'id' | 'bookId'>): Promise<Transaction> => {
+  const allTransactions = await readData<Transaction>(transactionsFilePath);
   const newTransaction: Transaction = {
     ...transaction,
     id: `txn_${Date.now()}`,
+    bookId: bookId
   };
-  transactions.unshift(newTransaction);
-  writeData<Transaction>(transactionsFilePath, transactions);
+  allTransactions.unshift(newTransaction);
+  await writeData<Transaction>(transactionsFilePath, allTransactions);
   return newTransaction;
 };
 
-export const updateTransaction = async (id: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> => {
-  const transactions = await getTransactions();
-  const index = transactions.findIndex(t => t.id === id);
+export const updateTransaction = async (bookId: string, id: string, transaction: Omit<Transaction, 'id' | 'bookId'>): Promise<Transaction> => {
+  const allTransactions = await readData<Transaction>(transactionsFilePath);
+  const index = allTransactions.findIndex(t => t.id === id && t.bookId === bookId);
   if (index === -1) {
-    throw new Error('Transaction not found.');
+    throw new Error('Transaction not found in this book.');
   }
-  const updatedTransaction = { ...transactions[index], ...transaction, id };
-  transactions[index] = updatedTransaction;
-  writeData<Transaction>(transactionsFilePath, transactions);
+  const updatedTransaction = { ...allTransactions[index], ...transaction, id, bookId };
+  allTransactions[index] = updatedTransaction;
+  await writeData<Transaction>(transactionsFilePath, allTransactions);
   return updatedTransaction;
 };
 
-export const updateTransactionHighlight = async (id: string, highlight: Transaction['highlight'] | null): Promise<void> => {
-    const transactions = await getTransactions();
-    const index = transactions.findIndex(t => t.id === id);
+export const updateTransactionHighlight = async (bookId: string, id: string, highlight: Transaction['highlight'] | null): Promise<void> => {
+    const allTransactions = await readData<Transaction>(transactionsFilePath);
+    const index = allTransactions.findIndex(t => t.id === id && t.bookId === bookId);
     if (index === -1) {
         throw new Error('Transaction not found.');
     }
     if (highlight) {
-        transactions[index].highlight = highlight;
+        allTransactions[index].highlight = highlight;
     } else {
-        delete transactions[index].highlight;
+        delete allTransactions[index].highlight;
     }
-    writeData<Transaction>(transactionsFilePath, transactions);
+    await writeData<Transaction>(transactionsFilePath, allTransactions);
 };
 
-export const addCategory = async (name: string): Promise<Category> => {
-  const categories = await getCategories();
-  const newCategory = { id: `cat_${Date.now()}`, name };
-  if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) {
-    throw new Error('Category already exists.');
+export const addCategory = async (bookId: string, name: string): Promise<Category> => {
+  const allCategories = await readData<Category>(categoriesFilePath);
+  const newCategory: Category = { id: `cat_${Date.now()}`, name, bookId };
+  if (allCategories.find(c => c.name.toLowerCase() === name.toLowerCase() && c.bookId === bookId)) {
+    throw new Error('Category already exists in this book.');
   }
-  categories.push(newCategory);
-  writeData<Category>(categoriesFilePath, categories);
+  allCategories.push(newCategory);
+  await writeData<Category>(categoriesFilePath, allCategories);
   return newCategory;
 };
 
-export const deleteCategory = async (id: string): Promise<void> => {
-    const accounts = await getAccounts();
+export const deleteCategory = async (bookId: string, id: string): Promise<void> => {
+    const accounts = await getAccounts(bookId);
     const isCategoryInUse = accounts.some(acc => acc.categoryId === id);
     if (isCategoryInUse) {
         throw new Error('Cannot delete category. It is currently assigned to one or more accounts.');
     }
 
-    let categories = await getCategories();
-    const index = categories.findIndex(c => c.id === id);
+    let allCategories = await readData<Category>(categoriesFilePath);
+    const index = allCategories.findIndex(c => c.id === id && c.bookId === bookId);
     if (index === -1) {
         throw new Error('Category not found.');
     }
-    const [deletedCategory] = categories.splice(index, 1);
-    addToRecycleBin({ ...deletedCategory, type: 'category' });
-    writeData<Category>(categoriesFilePath, categories);
+    const [deletedCategory] = allCategories.splice(index, 1);
+    await addToRecycleBin({ ...deletedCategory, type: 'category' });
+    await writeData<Category>(allCategories, allCategories);
 };
 
-export const deleteTransaction = async (id: string): Promise<void> => {
-  let transactions = await getTransactions();
-  const index = transactions.findIndex(t => t.id === id);
+export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
+  let allTransactions = await readData<Transaction>(transactionsFilePath);
+  const index = allTransactions.findIndex(t => t.id === id && t.bookId === bookId);
   if (index === -1) {
     throw new Error('Transaction not found.');
   }
-  const [deletedTransaction] = transactions.splice(index, 1);
-  addToRecycleBin({ ...deletedTransaction, type: 'transaction' });
-  writeData<Transaction>(transactionsFilePath, transactions);
+  const [deletedTransaction] = allTransactions.splice(index, 1);
+  await addToRecycleBin({ ...deletedTransaction, type: 'transaction' });
+  await writeData<Transaction>(transactionsFilePath, allTransactions);
 };
 
-export const addAccount = async (account: Omit<Account, 'id' | 'openingBalance'> & { openingBalance?: number }): Promise<Account> => {
-    const accounts = await getAccounts();
+export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId' | 'openingBalance'> & { openingBalance?: number }): Promise<Account> => {
+    const allAccounts = await readData<Account>(accountsFilePath);
     const newAccount: Account = {
         name: account.name,
         categoryId: account.categoryId,
         type: account.type,
         id: `acc_${Date.now()}`,
+        bookId: bookId,
     };
-    accounts.push(newAccount);
-    writeData<Account>(accountsFilePath, accounts);
-
+    allAccounts.push(newAccount);
+    await writeData<Account>(accountsFilePath, allAccounts);
 
     if (account.openingBalance && account.openingBalance > 0) {
       const isDebitAccount = ['asset', 'expense'].includes(account.type);
+      const bookAccounts = await getAccounts(bookId);
+      const openingBalanceAccount = bookAccounts.find(a => a.name === 'Opening Balance Equity');
+      if (!openingBalanceAccount) {
+          throw new Error('Opening Balance Equity account not found for this book.');
+      }
       
-      const openingBalanceTransaction: Omit<Transaction, 'id'> = {
+      const openingBalanceTransaction: Omit<Transaction, 'id' | 'bookId'> = {
         date: new Date().toISOString(),
         description: `Opening balance for ${account.name}`,
         entries: [
@@ -236,39 +262,40 @@ export const addAccount = async (account: Omit<Account, 'id' | 'openingBalance'>
             amount: account.openingBalance,
           },
           {
-            accountId: 'acc_equity_opening', // This is a special account for this purpose.
+            accountId: openingBalanceAccount.id,
             type: isDebitAccount ? 'credit' : 'debit',
             amount: account.openingBalance,
           },
         ],
       };
-      await addTransaction(openingBalanceTransaction);
+      await addTransaction(bookId, openingBalanceTransaction);
     }
     return newAccount;
 };
 
-export const deleteAccount = async (id: string): Promise<void> => {
-    const transactions = await getTransactions();
+export const deleteAccount = async (bookId: string, id: string): Promise<void> => {
+    const transactions = await getTransactions(bookId);
     // Check if account has transactions
     const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === id));
     if (hasTransactions) {
         throw new Error('Cannot delete account with existing transactions.');
     }
     
-    let accounts = await getAccounts();
-    const index = accounts.findIndex(a => a.id === id);
+    let allAccounts = await readData<Account>(accountsFilePath);
+    const index = allAccounts.findIndex(a => a.id === id && a.bookId === bookId);
     if (index === -1) {
         throw new Error('Account not found.');
     }
-    accounts.splice(index, 1);
-    writeData<Account>(accountsFilePath, accounts);
+    allAccounts.splice(index, 1);
+    await writeData<Account>(accountsFilePath, allAccounts);
 };
 
-export const deleteMultipleAccounts = async (accountIds: string[]): Promise<void> => {
-    const transactions = await getTransactions();
-    const accounts = await getAccounts();
+export const deleteMultipleAccounts = async (bookId: string, accountIds: string[]): Promise<void> => {
+    const transactions = await getTransactions(bookId);
+    const allAccounts = await readData<Account>(accountsFilePath);
+    const bookAccounts = allAccounts.filter(acc => acc.bookId === bookId);
 
-    let accountsToDelete = accounts.filter(acc => accountIds.includes(acc.id));
+    let accountsToDelete = bookAccounts.filter(acc => accountIds.includes(acc.id));
     
     for (const account of accountsToDelete) {
         const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === account.id));
@@ -277,6 +304,6 @@ export const deleteMultipleAccounts = async (accountIds: string[]): Promise<void
         }
     }
 
-    const remainingAccounts = accounts.filter(acc => !accountIds.includes(acc.id));
-    writeData<Account>(accountsFilePath, remainingAccounts);
+    const remainingAccounts = allAccounts.filter(acc => !accountIds.includes(acc.id));
+    await writeData<Account>(accountsFilePath, remainingAccounts);
 };

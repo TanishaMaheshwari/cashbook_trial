@@ -17,16 +17,19 @@ import { useState, useTransition } from "react";
 import { createCategoryAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { Category } from "@/lib/types";
+import { useBooks } from "@/context/BookContext";
 
 export default function ManageCategories({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { activeBook } = useBooks();
 
   const handleAddCategory = () => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await createCategoryAction(newCategoryName);
+      const result = await createCategoryAction(activeBook.id, newCategoryName);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
         setNewCategoryName("");
@@ -49,7 +52,7 @@ export default function ManageCategories({ categories }: { categories: Category[
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">Manage Categories</DialogTitle>
           <DialogDescription>
-            View existing categories and add new ones to organize your accounts.
+            View existing categories and add new ones to organize your accounts for the current book.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

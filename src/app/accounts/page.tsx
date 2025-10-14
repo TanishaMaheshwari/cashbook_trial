@@ -1,12 +1,14 @@
 import { getAccounts, getCategories, getTransactions } from '@/lib/data';
-import type { Account, Transaction, AccountType } from '@/lib/types';
 import AccountsClient from '@/components/accounts/AccountsClient';
+import { cookies } from 'next/headers';
 
 export default async function AllAccountsPage() {
+  const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
+
   const [accounts, categories, transactions] = await Promise.all([
-    getAccounts(),
-    getCategories(),
-    getTransactions(),
+    getAccounts(activeBookId),
+    getCategories(activeBookId),
+    getTransactions(activeBookId),
   ]);
 
   const accountsWithBalances = accounts.map((account) => {

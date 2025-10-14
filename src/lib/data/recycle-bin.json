@@ -1,5 +1,11 @@
 [
   {
+    "id": "cat_revenue",
+    "name": "Revenue",
+    "type": "category",
+    "deletedAt": "2025-10-14T22:43:47.075Z"
+  },
+  {
     "id": "book_1760481520629",
     "name": "TEST",
     "type": "book",

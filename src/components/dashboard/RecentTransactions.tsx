@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency, cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, MoreVertical, Calendar as CalendarIcon } from 'lucide-react';
 import {
@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { useBooks } from '@/context/BookContext';
 
 
 type RecentTransactionsProps = {
@@ -64,6 +65,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [isPending, startTransition] = useTransition();
   const [isHighlightPending, startHighlightTransition] = useTransition();
   const { toast } = useToast();
+  const { activeBook } = useBooks();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDescriptor, setSortDescriptor] = useState('date-desc');
@@ -78,16 +80,19 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
-    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
-    if (storedView) {
-      setTransactionView(storedView);
+    if (activeBook) {
+      const storedView = localStorage.getItem(`transactionView_${activeBook.id}`) as TransactionView | null;
+      if (storedView) {
+        setTransactionView(storedView);
+      }
     }
     setIsMounted(true);
-  }, []);
+  }, [activeBook]);
 
   const handleDelete = (transactionId: string) => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await deleteTransactionAction(transactionId);
+      const result = await deleteTransactionAction(activeBook.id, transactionId);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
       } else {
@@ -112,9 +117,10 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   }
 
   const handleHighlight = (transactionId: string, color: HighlightColor, currentColor?: HighlightColor) => {
+    if (!activeBook) return;
     startHighlightTransition(async () => {
       const newHighlight = currentColor === color ? null : color;
-      const result = await updateTransactionHighlightAction(transactionId, newHighlight);
+      const result = await updateTransactionHighlightAction(activeBook.id, transactionId, newHighlight);
       if (!result.success && result.message) {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
       }

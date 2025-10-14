@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import ManageBooks from './ManageBooks';
 import type { Book as BookType } from '@/lib/types';
+import { useBooks } from '@/context/BookContext';
 
 
 type Theme = 'light' | 'dark';
@@ -25,20 +26,28 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
   const [theme, setTheme] = useState<Theme>('light');
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
+  const { activeBook } = useBooks();
   
   useEffect(() => {
+    // Theme is global
     const storedTheme = localStorage.getItem('theme') as Theme | null;
-    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
     if (storedTheme) {
       setTheme(storedTheme);
       document.documentElement.classList.toggle('dark', storedTheme === 'dark');
     }
-    if (storedView) {
-      setTransactionView(storedView);
+    
+    // Transaction view is book-specific
+    if (activeBook) {
+      const storedView = localStorage.getItem(`transactionView_${activeBook.id}`) as TransactionView | null;
+      if (storedView) {
+        setTransactionView(storedView);
+      } else {
+        setTransactionView('to_from'); // default
+      }
     }
     
     setIsMounted(true);
-  }, []);
+  }, [activeBook]);
 
   if (!isMounted) {
     return null; // or a loading spinner
@@ -55,10 +64,11 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
   };
   
   const handleTransactionViewChange = (view: TransactionView) => {
+    if (!activeBook) return;
     setTransactionView(view);
-    localStorage.setItem('transactionView', view);
+    localStorage.setItem(`transactionView_${activeBook.id}`, view);
     toast({
-      title: `Transaction view set to "${view === 'to_from' ? 'To/From' : 'Dr/Cr'}"`,
+      title: `Transaction view set to "${view === 'to_from' ? 'To/From' : 'Dr/Cr'}" for book: ${activeBook.name}`,
       description: "Refresh may be required for all views to update.",
     });
   }
@@ -99,9 +109,9 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
             </div>
              <div className="space-y-3 rounded-lg border p-3">
                 <Label>Transaction Display</Label>
-                <p className="text-sm text-muted-foreground">Choose how to display transaction entries.</p>
+                <p className="text-sm text-muted-foreground">Choose display for <span className="font-bold">{activeBook?.name}</span>.</p>
                 <RadioGroup 
-                    defaultValue={transactionView} 
+                    value={transactionView} 
                     onValueChange={(value: TransactionView) => handleTransactionViewChange(value)}
                     className="flex gap-4 pt-2"
                 >

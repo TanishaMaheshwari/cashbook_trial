@@ -2,6 +2,8 @@ import { getAccounts, getTransactions } from '@/lib/data';
 import type { Account, Transaction, TransactionEntry } from '@/lib/types';
 import { notFound } from 'next/navigation';
 import AccountLedgerClient from '@/components/accounts/AccountLedgerClient';
+import { cookies } from 'next/headers';
+
 
 type LedgerEntry = {
   transactionId: string;
@@ -14,9 +16,11 @@ type LedgerEntry = {
 
 export default async function AccountLedgerPage({ params }: { params: { accountId: string } }) {
   const { accountId } = params;
+  const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
+
   const [accounts, transactions] = await Promise.all([
-    getAccounts(),
-    getTransactions(),
+    getAccounts(activeBookId),
+    getTransactions(activeBookId),
   ]);
 
   const account = accounts.find((a) => a.id === accountId);

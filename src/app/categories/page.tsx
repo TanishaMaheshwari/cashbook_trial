@@ -1,6 +1,7 @@
 import { getAccounts, getCategories, getTransactions } from '@/lib/data';
 import type { Account, Transaction, Category } from '@/lib/types';
 import CategoriesClient from '@/components/categories/CategoriesClient';
+import { cookies } from 'next/headers';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -9,10 +10,12 @@ type CategoryWithDetails = Category & {
 };
 
 export default async function CategoriesPage() {
+  const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
+
   const [accounts, categories, transactions] = await Promise.all([
-    getAccounts(),
-    getCategories(),
-    getTransactions(),
+    getAccounts(activeBookId),
+    getCategories(activeBookId),
+    getTransactions(activeBookId),
   ]);
 
   const categoriesWithDetails: CategoryWithDetails[] = categories.map((category) => {

@@ -12,6 +12,7 @@ import RecentTransactions from './RecentTransactions';
 import Link from 'next/link';
 import { List, Users } from 'lucide-react';
 import CategoryAccounts from './CategoryAccounts';
+import { useBooks } from '@/context/BookContext';
 
 
 type DashboardClientProps = {
@@ -21,7 +22,9 @@ type DashboardClientProps = {
 };
 
 export default function DashboardClient({ initialTransactions, accounts, categories }: DashboardClientProps) {
+  const { isLoading: isBookLoading } = useBooks();
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
+  
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(categories[0]?.id);
 
   const stats = useMemo(() => {
@@ -56,6 +59,11 @@ export default function DashboardClient({ initialTransactions, accounts, categor
   }, [initialTransactions, accounts, categories, selectedCategoryId]);
 
   const selectedCategoryName = categories.find(c => c.id === selectedCategoryId)?.name;
+  
+  if (isBookLoading) {
+      return <div>Loading...</div>; // Or a proper skeleton loader
+  }
+
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { deleteCategoryAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { useBooks } from '@/context/BookContext';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -37,10 +38,12 @@ export default function CategoriesClient({ categories, allCategories }: Categori
   const [openManageCategories, setOpenManageCategories] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { activeBook } = useBooks();
 
   const handleDelete = (categoryId: string) => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await deleteCategoryAction(categoryId);
+      const result = await deleteCategoryAction(activeBook.id, categoryId);
       if (result.success) {
         toast({ title: "Success", description: result.message });
       } else {

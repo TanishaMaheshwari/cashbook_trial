@@ -21,6 +21,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent } from '../ui/card';
 import { Combobox } from '@/components/ui/combobox';
+import { useBooks } from '@/context/BookContext';
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
@@ -60,17 +61,20 @@ type TransactionView = 'to_from' | 'dr_cr';
 export default function AddTransactionForm({ accounts, categories, onFinished, initialData }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { activeBook } = useBooks();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
-    if (storedView) {
-      setTransactionView(storedView);
+    if (activeBook) {
+      const storedView = localStorage.getItem(`transactionView_${activeBook.id}`) as TransactionView | null;
+      if (storedView) {
+        setTransactionView(storedView);
+      }
     }
     setIsMounted(true);
-  }, []);
+  }, [activeBook]);
 
   const isEditMode = !!initialData;
 
@@ -120,10 +124,11 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
   }, [initialData, form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!activeBook) return;
     startTransition(async () => {
       const result = isEditMode
-        ? await updateTransactionAction(initialData.id, values)
-        : await createTransactionAction(values);
+        ? await updateTransactionAction(activeBook.id, initialData.id, values)
+        : await createTransactionAction(activeBook.id, values);
 
       if (result.success) {
         toast({ title: 'Success', description: result.message });

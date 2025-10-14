@@ -1,22 +1,28 @@
+
 [
   {
     "id": "cat_cash",
-    "name": "Cash"
+    "name": "Cash",
+    "bookId": "book_default"
   },
   {
     "id": "cat_capital",
-    "name": "Capital"
+    "name": "Capital",
+    "bookId": "book_default"
   },
   {
     "id": "cat_party",
-    "name": "Parties"
-  },
-  {
-    "id": "cat_revenue",
-    "name": "Revenue"
+    "name": "Parties",
+    "bookId": "book_default"
   },
   {
     "id": "cat_expense",
-    "name": "Expenses"
+    "name": "Expenses",
+    "bookId": "book_default"
+  },
+  {
+    "id": "cat_1760481839544",
+    "name": "STAFF",
+    "bookId": "book_default"
   }
 ]

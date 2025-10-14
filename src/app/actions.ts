@@ -4,9 +4,9 @@ import { revalidatePath } from 'next/cache';
 import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
-export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
+export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
   try {
-    await addTransaction({
+    await addTransaction(bookId, {
       ...data,
       date: data.date.toISOString(),
     });
@@ -21,9 +21,9 @@ export async function createTransactionAction(data: Omit<Transaction, 'id' | 'da
   }
 }
 
-export async function updateTransactionAction(id: string, data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
+export async function updateTransactionAction(bookId: string, id: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
   try {
-    await updateTransaction(id, {
+    await updateTransaction(bookId, id, {
       ...data,
       date: data.date.toISOString(),
     });
@@ -40,12 +40,12 @@ export async function updateTransactionAction(id: string, data: Omit<Transaction
 }
 
 
-export async function createCategoryAction(name: string) {
+export async function createCategoryAction(bookId: string, name: string) {
     if (!name || name.trim().length === 0) {
         return { success: false, message: "Category name cannot be empty." };
     }
     try {
-        await addCategory(name);
+        await addCategory(bookId, name);
         revalidatePath('/');
         revalidatePath('/accounts');
         revalidatePath('/categories');
@@ -56,9 +56,9 @@ export async function createCategoryAction(name: string) {
     }
 }
 
-export async function deleteCategoryAction(categoryId: string) {
+export async function deleteCategoryAction(bookId: string, categoryId: string) {
     try {
-        await deleteCategory(categoryId);
+        await deleteCategory(bookId, categoryId);
         revalidatePath('/categories');
         revalidatePath('/accounts');
         return { success: true, message: 'Category deleted successfully.' };
@@ -68,9 +68,9 @@ export async function deleteCategoryAction(categoryId: string) {
     }
 }
 
-export async function deleteTransactionAction(transactionId: string) {
+export async function deleteTransactionAction(bookId: string, transactionId: string) {
   try {
-    await deleteTransaction(transactionId);
+    await deleteTransaction(bookId, transactionId);
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/accounts');
@@ -81,9 +81,9 @@ export async function deleteTransactionAction(transactionId: string) {
   }
 }
 
-export async function createAccountAction(data: Omit<Account, 'id'>) {
+export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'>) {
     try {
-        await addAccount(data);
+        await addAccount(bookId, data);
         revalidatePath('/accounts');
         revalidatePath('/');
         return { success: true, message: 'Account created successfully.' };
@@ -93,9 +93,9 @@ export async function createAccountAction(data: Omit<Account, 'id'>) {
     }
 }
 
-export async function deleteAccountAction(accountId: string) {
+export async function deleteAccountAction(bookId: string, accountId: string) {
     try {
-        await deleteAccount(accountId);
+        await deleteAccount(bookId, accountId);
         revalidatePath('/accounts');
         revalidatePath('/');
         return { success: true, message: 'Account deleted successfully.' };
@@ -105,9 +105,9 @@ export async function deleteAccountAction(accountId: string) {
     }
 }
 
-export async function deleteMultipleAccountsAction(accountIds: string[]) {
+export async function deleteMultipleAccountsAction(bookId: string, accountIds: string[]) {
     try {
-        await deleteMultipleAccounts(accountIds);
+        await deleteMultipleAccounts(bookId, accountIds);
         revalidatePath('/accounts');
         revalidatePath('/');
         return { success: true };
@@ -117,9 +117,9 @@ export async function deleteMultipleAccountsAction(accountIds: string[]) {
     }
 }
 
-export async function updateTransactionHighlightAction(transactionId: string, highlight: Transaction['highlight'] | null) {
+export async function updateTransactionHighlightAction(bookId: string, transactionId: string, highlight: Transaction['highlight'] | null) {
   try {
-    await updateTransactionHighlight(transactionId, highlight);
+    await updateTransactionHighlight(bookId, transactionId, highlight);
     revalidatePath('/transactions');
     revalidatePath('/');
     return { success: true };
@@ -145,6 +145,7 @@ export async function updateBookAction(id: string, name: string) {
   try {
     await updateBook(id, name);
     revalidatePath('/settings');
+    revalidatePath('/'); // To update the book name in the header
     return { success: true, message: 'Book name updated.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
@@ -156,6 +157,7 @@ export async function deleteBookAction(id: string) {
   try {
     await deleteBook(id);
     revalidatePath('/settings');
+     revalidatePath('/'); // To update the book list
     return { success: true, message: 'Book deleted.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';

@@ -14,6 +14,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Always fetch all books for the provider
   const initialBooks = await getBooks();
 
   return (

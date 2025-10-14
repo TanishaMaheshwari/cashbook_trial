@@ -1,6 +1,7 @@
 export type Category = {
   id: string;
   name: string;
+  bookId: string;
 };
 
 // Based on accounting principles.
@@ -13,6 +14,7 @@ export type Account = {
   name: string;
   categoryId: string;
   type: AccountType;
+  bookId: string;
   openingBalance?: number;
 };
 
@@ -28,6 +30,7 @@ export type Transaction = {
   date: string; // ISO string
   description: string;
   entries: TransactionEntry[];
+  bookId: string;
   highlight?: 'yellow' | 'blue' | 'green';
 };
 

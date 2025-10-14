@@ -35,6 +35,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Checkbox } from '../ui/checkbox';
+import { useBooks } from '@/context/BookContext';
 
 type AccountWithBalance = Account & { balance: number };
 
@@ -52,6 +53,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [sortDescriptor, setSortDescriptor] = useState('name-asc');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [filter, setFilter] = useState('all');
+  const { activeBook } = useBooks();
 
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
@@ -62,8 +64,9 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [isAddSheetOpen, setAddSheetOpen] = useState(false);
 
   const handleDelete = (accountId: string) => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await deleteAccountAction(accountId);
+      const result = await deleteAccountAction(activeBook.id, accountId);
       if (result.success) {
         toast({ title: "Success", description: result.message });
       } else {
@@ -73,8 +76,9 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   };
   
   const handleBulkDelete = () => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await deleteMultipleAccountsAction(selectedAccounts);
+      const result = await deleteMultipleAccountsAction(activeBook.id, selectedAccounts);
       if (result.success) {
         toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
         setSelectedAccounts([]);

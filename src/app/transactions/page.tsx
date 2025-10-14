@@ -1,12 +1,18 @@
-import { getTransactions, getAccounts } from '@/lib/data';
+import { getTransactions, getAccounts, getCategories } from '@/lib/data';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { cookies } from 'next/headers';
 
 export default async function AllTransactionsPage() {
-  const transactions = await getTransactions();
-  const accounts = await getAccounts();
+  const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
+
+  const [transactions, accounts, categories] = await Promise.all([
+    getTransactions(activeBookId),
+    getAccounts(activeBookId),
+    getCategories(activeBookId),
+  ]);
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -18,7 +24,7 @@ export default async function AllTransactionsPage() {
           </Link>
         </Button>
       </div>
-      <RecentTransactions transactions={transactions} accounts={accounts} />
+      <RecentTransactions transactions={transactions} accounts={accounts} categories={categories} />
     </div>
   );
 }

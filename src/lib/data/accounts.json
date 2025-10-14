@@ -1,8 +1,10 @@
+
 [
   {
     "id": "acc_equity_opening",
     "name": "Opening Balance Equity",
     "categoryId": "cat_capital",
-    "type": "equity"
+    "type": "equity",
+    "bookId": "book_default"
   }
 ]

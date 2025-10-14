@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Account, AccountType } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
+import { useBooks } from '@/context/BookContext';
 
 type TransactionView = 'to_from' | 'dr_cr';
 
@@ -36,14 +37,17 @@ type AccountLedgerClientProps = {
 export default function AccountLedgerClient({ account, ledgerEntries }: AccountLedgerClientProps) {
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
+  const { activeBook } = useBooks();
 
   useEffect(() => {
-    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
-    if (storedView) {
-      setTransactionView(storedView);
+    if (activeBook) {
+      const storedView = localStorage.getItem(`transactionView_${activeBook.id}`) as TransactionView | null;
+      if (storedView) {
+        setTransactionView(storedView);
+      }
     }
     setIsMounted(true);
-  }, []);
+  }, [activeBook]);
 
 
   const isDebitAccount = account.type === 'asset' || account.type === 'expense';

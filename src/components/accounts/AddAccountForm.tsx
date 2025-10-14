@@ -11,6 +11,7 @@ import type { Account, Category } from '@/lib/types';
 import { useTransition } from 'react';
 import { createAccountAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { useBooks } from '@/context/BookContext';
 
 const accountTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
 
@@ -29,6 +30,7 @@ type AddAccountFormProps = {
 export default function AddAccountForm({ categories, onFinished }: AddAccountFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { activeBook } = useBooks();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,8 +43,9 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!activeBook) return;
     startTransition(async () => {
-      const result = await createAccountAction(values);
+      const result = await createAccountAction(activeBook.id, values);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
         onFinished();

@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "date": "2025-10-14T22:46:58.651Z",
+    "description": "Opening balance for DAGA",
+    "entries": [
+      {
+        "accountId": "acc_1760482018651",
+        "type": "debit",
+        "amount": 25000
+      },
+      {
+        "accountId": "acc_equity_opening",
+        "type": "credit",
+        "amount": 25000
+      }
+    ],
+    "id": "txn_1760482018651"
+  }
+]
