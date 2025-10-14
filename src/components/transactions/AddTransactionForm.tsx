@@ -89,6 +89,7 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
       form.reset({
         ...initialData,
         date: new Date(initialData.date),
+        entries: initialData.entries.map(e => ({...e, description: e.description || ''})),
         useSeparateNarration: initialData.entries.some(e => e.description)
       });
       if (initialData.entries.length > 2) {
@@ -127,11 +128,9 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
 
   const handleAmountSync = (index: number, amount: number) => {
     if (!isSplit) {
-      if(index === 0 && fields[1]) {
-        form.setValue(`entries.1.amount`, amount);
-      }
-      if(index === 1 && fields[0]) {
-        form.setValue(`entries.0.amount`, amount);
+      const otherIndex = fields.findIndex((field, i) => i !== index && field.type !== fields[index].type);
+      if (otherIndex !== -1) {
+          form.setValue(`entries.${otherIndex}.amount`, amount);
       }
     }
   }
@@ -301,12 +300,14 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
                     </div>
                 </div>
 
-                {!isSplit ? (
+                {!isSplit && (
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} />
+                        <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} checked={isSplit} />
                         <label htmlFor="enable-split" className="text-sm font-medium leading-none">Enable Split Entry</label>
                     </div>
-                ) : (
+                )} 
+
+                {(isSplit || (totalCredits > 0 || totalDebits > 0)) && (
                    <div className="bg-muted p-4 rounded-lg space-y-2">
                       <div className="flex justify-between font-mono text-sm">
                           <span>Total To:</span>

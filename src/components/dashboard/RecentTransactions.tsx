@@ -13,7 +13,7 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +51,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 
   const handleDelete = (transactionId: string) => {
@@ -67,11 +67,16 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    setIsEditSheetOpen(true);
+    setIsSheetOpen(true);
   };
+
+  const handleAdd = () => {
+    setEditingTransaction(null);
+    setIsSheetOpen(true);
+  }
   
-  const onEditFinished = () => {
-    setIsEditSheetOpen(false);
+  const onSheetFinished = () => {
+    setIsSheetOpen(false);
     setEditingTransaction(null);
   }
 
@@ -118,18 +123,26 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   return (
     <>
     <Card>
-      <CardHeader>
-         <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
-        {isTransactionsPage ? (
-          <div className="flex items-center gap-4 pt-4">
-            <Input
-              placeholder="Filter by description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-        ) : <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
+          {isTransactionsPage ? (
+            <div className="flex items-center gap-4 pt-4">
+              <Input
+                placeholder="Filter by description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+          ) : <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+        </div>
+        {isTransactionsPage && (
+          <Button onClick={handleAdd}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
       {transactions.length === 0 ? (
@@ -219,18 +232,16 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       )}
     </Card>
 
-    <Dialog open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+    <Dialog open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <DialogContent className="sm:max-w-3xl w-full overflow-y-auto max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Edit Transaction</DialogTitle>
+            <DialogTitle className="font-headline text-2xl">{editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}</DialogTitle>
           </DialogHeader>
-          {editingTransaction && (
             <AddTransactionForm
               accounts={accounts}
-              onFinished={onEditFinished}
+              onFinished={onSheetFinished}
               initialData={editingTransaction}
             />
-          )}
         </DialogContent>
     </Dialog>
     </>
