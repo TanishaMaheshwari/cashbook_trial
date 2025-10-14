@@ -1,0 +1,87 @@
+[
+  {
+    "id": "txn_1",
+    "date": "2023-10-01T00:00:00.000Z",
+    "description": "Initial capital investment",
+    "entries": [
+      {
+        "accountId": "acc_bank",
+        "type": "debit",
+        "amount": 50000
+      },
+      {
+        "accountId": "acc_capital",
+        "type": "credit",
+        "amount": 50000
+      }
+    ]
+  },
+  {
+    "id": "txn_2",
+    "date": "2023-10-05T00:00:00.000Z",
+    "description": "Paid office rent for October",
+    "entries": [
+      {
+        "accountId": "acc_rent",
+        "type": "debit",
+        "amount": 2000
+      },
+      {
+        "accountId": "acc_bank",
+        "type": "credit",
+        "amount": 2000
+      }
+    ]
+  },
+  {
+    "id": "txn_3",
+    "date": "2023-10-10T00:00:00.000Z",
+    "description": "Sale to Customer B on credit",
+    "entries": [
+      {
+        "accountId": "acc_customer_b",
+        "type": "debit",
+        "amount": 5000
+      },
+      {
+        "accountId": "acc_sales",
+        "type": "credit",
+        "amount": 5000
+      }
+    ]
+  },
+  {
+    "id": "txn_4",
+    "date": "2023-10-15T00:00:00.000Z",
+    "description": "Purchased supplies from Supplier A on credit",
+    "entries": [
+      {
+        "accountId": "acc_supplies",
+        "type": "debit",
+        "amount": 750
+      },
+      {
+        "accountId": "acc_supplier_a",
+        "type": "credit",
+        "amount": 750
+      }
+    ]
+  },
+  {
+    "id": "txn_5",
+    "date": "2023-10-20T00:00:00.000Z",
+    "description": "Received payment from Customer B",
+    "entries": [
+      {
+        "accountId": "acc_bank",
+        "type": "debit",
+        "amount": 2500
+      },
+      {
+        "accountId": "acc_customer_b",
+        "type": "credit",
+        "amount": 2500
+      }
+    ]
+  }
+]

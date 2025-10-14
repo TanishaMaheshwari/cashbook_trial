@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cat_cash",
+    "name": "Cash"
+  },
+  {
+    "id": "cat_capital",
+    "name": "Capital"
+  },
+  {
+    "id": "cat_party",
+    "name": "Parties"
+  },
+  {
+    "id": "cat_revenue",
+    "name": "Revenue"
+  },
+  {
+    "id": "cat_expense",
+    "name": "Expenses"
+  }
+]
