@@ -17,7 +17,7 @@ export default async function AllTransactionsPage() {
             <span className="sr-only">Back to Dashboard</span>
           </Link>
         </Button>
-        <h1 className="text-3xl font-headline">All Transactions</h1>
+        {/* The title is now inside the RecentTransactions component */}
       </div>
       <RecentTransactions transactions={transactions} accounts={accounts} />
     </div>

@@ -93,7 +93,10 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="space-y-8">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-end">
+             <div>
+                <h2 className="text-2xl font-headline mb-4">Dashboard Overview</h2>
+             </div>
             <div className="w-full max-w-xs space-y-2">
               <Label htmlFor="category-select">Select Category</Label>
               <Select onValueChange={setSelectedCategoryId} defaultValue={selectedCategoryId}>

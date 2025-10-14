@@ -2,9 +2,16 @@
 
 import type { Account, Transaction } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
-import { Separator } from '../ui/separator';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -19,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useTransition, useState } from 'react';
+import { useTransition } from 'react';
 import { deleteTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,9 +43,6 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
 
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-
 
   const handleDelete = (transactionId: string) => {
     startTransition(async () => {
@@ -62,93 +66,80 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
 
 
   return (
-    <div>
-      {!isTransactionsPage && <h2 className="text-2xl font-headline mb-4">Recent Transactions</h2>}
+    <Card>
+      <CardHeader>
+         <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
+        {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+      </CardHeader>
+      <CardContent>
       {transactions.length === 0 ? (
-        <Card className="flex items-center justify-center h-40">
+        <div className="flex items-center justify-center h-40">
           <p className="text-muted-foreground">No transactions yet.</p>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {transactions.map(tx => (
-            <Card key={tx.id} className="transition-all hover:shadow-lg">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="font-body font-bold text-lg">{tx.description}</CardTitle>
-                    <CardDescription>{new Date(tx.date).toLocaleDateString()}</CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</Badge>
-                     {isTransactionsPage && (
-                      <>
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(tx)}>
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this transaction.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(tx.id)}
-                                disabled={isPending}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                {isPending ? 'Deleting...' : 'Delete'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-chart-2">To</h4>
-                    <Separator className="mb-2 bg-chart-2/20" />
-                    <ul className="space-y-1 text-sm">
-                      {tx.entries.filter(e => e.type === 'debit').map((entry, i) => (
-                        <li key={i} className="flex justify-between">
-                          <span>{getAccountName(entry.accountId)}</span>
-                          <span>{formatCurrency(entry.amount)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-chart-3">From</h4>
-                    <Separator className="mb-2 bg-chart-3/20"/>
-                    <ul className="space-y-1 text-sm">
-                      {tx.entries.filter(e => e.type === 'credit').map((entry, i) => (
-                        <li key={i} className="flex justify-between">
-                          <span>{getAccountName(entry.accountId)}</span>
-                          <span>{formatCurrency(entry.amount)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              {isTransactionsPage && <TableHead className="text-right">Actions</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.map(tx => (
+              <TableRow key={tx.id}>
+                <TableCell className="w-28">{new Date(tx.date).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <div className="font-medium">{tx.description}</div>
+                  <div className="text-xs text-muted-foreground">
+                    <span className="text-chart-2 font-semibold">To:</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-chart-3 font-semibold mx-2">From:</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right font-mono">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
+                 {isTransactionsPage && (
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(tx)}>
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete this transaction.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(tx.id)}
+                              disabled={isPending}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              {isPending ? 'Deleting...' : 'Delete'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
