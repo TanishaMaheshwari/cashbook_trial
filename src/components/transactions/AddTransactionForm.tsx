@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -18,9 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import AddAccountForm from '@/components/accounts/AddAccountForm';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
-import { Card, CardContent } from '../ui/card';
-import { Combobox } from '@/components/ui/combobox';
 import { useBooks } from '@/context/BookContext';
+import { TransactionEntryCard } from './TransactionEntryCard';
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
@@ -30,7 +29,7 @@ const transactionEntrySchema = z.object({
 });
 
 const formSchema = z.object({
-  description: z.string().min(3, 'Description must be at least 3 characters.').max(100),
+  description: z.string().min(1, 'Description is required.').max(100),
   date: z.date({ required_error: 'Date is required.' }),
   entries: z.array(transactionEntrySchema).min(2, 'At least one debit and one credit entry are required.'),
   useSeparateNarration: z.boolean().default(false),
@@ -150,91 +149,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
   const debitFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'debit');
 
   const accountOptions = useMemo(() => accounts.map(acc => ({ value: acc.id, label: acc.name })), [accounts]);
-
-  const fromLabel = transactionView === 'dr_cr' ? 'Credit Account' : 'From Account';
-  const toLabel = transactionView === 'dr_cr' ? 'Debit Account' : 'To Account';
-
-  const EntryCard = ({ index, type }: { index: number, type: 'credit' | 'debit' }) => (
-    <Card className={cn("w-full", type === 'debit' ? 'bg-green-50/50 dark:bg-green-950/20' : 'bg-red-50/50 dark:bg-red-950/20')}>
-      <CardContent className="p-4 space-y-4">
-        <h4 className={cn("font-semibold", type === 'debit' ? 'text-green-700' : 'text-red-700')}>
-            {type === 'debit' ? toLabel : fromLabel}
-        </h4>
-         <FormField
-          control={form.control}
-          name={`entries.${index}.accountId`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="sr-only">{type === 'debit' ? toLabel : fromLabel}</FormLabel>
-                <FormControl>
-                    <Combobox
-                        options={accountOptions}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Type account name..."
-                        searchPlaceholder="Search accounts..."
-                        notFoundPlaceholder="No account found."
-                    />
-                </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={`entries.${index}.amount`}
-          render={({ field: formField }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...formField}
-                  onChange={(e) => {
-                      const amount = parseFloat(e.target.value) || 0;
-                      formField.onChange(amount);
-                      // Sync amounts for simple (non-split) transactions
-                      if (!isSplit && fields.length === 2) {
-                        const otherIndex = index === 0 ? 1 : 0;
-                        form.setValue(`entries.${otherIndex}.amount`, amount, { shouldValidate: true });
-                      }
-                  }}
-                  className="bg-background"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         {useSeparateNarration && (
-            <FormField
-              control={form.control}
-              name={`entries.${index}.description`}
-              render={({ field: formField }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">Line Description</FormLabel>
-                  <FormControl>
-                      <Input placeholder="Line item description (optional)" {...formField} className="bg-background" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-         {isSplit && (
-            <div className="flex justify-end">
-                <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => remove(index)} disabled={(type === 'credit' && creditFields.length <= 1) || (type === 'debit' && debitFields.length <= 1)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Remove
-                </Button>
-            </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-
+  
   if (!isMounted) {
     return <div>Loading form...</div>;
   }
@@ -304,7 +219,21 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
-                    {debitFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="debit" />)}
+                    {debitFields.map((item) => (
+                      <TransactionEntryCard
+                        key={item.field.id}
+                        control={form.control}
+                        index={item.index}
+                        remove={remove}
+                        accountOptions={accountOptions}
+                        isSplit={isSplit}
+                        totalFieldsOfType={debitFields.length}
+                        useSeparateNarration={useSeparateNarration}
+                        transactionView={transactionView}
+                        type="debit"
+                        fieldsLength={fields.length}
+                      />
+                    ))}
                     {isSplit && (
                         <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0, description: '' })} className="w-full">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Debit' : 'To'} Account
@@ -312,7 +241,21 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                     )}
                 </div>
                 <div className="space-y-4">
-                    {creditFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="credit" />)}
+                    {creditFields.map((item) => (
+                       <TransactionEntryCard
+                        key={item.field.id}
+                        control={form.control}
+                        index={item.index}
+                        remove={remove}
+                        accountOptions={accountOptions}
+                        isSplit={isSplit}
+                        totalFieldsOfType={creditFields.length}
+                        useSeparateNarration={useSeparateNarration}
+                        transactionView={transactionView}
+                        type="credit"
+                        fieldsLength={fields.length}
+                      />
+                    ))}
                     {isSplit && (
                         <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: 0, description: '' })} className="w-full">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Credit' : 'From'} Account

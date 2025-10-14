@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useTransition, useState, useMemo, useEffect } from 'react';
 import { deleteTransactionAction, updateTransactionHighlightAction, deleteMultipleTransactionsAction } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -65,7 +64,6 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
   const [isPending, startTransition] = useTransition();
   const [isHighlightPending, startHighlightTransition] = useTransition();
-  const { toast } = useToast();
   const { activeBook } = useBooks();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,10 +93,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     if (!activeBook) return;
     startTransition(async () => {
       const result = await deleteTransactionAction(activeBook.id, transactionId);
-      if (result.success) {
-        toast({ title: 'Success', description: result.message });
-      } else {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
+      if (!result.success) {
+        console.error(result.message);
       }
     });
   };
@@ -108,10 +104,9 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     startTransition(async () => {
         const result = await deleteMultipleTransactionsAction(activeBook.id, selectedTransactions);
         if(result.success) {
-            toast({ title: "Success", description: result.message });
             setSelectedTransactions([]);
         } else {
-            toast({ title: "Error", description: result.message, variant: "destructive" });
+            console.error(result.message);
         }
     });
   };
@@ -135,10 +130,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     if (!activeBook) return;
     startHighlightTransition(async () => {
       const newHighlight = currentColor === color ? null : color;
-      const result = await updateTransactionHighlightAction(activeBook.id, transactionId, newHighlight);
-      if (!result.success && result.message) {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
-      }
+      await updateTransactionHighlightAction(activeBook.id, transactionId, newHighlight);
     });
   };
   

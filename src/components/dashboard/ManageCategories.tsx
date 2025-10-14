@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { FolderPlus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { createCategoryAction } from "@/app/actions";
-import { useToast } from "@/hooks/use-toast";
 import type { Category } from "@/lib/types";
 import { useBooks } from "@/context/BookContext";
 
@@ -23,7 +22,6 @@ export default function ManageCategories({ categories }: { categories: Category[
   const [open, setOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
   const { activeBook } = useBooks();
 
   const handleAddCategory = () => {
@@ -31,11 +29,10 @@ export default function ManageCategories({ categories }: { categories: Category[
     startTransition(async () => {
       const result = await createCategoryAction(activeBook.id, newCategoryName);
       if (result.success) {
-        toast({ title: 'Success', description: result.message });
         setNewCategoryName("");
         setOpen(false);
       } else {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
+        console.error(result.message);
       }
     });
   };

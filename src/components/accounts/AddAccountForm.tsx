@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { Category } from '@/lib/types';
 import { useTransition } from 'react';
 import { createAccountAction } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
 
 const formSchema = z.object({
@@ -29,7 +28,6 @@ type AddAccountFormProps = {
 
 export default function AddAccountForm({ categories, onFinished }: AddAccountFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
   const { activeBook } = useBooks();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,11 +48,8 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
         onFinished();
         form.reset();
       } else {
-        toast({
-          title: 'Error',
-          description: result.message,
-          variant: 'destructive',
-        });
+        // Silently fail on error, maybe log it
+        console.error(result.message);
       }
     });
   };

@@ -5,11 +5,6 @@ export type Category = {
   bookId: string;
 };
 
-// Based on accounting principles.
-// Assets & Expenses increase with Debits.
-// Liabilities, Equity & Revenue increase with Credits.
-export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
-
 export type Account = {
   id: string;
   name: string;

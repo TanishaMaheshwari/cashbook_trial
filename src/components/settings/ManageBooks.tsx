@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { Book, Edit, PlusCircle, Trash2 } from 'lucide-react';
 import type { Book as BookType } from '@/lib/types';
 import { addBookAction, updateBookAction, deleteBookAction } from '@/app/actions';
@@ -41,7 +40,6 @@ type ManageBooksProps = {
 };
 
 export default function ManageBooks({ initialBooks }: ManageBooksProps) {
-  const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -51,17 +49,15 @@ export default function ManageBooks({ initialBooks }: ManageBooksProps) {
 
   const handleAddBook = () => {
     if (!bookName.trim()) {
-      toast({ title: 'Error', description: 'Book name cannot be empty.', variant: 'destructive' });
       return;
     }
     startTransition(async () => {
       const result = await addBookAction(bookName);
       if (result.success) {
-        toast({ title: 'Success', description: result.message });
         setIsAddDialogOpen(false);
         setBookName('');
       } else {
-        toast({ title: 'Error', description: result.message, variant: 'destructive' });
+        console.error(result.message);
       }
     });
   };
@@ -75,18 +71,16 @@ export default function ManageBooks({ initialBooks }: ManageBooksProps) {
   const handleUpdateBook = () => {
       if (!editingBook) return;
        if (!bookName.trim()) {
-        toast({ title: 'Error', description: 'Book name cannot be empty.', variant: 'destructive' });
         return;
       }
       startTransition(async () => {
         const result = await updateBookAction(editingBook.id, bookName);
         if (result.success) {
-          toast({ title: 'Success', description: result.message });
           setIsEditDialogOpen(false);
           setEditingBook(null);
           setBookName('');
         } else {
-            toast({ title: 'Error', description: result.message, variant: 'destructive' });
+            console.error(result.message);
         }
       });
   }
@@ -94,10 +88,8 @@ export default function ManageBooks({ initialBooks }: ManageBooksProps) {
   const handleDeleteBook = (bookId: string) => {
       startTransition(async () => {
         const result = await deleteBookAction(bookId);
-        if (result.success) {
-            toast({ title: 'Success', description: result.message });
-        } else {
-            toast({ title: 'Error', description: result.message, variant: 'destructive' });
+        if (!result.success) {
+            console.error(result.message);
         }
       });
   }

@@ -300,7 +300,7 @@ export const deleteCategory = async (bookId: string, id: string): Promise<void> 
     await addToRecycleBin({ ...categoryToDelete, type: 'category' });
 
     const remainingCategories = allCategories.filter(c => c.id !== id);
-    await writeData<Category>(categoriesFilePath, remainingCategories);
+    await writeData<Category>(remainingCategories, categoriesFilePath);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
@@ -335,10 +335,13 @@ export const addAccount = async (
 ): Promise<Account> => {
     const allAccounts = await readData<Account>(accountsFilePath);
     
-    const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === accountData.name.toLowerCase());
-    if (existingAccount) {
-        throw new Error(`An account named "${accountData.name}" already exists in this book.`);
+    if (accountData.name) {
+        const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === accountData.name.toLowerCase());
+        if (existingAccount) {
+            throw new Error(`An account named "${accountData.name}" already exists in this book.`);
+        }
     }
+
 
     const newAccount: Account = {
         id: `acc_${Date.now()}`,
