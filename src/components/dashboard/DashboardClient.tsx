@@ -28,23 +28,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
     const totalDebit = initialTransactions.flatMap(t => t.entries).filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
     const totalCredit = initialTransactions.flatMap(t => t.entries).filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
 
-    const categoryBalances = categories.map(category => {
-      const categoryAccounts = accounts.filter(acc => acc.categoryId === category.id);
-      const balance = categoryAccounts.reduce((catBalance, acc) => {
-        const accountEntries = initialTransactions.flatMap(t => t.entries).filter(e => e.accountId === acc.id);
-        const accountDebit = accountEntries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
-        const accountCredit = accountEntries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
-        
-        if (acc.type === 'asset' || acc.type === 'expense') {
-          return catBalance + accountDebit - accountCredit;
-        }
-        return catBalance + accountCredit - accountDebit;
-      }, 0);
-      return { ...category, balance };
-    }).filter(cat => cat.balance !== 0);
-    
-    const selectedCategoryBalance = selectedCategoryId ? categoryBalances.find(c => c.id === selectedCategoryId) : undefined;
-    
     let accountsInSelectedCategory;
     if (selectedCategoryId) {
         accountsInSelectedCategory = accounts
@@ -68,8 +51,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
       totalDebit,
       totalCredit,
       difference: totalDebit - totalCredit,
-      categoryBalances,
-      selectedCategoryBalance,
       accountsInSelectedCategory,
     };
   }, [initialTransactions, accounts, categories, selectedCategoryId]);
@@ -115,7 +96,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <StatCards 
             stats={stats}
           />
-          {stats.accountsInSelectedCategory && selectedCategoryName && (
+          {stats.accountsInSelectedCategory && selectedCategoryName && categories && (
               <CategoryAccounts 
                 categoryName={selectedCategoryName}
                 accounts={stats.accountsInSelectedCategory} 
