@@ -84,8 +84,8 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
       description: '',
       date: new Date(),
       entries: [
-        { accountId: '', type: 'credit', amount: 0, description: '' },
         { accountId: '', type: 'debit', amount: 0, description: '' },
+        { accountId: '', type: 'credit', amount: 0, description: '' },
       ],
       useSeparateNarration: false,
     },
@@ -114,8 +114,8 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
             description: '',
             date: new Date(),
             entries: [
-                { accountId: '', type: 'credit', amount: 0, description: '' },
                 { accountId: '', type: 'debit', amount: 0, description: '' },
+                { accountId: '', type: 'credit', amount: 0, description: '' },
             ],
             useSeparateNarration: false,
         });
@@ -168,17 +168,17 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
   const toLabel = transactionView === 'dr_cr' ? 'Debit Account' : 'To Account';
 
   const EntryCard = ({ index, type }: { index: number, type: 'credit' | 'debit' }) => (
-    <Card className={cn("w-full", type === 'credit' ? 'bg-red-50/50 dark:bg-red-950/20' : 'bg-green-50/50 dark:bg-green-950/20')}>
+    <Card className={cn("w-full", type === 'debit' ? 'bg-green-50/50 dark:bg-green-950/20' : 'bg-red-50/50 dark:bg-red-950/20')}>
       <CardContent className="p-4 space-y-4">
-        <h4 className={cn("font-semibold", type === 'credit' ? 'text-red-700' : 'text-green-700')}>
-            {type === 'credit' ? fromLabel : toLabel}
+        <h4 className={cn("font-semibold", type === 'debit' ? 'text-green-700' : 'text-red-700')}>
+            {type === 'debit' ? toLabel : fromLabel}
         </h4>
          <FormField
           control={form.control}
           name={`entries.${index}.accountId`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="sr-only">{type === 'credit' ? fromLabel : toLabel}</FormLabel>
+              <FormLabel className="sr-only">{type === 'debit' ? toLabel : fromLabel}</FormLabel>
                 <FormControl>
                     <Combobox
                         options={accountOptions}
@@ -313,18 +313,18 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
-                    {creditFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="credit" />)}
-                    {isSplit && (
-                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: 0, description: '' })} className="w-full">
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Credit' : 'From'} Account
-                        </Button>
-                    )}
-                </div>
-                <div className="space-y-4">
                     {debitFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="debit" />)}
                     {isSplit && (
                         <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0, description: '' })} className="w-full">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Debit' : 'To'} Account
+                        </Button>
+                    )}
+                </div>
+                <div className="space-y-4">
+                    {creditFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="credit" />)}
+                    {isSplit && (
+                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: 0, description: '' })} className="w-full">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Credit' : 'From'} Account
                         </Button>
                     )}
                 </div>
