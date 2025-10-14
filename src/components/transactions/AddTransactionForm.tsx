@@ -54,27 +54,27 @@ type AddTransactionFormProps = {
   categories: Category[];
   onFinished: () => void;
   initialData?: Transaction | null;
+  bookId?: string | null;
 };
 
 type TransactionView = 'to_from' | 'dr_cr';
 
-export default function AddTransactionForm({ accounts, categories, onFinished, initialData }: AddTransactionFormProps) {
+export default function AddTransactionForm({ accounts, categories, onFinished, initialData, bookId }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const { activeBook } = useBooks();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (activeBook) {
-      const storedView = localStorage.getItem(`transactionView_${activeBook.id}`) as TransactionView | null;
+    if (bookId) {
+      const storedView = localStorage.getItem(`transactionView_${bookId}`) as TransactionView | null;
       if (storedView) {
         setTransactionView(storedView);
       }
     }
     setIsMounted(true);
-  }, [activeBook]);
+  }, [bookId]);
 
   const isEditMode = !!initialData;
 
@@ -124,11 +124,11 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
   }, [initialData, form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (!activeBook) return;
+    if (!bookId) return;
     startTransition(async () => {
       const result = isEditMode
-        ? await updateTransactionAction(activeBook.id, initialData.id, values)
-        : await createTransactionAction(activeBook.id, values);
+        ? await updateTransactionAction(bookId, initialData.id, values)
+        : await createTransactionAction(bookId, values);
 
       if (result.success) {
         toast({ title: 'Success', description: result.message });

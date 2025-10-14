@@ -21,7 +21,7 @@ type DashboardClientProps = {
 };
 
 export default function DashboardClient({ initialTransactions, accounts, categories }: DashboardClientProps) {
-  const { isLoading: isBookLoading } = useBooks();
+  const { isLoading: isBookLoading, activeBook } = useBooks();
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
   
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(categories[0]?.id);
@@ -163,7 +163,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <DialogHeader>
             <DialogTitle className="font-headline text-2xl">Add New Transaction</DialogTitle>
           </DialogHeader>
-          <AddTransactionForm accounts={accounts} categories={categories} onFinished={() => setAddTxSheetOpen(false)} />
+          <AddTransactionForm accounts={accounts} categories={categories} bookId={activeBook?.id} onFinished={() => setAddTxSheetOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

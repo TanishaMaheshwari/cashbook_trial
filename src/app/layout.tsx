@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getBooks } from '@/lib/data';
-import AppShell from '@/components/AppShell';
+import { BookProvider } from '@/context/BookContext';
 
 export const metadata: Metadata = {
   title: 'LedgerBalance',
@@ -24,9 +24,9 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <AppShell initialBooks={initialBooks}>
+        <BookProvider initialBooks={initialBooks}>
           {children}
-        </AppShell>
+        </BookProvider>
         <Toaster />
       </body>
     </html>
