@@ -1,5 +1,113 @@
 [
   {
+    "date": "2025-10-14T23:36:49.144Z",
+    "description": "Opening Balance for Prannav",
+    "entries": [
+      {
+        "accountId": "acc_1760485009135",
+        "amount": 300000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 300000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760485009146",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-14T23:36:33.180Z",
+    "description": "Opening Balance for Nirmal mama",
+    "entries": [
+      {
+        "accountId": "acc_1760484993171",
+        "amount": 229000,
+        "type": "credit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 229000,
+        "type": "debit"
+      }
+    ],
+    "id": "txn_1760484993181",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-14T23:36:14.367Z",
+    "description": "Opening Balance for Ankit vc",
+    "entries": [
+      {
+        "accountId": "acc_1760484974343",
+        "amount": 84600,
+        "type": "credit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 84600,
+        "type": "debit"
+      }
+    ],
+    "id": "txn_1760484974373",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-14T23:34:22.850Z",
+    "description": "Opening Balance for Yash surat",
+    "entries": [
+      {
+        "accountId": "acc_1760484862841",
+        "amount": 1703500,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 1703500,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760484862854",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-14T23:33:56.868Z",
+    "description": "Opening Balance for Cherub",
+    "entries": [
+      {
+        "accountId": "acc_1760484836865",
+        "amount": 1000000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 1000000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760484836876",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-14T23:33:38.342Z",
+    "description": "Opening Balance for Pintu mama",
+    "entries": [
+      {
+        "accountId": "acc_1760484818334",
+        "amount": 250000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 250000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760484818344",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-14T23:29:01.816Z",
     "description": "Opening Balance for Mahesh",
     "entries": [
@@ -18,17 +126,17 @@
     "bookId": "book_default"
   },
   {
-    "date": "2025-10-14T23:28:12.387Z",
+    "date": "2025-10-14T23:35:46.008Z",
     "description": "Opening Balance for Cash",
     "entries": [
       {
         "accountId": "acc_1760484492379",
-        "amount": 6128710,
+        "amount": 1128710,
         "type": "debit"
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
-        "amount": 6128710,
+        "amount": 1128710,
         "type": "credit"
       }
     ],

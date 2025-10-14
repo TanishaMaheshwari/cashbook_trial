@@ -13,7 +13,6 @@ import { cn, formatCurrency } from '@/lib/utils';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { useTransition, useMemo, useState, useEffect } from 'react';
 import { createTransactionAction, updateTransactionAction } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AddAccountForm from '@/components/accounts/AddAccountForm';
@@ -61,7 +60,6 @@ type TransactionView = 'to_from' | 'dr_cr';
 
 export default function AddTransactionForm({ accounts, categories, onFinished, initialData, bookId }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
@@ -131,15 +129,11 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
         : await createTransactionAction(bookId, values);
 
       if (result.success) {
-        toast({ title: 'Success', description: result.message });
         onFinished();
         form.reset();
       } else {
-        toast({
-          title: 'Error',
-          description: result.message,
-          variant: 'destructive',
-        });
+        // We can still log the error for debugging without showing a toast
+        console.error("Failed to save transaction:", result.message);
       }
     });
   };

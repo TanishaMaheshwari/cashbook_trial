@@ -1,5 +1,25 @@
 [
   {
+    "date": "2025-10-14T23:35:15.288Z",
+    "description": "Opening Balance for HM",
+    "entries": [
+      {
+        "accountId": "acc_1760484514093",
+        "amount": 1128710,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 1128710,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760484915293",
+    "bookId": "book_default",
+    "type": "transaction",
+    "deletedAt": "2025-10-14T23:35:39.148Z"
+  },
+  {
     "id": "acc_sales",
     "name": "Sales Revenue",
     "categoryId": "cat_revenue",

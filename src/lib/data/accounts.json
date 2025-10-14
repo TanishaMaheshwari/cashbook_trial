@@ -21,7 +21,9 @@
     "id": "acc_1760484492379",
     "bookId": "book_default",
     "name": "Cash",
-    "categoryId": "cat_cash"
+    "categoryId": "cat_cash",
+    "openingBalance": 1128710,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_opening_balance_equity_book_default",
@@ -33,12 +35,50 @@
     "id": "acc_1760484514093",
     "bookId": "book_default",
     "name": "HM",
-    "categoryId": "cat_capital"
+    "categoryId": "cat_capital",
+    "openingBalance": 0,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760484541813",
     "bookId": "book_default",
     "name": "Mahesh",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1760484818334",
+    "bookId": "book_default",
+    "name": "Pintu mama",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1760484836865",
+    "bookId": "book_default",
+    "name": "Cherub",
+    "categoryId": "cat_expense"
+  },
+  {
+    "id": "acc_1760484862841",
+    "bookId": "book_default",
+    "name": "Yash surat",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1760484974343",
+    "bookId": "book_default",
+    "name": "Ankit vc",
+    "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760484993171",
+    "bookId": "book_default",
+    "name": "Nirmal mama",
+    "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760485009135",
+    "bookId": "book_default",
+    "name": "Prannav",
     "categoryId": "cat_party"
   }
 ]
