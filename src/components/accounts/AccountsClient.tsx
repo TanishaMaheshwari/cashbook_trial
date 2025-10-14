@@ -51,6 +51,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDescriptor, setSortDescriptor] = useState('name-asc');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [filter, setFilter] = useState('all');
 
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
@@ -96,6 +97,16 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
 
   const filteredAndSortedAccounts = useMemo(() => {
     let accounts = [...initialAccounts];
+    
+    if (filter !== 'all') {
+        if (filter === 'debit') {
+            accounts = accounts.filter(a => isDebitAccount(a.type));
+        } else if (filter === 'credit') {
+            accounts = accounts.filter(a => !isDebitAccount(a.type));
+        } else {
+            accounts = accounts.filter(a => a.categoryId === filter);
+        }
+    }
 
     if (searchTerm) {
       accounts = accounts.filter(account =>
@@ -136,7 +147,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     });
 
     return accounts;
-  }, [initialAccounts, searchTerm, sortDescriptor, categories]);
+  }, [initialAccounts, searchTerm, sortDescriptor, categories, filter]);
 
   const handleSelect = (accountId: string, checked: boolean) => {
     if(checked) {
@@ -192,13 +203,26 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       
       <Card>
         <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="relative flex-grow md:flex-grow-0">
+            <div className="flex-grow md:flex-grow-0 flex flex-wrap gap-4">
                 <Input
-                  placeholder="Search accounts by name or category..."
+                  placeholder="Search accounts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8 w-full md:w-64 lg:w-80"
                 />
+                 <Select value={filter} onValueChange={setFilter}>
+                    <SelectTrigger className="w-full md:w-[180px] h-9">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Accounts</SelectItem>
+                        <SelectItem value="debit">Debit Balance</SelectItem>
+                        <SelectItem value="credit">Credit Balance</SelectItem>
+                        {categories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
             <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 text-sm">
