@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction } from '@/lib/data';
-import type { Transaction } from '@/lib/types';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount } from '@/lib/data';
+import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
   try {
@@ -13,6 +13,7 @@ export async function createTransactionAction(data: Omit<Transaction, 'id' | 'da
     
     revalidatePath('/');
     revalidatePath('/transactions');
+    revalidatePath('/accounts');
     
     return { success: true, message: 'Transaction added successfully.' };
   } catch (error) {
@@ -27,6 +28,7 @@ export async function createCategoryAction(name: string) {
     try {
         await addCategory(name);
         revalidatePath('/');
+        revalidatePath('/accounts');
         return { success: true, message: `Category '${name}' created.` };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
@@ -39,9 +41,34 @@ export async function deleteTransactionAction(transactionId: string) {
     await deleteTransaction(transactionId);
     revalidatePath('/');
     revalidatePath('/transactions');
+    revalidatePath('/accounts');
     return { success: true, message: 'Transaction deleted successfully.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return { success: false, message: `Failed to delete transaction: ${errorMessage}` };
   }
+}
+
+export async function createAccountAction(data: Omit<Account, 'id'>) {
+    try {
+        await addAccount(data);
+        revalidatePath('/accounts');
+        revalidatePath('/');
+        return { success: true, message: 'Account created successfully.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to create account: ${errorMessage}` };
+    }
+}
+
+export async function deleteAccountAction(accountId: string) {
+    try {
+        await deleteAccount(accountId);
+        revalidatePath('/accounts');
+        revalidatePath('/');
+        return { success: true, message: 'Account deleted successfully.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to delete account: ${errorMessage}` };
+    }
 }

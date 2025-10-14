@@ -108,3 +108,25 @@ export const deleteTransaction = async (id: string): Promise<void> => {
   }
   transactions.splice(index, 1);
 };
+
+export const addAccount = async (account: Omit<Account, 'id'>): Promise<Account> => {
+    const newAccount: Account = {
+        ...account,
+        id: `acc_${Date.now()}`,
+    };
+    accounts.push(newAccount);
+    return newAccount;
+};
+
+export const deleteAccount = async (id: string): Promise<void> => {
+    // Check if account has transactions
+    const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === id));
+    if (hasTransactions) {
+        throw new Error('Cannot delete account with existing transactions.');
+    }
+    const index = accounts.findIndex(a => a.id === id);
+    if (index === -1) {
+        throw new Error('Account not found.');
+    }
+    accounts.splice(index, 1);
+};
