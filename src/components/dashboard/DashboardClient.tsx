@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from '../ui/label';
+import Link from 'next/link';
+import { List, Users } from 'lucide-react';
+
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -66,6 +69,18 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <div className="flex items-center justify-between h-16">
             <Logo />
             <div className="flex items-center gap-2">
+               <Button variant="outline" asChild>
+                <Link href="/transactions">
+                  <List className="mr-2 h-4 w-4" />
+                  All Transactions
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/accounts">
+                  <Users className="mr-2 h-4 w-4" />
+                  All Accounts
+                </Link>
+              </Button>
               <ManageCategories categories={categories} />
               <Button onClick={() => setAddTxSheetOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { Separator } from '../ui/separator';
+import { usePathname } from 'next/navigation';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
@@ -13,10 +14,12 @@ type RecentTransactionsProps = {
 
 export default function RecentTransactions({ transactions, accounts }: RecentTransactionsProps) {
   const getAccountName = (accountId: string) => accounts.find(a => a.id === accountId)?.name || 'Unknown Account';
+  const pathname = usePathname();
+  const isTransactionsPage = pathname === '/transactions';
 
   return (
     <div>
-      <h2 className="text-2xl font-headline mb-4">Recent Transactions</h2>
+      {!isTransactionsPage && <h2 className="text-2xl font-headline mb-4">Recent Transactions</h2>}
       {transactions.length === 0 ? (
         <Card className="flex items-center justify-center h-40">
           <p className="text-muted-foreground">No transactions yet.</p>
