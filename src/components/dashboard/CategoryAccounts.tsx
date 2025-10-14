@@ -44,9 +44,8 @@ export default function CategoryAccounts({ categoryName, accounts }: CategoryAcc
     <Card>
       <CardHeader>
         <CardTitle>{categoryName} Accounts</CardTitle>
-        <CardDescription>Breakdown of accounts in the selected category.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-2">
         <Table>
           <TableHeader>
             <TableRow>
