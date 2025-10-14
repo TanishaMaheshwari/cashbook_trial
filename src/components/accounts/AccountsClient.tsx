@@ -27,6 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import AddAccountForm from './AddAccountForm';
@@ -374,3 +375,5 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     </div>
   );
 }
+
+    
