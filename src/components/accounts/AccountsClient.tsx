@@ -37,6 +37,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from '../ui/checkbox';
 import { useBooks } from '@/context/BookContext';
 import EditAccountForm from './EditAccountForm';
+import Header from '../layout/Header';
 
 
 type AccountWithBalance = Account & { balance: number };
@@ -166,6 +167,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <Header />
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-headline">Accounts</h1>
         <div className="flex items-center gap-2">
@@ -183,12 +185,6 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                 <AddAccountForm categories={categories} onFinished={() => setAddSheetOpen(false)} />
               </DialogContent>
             </Dialog>
-            <Button variant="outline" asChild>
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
         </div>
       </div>
       

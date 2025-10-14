@@ -55,7 +55,9 @@
     "id": "acc_1760484836865",
     "bookId": "book_default",
     "name": "Cherub",
-    "categoryId": "cat_expense"
+    "categoryId": "cat_party",
+    "openingBalance": 1000000,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760484862841",

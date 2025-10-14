@@ -18,6 +18,7 @@ import type { Account } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useBooks } from '@/context/BookContext';
+import Header from '../layout/Header';
 
 type TransactionView = 'to_from' | 'dr_cr';
 
@@ -60,26 +61,15 @@ export default function AccountLedgerClient({ account, ledgerEntries, finalBalan
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between gap-4 mb-6">
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <Header backHref="/accounts" />
+       <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" asChild>
-              <Link href="/accounts">
-                <ArrowLeft />
-                <span className="sr-only">Back to Accounts</span>
-              </Link>
-            </Button>
             <div>
                 <h1 className="text-3xl font-headline">{account.name}</h1>
                 <p className="text-muted-foreground">Account Ledger</p>
             </div>
           </div>
-          <Button variant="outline" asChild>
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Link>
-            </Button>
       </div>
       
       <Card className="mb-6">

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
+import Link from 'next/link';
 
 export function Logo() {
   const { books, activeBook, setActiveBook, isLoading } = useBooks();
@@ -26,9 +27,11 @@ export function Logo() {
 
   return (
     <div className="flex items-center gap-3" aria-label="CASHBOOK Logo">
-      <div className="bg-primary/20 text-primary p-2 rounded-lg">
-         <Scale className="h-6 w-6" />
-      </div>
+      <Link href="/" className="flex items-center gap-3">
+        <div className="bg-primary/20 text-primary p-2 rounded-lg">
+          <Scale className="h-6 w-6" />
+        </div>
+      </Link>
        <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="text-2xl font-headline font-bold text-foreground tracking-wide p-2 h-auto -ml-2">

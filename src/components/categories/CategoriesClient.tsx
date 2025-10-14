@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { deleteCategoryAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
+import Header from '../layout/Header';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -45,7 +46,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
     startTransition(async () => {
       const result = await deleteCategoryAction(activeBook.id, categoryId);
       if (result.success) {
-        toast({ title: "Success", description: result.message });
+        // toast({ title: "Success", description: result.message });
       } else {
         toast({ title: "Error", description: result.message, variant: "destructive" });
       }
@@ -54,16 +55,11 @@ export default function CategoriesClient({ categories, allCategories }: Categori
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <Header />
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-headline">Categories</h1>
         <div className="flex items-center gap-2">
             <ManageCategories categories={allCategories} />
-            <Button variant="outline" asChild>
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Link>
-            </Button>
         </div>
       </div>
 

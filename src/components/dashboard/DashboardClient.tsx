@@ -13,6 +13,7 @@ import Link from 'next/link';
 import CategoryAccounts from './CategoryAccounts';
 import { useBooks } from '@/context/BookContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import Header from '../layout/Header';
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -62,81 +63,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Logo />
-            <div className="flex items-center gap-2">
-               {/* Desktop Menu */}
-               <div className="hidden md:flex items-center gap-2">
-                 <Button variant="outline" asChild>
-                   <Link href="/transactions">
-                     <List className="mr-2 h-4 w-4" />
-                     All Transactions
-                   </Link>
-                 </Button>
-                 <Button variant="outline" asChild>
-                   <Link href="/accounts">
-                     <Users className="mr-2 h-4 w-4" />
-                     All Accounts
-                   </Link>
-                 </Button>
-                 <Button variant="outline" asChild>
-                   <Link href="/categories">
-                     <Folder className="mr-2 h-4 w-4" />
-                     All Categories
-                   </Link>
-                 </Button>
-                 <Button variant="ghost" size="icon" asChild>
-                   <Link href="/settings">
-                     <Settings />
-                     <span className="sr-only">Settings</span>
-                   </Link>
-                 </Button>
-               </div>
-
-              <Button onClick={() => setAddTxSheetOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Transaction
-              </Button>
-              
-               {/* Mobile Menu */}
-               <div className="md:hidden">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical />
-                        <span className="sr-only">More options</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href="/transactions">
-                          <List className="mr-2 h-4 w-4" /> All Transactions
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                         <Link href="/accounts">
-                           <Users className="mr-2 h-4 w-4" /> All Accounts
-                         </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                         <Link href="/categories">
-                           <Folder className="mr-2 h-4 w-4" /> All Categories
-                         </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                         <Link href="/settings">
-                           <Settings className="mr-2 h-4 w-4" /> Settings
-                         </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-               </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:px-8">
         <div className="space-y-8">
