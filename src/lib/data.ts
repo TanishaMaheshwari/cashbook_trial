@@ -127,24 +127,7 @@ export const getCategories = async (bookId: string): Promise<Category[]> => {
 
 export const getAccounts = async (bookId: string): Promise<Account[]> => {
     const allAccounts = await readData<Account>(accountsFilePath);
-    const bookAccounts = allAccounts.filter(a => a.bookId === bookId);
-
-    if (bookAccounts.length === 0 && bookId === 'book_default') {
-        // Ensure default categories exist for this book first
-        const bookCategories = await getCategories(bookId);
-        const capitalCategory = bookCategories.find(c => c.name === 'Capital');
-
-        const defaultAccount: Account = {
-            id: 'acc_equity_opening',
-            name: 'Opening Balance Equity',
-            categoryId: capitalCategory?.id || 'cat_capital',
-            bookId: bookId,
-        };
-        const allAccountsWithNew = [...allAccounts, defaultAccount];
-        await writeData<Account>(accountsFilePath, allAccountsWithNew);
-        return [defaultAccount];
-    }
-    return bookAccounts;
+    return allAccounts.filter(a => a.bookId === bookId);
 };
 
 export const getTransactions = async (bookId: string): Promise<Transaction[]> => {
@@ -244,31 +227,7 @@ export const addAccount = async (bookId: string, account: Omit<Account, 'id' | '
 
     const openingBalance = account.openingDebit || account.openingCredit;
     if (openingBalance && openingBalance > 0) {
-      const balanceType = account.openingDebit ? 'debit' : 'credit';
-      
-      const bookAccounts = await getAccounts(bookId);
-      const openingBalanceAccount = bookAccounts.find(a => a.name === 'Opening Balance Equity');
-      if (!openingBalanceAccount) {
-          throw new Error('Opening Balance Equity account not found for this book.');
-      }
-      
-      const openingBalanceTransaction: Omit<Transaction, 'id' | 'bookId'> = {
-        date: new Date().toISOString(),
-        description: `Opening balance for ${account.name}`,
-        entries: [
-          {
-            accountId: newAccount.id,
-            type: balanceType,
-            amount: openingBalance,
-          },
-          {
-            accountId: openingBalanceAccount.id,
-            type: balanceType === 'debit' ? 'credit' : 'debit',
-            amount: openingBalance,
-          },
-        ],
-      };
-      await addTransaction(bookId, openingBalanceTransaction);
+      console.warn("Opening balance was provided, but automatic transaction creation is disabled. Please create a manual transaction for the opening balance.");
     }
     return newAccount;
 };
