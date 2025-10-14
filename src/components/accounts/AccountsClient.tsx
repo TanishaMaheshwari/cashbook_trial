@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, TrendingDown, TrendingUp, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, TrendingDown, TrendingUp, ArrowUpDown, MoreVertical, Filter, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -33,6 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import AddAccountForm from './AddAccountForm';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 type AccountWithBalance = Account & { balance: number };
 
@@ -44,18 +45,6 @@ type AccountsClientProps = {
     credit: number;
   };
 };
-
-const StatCard = ({ title, value, icon: Icon, colorClass }: { title: string; value: string; icon: React.ElementType; colorClass?: string }) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      <Icon className={`h-5 w-5 ${colorClass || 'text-muted-foreground'}`} />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-    </CardContent>
-  </Card>
-);
 
 export default function AccountsClient({ initialAccounts, categories, totals }: AccountsClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,7 +85,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
 
     if (searchTerm) {
       accounts = accounts.filter(account =>
-        account.name.toLowerCase().includes(searchTerm.toLowerCase())
+        account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getCategoryName(account.categoryId).toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -135,137 +125,181 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     }
   }
 
+  const accountTypeColors: { [key: string]: string } = {
+    asset: 'bg-green-100 text-green-800',
+    liability: 'bg-red-100 text-red-800',
+    equity: 'bg-purple-100 text-purple-800',
+    revenue: 'bg-blue-100 text-blue-800',
+    expense: 'bg-yellow-100 text-yellow-800',
+  }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/">
-              <ArrowLeft />
-              <span className="sr-only">Back to Dashboard</span>
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-headline">All Accounts</h1>
-        </div>
-        <Dialog open={isAddSheetOpen} onOpenChange={setAddSheetOpen}>
-          <DialogTrigger asChild>
-             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Account
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-headline">Accounts</h1>
+        <div className="flex items-center gap-2">
+            <Dialog open={isAddSheetOpen} onOpenChange={setAddSheetOpen}>
+              <DialogTrigger asChild>
+                 <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Account
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-2xl">Add New Account</DialogTitle>
+                </DialogHeader>
+                <AddAccountForm categories={categories} onFinished={() => setAddSheetOpen(false)} />
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" asChild>
+              <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-headline text-2xl">Add New Account</DialogTitle>
-            </DialogHeader>
-            <AddAccountForm categories={categories} onFinished={() => setAddSheetOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        </div>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 mb-6">
-        <StatCard title="Total Debits" value={formatCurrency(totals.debit)} icon={TrendingUp} colorClass="text-blue-500" />
-        <StatCard title="Total Credits" value={formatCurrency(totals.credit)} icon={TrendingDown} colorClass="text-green-500" />
-      </div>
-
-       <Card>
-        <CardHeader>
-          <CardTitle>Chart of Accounts</CardTitle>
-           <div className="flex items-center gap-4 pt-4">
-            <Input
-              placeholder="Filter by account name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
+      
+      <Card>
+        <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="relative flex-grow md:flex-grow-0">
+                <Input
+                  placeholder="Search accounts by name or category..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-full md:w-64 lg:w-80"
+                />
+            </div>
+            <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-2 text-sm">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-muted-foreground">Filter:</label>
+                    <Select defaultValue="all">
+                        <SelectTrigger className="w-[120px] h-9">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Accounts</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                 <div className="flex items-center gap-2 text-sm">
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-muted-foreground">Sort by:</label>
+                    <Select value={sortField} onValueChange={setSortField}>
+                        <SelectTrigger className="w-[100px] h-9">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="name">Name</SelectItem>
+                            <SelectItem value="balance">Balance</SelectItem>
+                            <SelectItem value="type">Type</SelectItem>
+                            <SelectItem value="category">Category</SelectItem>
+                        </SelectContent>
+                    </Select>
+                     <Button variant="ghost" size="icon" onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}>
+                        {sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                     </Button>
+                 </div>
+            </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">All Accounts ({filteredAndSortedAccounts.length} of {initialAccounts.length})</CardTitle>
+            <div className="text-sm font-mono">
+                <span className="text-green-600 mr-4">Total Dr: {formatCurrency(totals.debit)}</span>
+                <span className="text-red-600">Total Cr: {formatCurrency(totals.credit)}</span>
+            </div>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Button variant="ghost" onClick={() => handleSort('name')}>
-                    Account Name <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </TableHead>
-                <TableHead>
-                   <Button variant="ghost" onClick={() => handleSort('category')}>
-                    Category <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button variant="ghost" onClick={() => handleSort('type')}>
-                    Type <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </TableHead>
-                <TableHead className="text-right">
-                  <Button variant="ghost" onClick={() => handleSort('balance')}>
-                    Balance <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAndSortedAccounts.map((account) => (
-                <TableRow key={account.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/accounts/${account.id}`} className="hover:underline text-primary">
-                      {account.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{getCategoryName(account.categoryId)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="capitalize">{account.type}</Badge>
-                  </TableCell>
-                  <TableCell className={cn(
-                      "text-right font-mono",
-                      isDebitAccount(account.type) ? "text-blue-600" : "text-green-600"
-                    )}>
-                      {formatCurrency(account.balance)}
-                      <span className="text-xs text-muted-foreground ml-1">{isDebitAccount(account.type) ? 'Dr' : 'Cr'}</span>
-                  </TableCell>
-                  <TableCell>
-                     <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(account)}>
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this account.
-                                You cannot delete an account that has transactions.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(account.id)}
-                                disabled={isPending}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                {isPending ? 'Deleting...' : 'Delete'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0">
+            <div className="space-y-2 p-4">
+            {filteredAndSortedAccounts.map((account) => (
+                <Card key={account.id} className="grid grid-cols-6 gap-4 items-center p-3 hover:bg-muted/50 transition-colors">
+                    <div className="col-span-2">
+                        <Link href={`/accounts/${account.id}`} className="hover:underline">
+                            <p className="font-semibold text-primary">{account.name}</p>
+                        </Link>
+                        <Badge variant="secondary" className={cn(accountTypeColors[account.type] || 'bg-gray-100 text-gray-800', 'capitalize text-xs')}>
+                          {getCategoryName(account.categoryId)}
+                        </Badge>
+                    </div>
+                    <div className="col-span-1 text-center font-mono">
+                        {isDebitAccount(account.type) && account.balance !== 0 ? (
+                           <>
+                             <p className="text-green-600 font-semibold">{formatCurrency(account.balance)}</p>
+                             <p className="text-xs text-muted-foreground">Dr Balance</p>
+                           </>
+                        ) : '-'}
+                    </div>
+                    <div className="col-span-1 text-center font-mono">
+                        {!isDebitAccount(account.type) && account.balance !== 0 ? (
+                           <>
+                            <p className="text-red-600 font-semibold">{formatCurrency(account.balance)}</p>
+                            <p className="text-xs text-muted-foreground">Cr Balance</p>
+                           </>
+                        ) : '-'}
+                    </div>
+                    <div className="col-span-1 text-center font-mono">
+                      {account.balance === 0 && (
+                        <>
+                          <p className="font-semibold">{formatCurrency(0)}</p>
+                          <p className="text-xs text-muted-foreground">{isDebitAccount(account.type) ? 'Dr Balance' : 'Cr Balance'}</p>
+                        </>
+                      )}
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                       <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEdit(account)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                                 <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                                            <span className="text-destructive">Delete</span>
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this account.
+                                        You cannot delete an account that has transactions.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDelete(account.id)}
+                                        disabled={isPending}
+                                        className="bg-destructive hover:bg-destructive/90"
+                                      >
+                                        {isPending ? 'Deleting...' : 'Delete'}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </Card>
+            ))}
+             {filteredAndSortedAccounts.length === 0 && (
+                 <div className="text-center py-10 text-muted-foreground">
+                    No accounts found.
+                 </div>
+             )}
+            </div>
         </CardContent>
       </Card>
     </div>
