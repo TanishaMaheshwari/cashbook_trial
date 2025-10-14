@@ -8,28 +8,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Check, ChevronsUpDown, MinusCircle, PlusCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn, formatCurrency } from '@/lib/utils';
-import type { Account, Category } from '@/lib/types';
-import { useTransition, useMemo, useState } from 'react';
-import { createTransactionAction } from '@/app/actions';
+import type { Account, Category, Transaction } from '@/lib/types';
+import { useTransition, useMemo, useState, useEffect } from 'react';
+import { createTransactionAction, updateTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AddAccountForm from '@/components/accounts/AddAccountForm';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Card, CardContent } from '../ui/card';
-
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
@@ -59,19 +50,23 @@ const formSchema = z.object({
 type AddTransactionFormProps = {
   accounts: Account[];
   onFinished: () => void;
+  initialData?: Transaction;
 };
 
-export default function AddTransactionForm({ accounts, onFinished }: AddTransactionFormProps) {
+export default function AddTransactionForm({ accounts, onFinished, initialData }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
-  const [isSplit, setIsSplit] = useState(false);
 
-  const dummyCategories: Category[] = [];
+  const isEditMode = !!initialData;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData ? {
+      ...initialData,
+      date: new Date(initialData.date),
+      useSeparateNarration: initialData.entries.some(e => e.description)
+    } : {
       description: '',
       date: new Date(),
       entries: [
@@ -81,15 +76,33 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
       useSeparateNarration: false,
     },
   });
-
+  
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: 'entries',
   });
 
+  const [isSplit, setIsSplit] = useState(isEditMode && initialData.entries.length > 2);
+
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        ...initialData,
+        date: new Date(initialData.date),
+        useSeparateNarration: initialData.entries.some(e => e.description)
+      });
+      if (initialData.entries.length > 2) {
+        setIsSplit(true);
+      }
+    }
+  }, [initialData, form]);
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      const result = await createTransactionAction(values);
+      const result = isEditMode
+        ? await updateTransactionAction(initialData.id, values)
+        : await createTransactionAction(values);
+
       if (result.success) {
         toast({ title: 'Success', description: result.message });
         onFinished();
@@ -125,8 +138,10 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
 
   const creditFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'credit');
   const debitFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'debit');
+  
+  const dummyCategories: Category[] = [];
 
-  const EntryCard = ({ index, type, field }: { index: number, type: 'credit' | 'debit', field: any }) => (
+  const EntryCard = ({ index, type }: { index: number, type: 'credit' | 'debit' }) => (
     <Card className={cn("w-full", type === 'credit' ? 'bg-blue-50' : 'bg-green-50')}>
       <CardContent className="p-4 space-y-4">
         <h4 className={cn("font-semibold", type === 'credit' ? 'text-blue-700' : 'text-green-700')}>
@@ -135,35 +150,21 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
          <FormField
           control={form.control}
           name={`entries.${index}.accountId`}
-          render={({ field: formField }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>{type === 'credit' ? 'From Account' : 'To Account'}</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <Button variant="outline" role="combobox" className={cn("justify-between w-full bg-white", !formField.value && "text-muted-foreground")}>
-                      {formField.value ? accounts.find((acc) => acc.id === formField.value)?.name : "Type account name..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select an account" />
+                    </SelectTrigger>
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search account..." />
-                    <CommandList>
-                      <CommandEmpty>No account found.</CommandEmpty>
-                      <CommandGroup>
-                        {accounts.map((acc) => (
-                          <CommandItem value={acc.name} key={acc.id} onSelect={() => form.setValue(`entries.${index}.accountId`, acc.id)}>
-                            <Check className={cn("mr-2 h-4 w-4", acc.id === formField.value ? "opacity-100" : "opacity-0")} />
-                            {acc.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                  <SelectContent>
+                    {accounts.map(acc => (
+                      <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -283,7 +284,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div className="space-y-4">
-                        {creditFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="credit" field={field} />)}
+                        {creditFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="credit" />)}
                         {isSplit && (
                             <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: 0, description: '' })} className="w-full">
                                 <PlusCircle className="mr-2 h-4 w-4" /> Add From Account
@@ -291,7 +292,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
                         )}
                     </div>
                     <div className="space-y-4">
-                        {debitFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="debit" field={field} />)}
+                        {debitFields.map(({ field, index }) => <EntryCard key={field.id} index={index} type="debit" />)}
                         {isSplit && (
                             <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0, description: '' })} className="w-full">
                                 <PlusCircle className="mr-2 h-4 w-4" /> Add To Account
@@ -302,7 +303,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
 
                 {!isSplit ? (
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="enable-split" onCheckedChange={() => setIsSplit(true)} />
+                        <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} />
                         <label htmlFor="enable-split" className="text-sm font-medium leading-none">Enable Split Entry</label>
                     </div>
                 ) : (
@@ -328,7 +329,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
 
         <div className="flex items-center justify-between">
           <Button type="submit" disabled={isPending} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            {isPending ? 'Recording...' : 'Record Transaction'}
+            {isPending ? (isEditMode ? 'Saving...' : 'Recording...') : (isEditMode ? 'Save Changes' : 'Record Transaction')}
           </Button>
 
           <Dialog open={isAddAccountOpen} onOpenChange={setAddAccountOpen}>

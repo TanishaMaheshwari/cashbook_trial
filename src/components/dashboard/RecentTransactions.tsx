@@ -10,11 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Plus, Trash2, ArrowRight } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +30,8 @@ import { deleteTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import Link from 'next/link';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
@@ -49,6 +50,9 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+
 
   const handleDelete = (transactionId: string) => {
     startTransition(async () => {
@@ -62,12 +66,14 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   };
 
   const handleEdit = (transaction: Transaction) => {
-    console.log('Editing transaction:', transaction);
-    toast({
-      title: "Edit Not Implemented",
-      description: "The edit functionality is not yet available.",
-    });
+    setEditingTransaction(transaction);
+    setIsEditSheetOpen(true);
   };
+  
+  const onEditFinished = () => {
+    setIsEditSheetOpen(false);
+    setEditingTransaction(null);
+  }
 
   const transactions = useMemo(() => {
     let filtered = [...initialTransactions];
@@ -110,6 +116,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
 
   return (
+    <>
     <Card>
       <CardHeader>
          <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
@@ -154,8 +161,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                 <TableCell>
                   <div className="font-medium">{tx.description}</div>
                   <div className="text-xs text-muted-foreground">
-                    <span className="text-chart-2 font-semibold">To:</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
-                    <span className="text-chart-3 font-semibold mx-2">From:</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-green-600 font-semibold">To:</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-blue-600 font-semibold mx-2">From:</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
                   </div>
                 </TableCell>
                 <TableCell className="text-right font-mono">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
@@ -211,5 +218,21 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         </CardFooter>
       )}
     </Card>
+
+    <Dialog open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+        <DialogContent className="sm:max-w-3xl w-full overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl">Edit Transaction</DialogTitle>
+          </DialogHeader>
+          {editingTransaction && (
+            <AddTransactionForm
+              accounts={accounts}
+              onFinished={onEditFinished}
+              initialData={editingTransaction}
+            />
+          )}
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }

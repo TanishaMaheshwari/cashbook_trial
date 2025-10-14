@@ -93,6 +93,16 @@ export const addTransaction = async (transaction: Omit<Transaction, 'id'>): Prom
   return newTransaction;
 };
 
+export const updateTransaction = async (id: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> => {
+  const index = transactions.findIndex(t => t.id === id);
+  if (index === -1) {
+    throw new Error('Transaction not found.');
+  }
+  const updatedTransaction = { ...transaction, id };
+  transactions[index] = updatedTransaction;
+  return updatedTransaction;
+};
+
 export const addCategory = async (name: string): Promise<Category> => {
   const newCategory = { id: `cat_${Date.now()}`, name };
   if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) {

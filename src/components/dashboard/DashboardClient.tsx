@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import StatCards from './StatCards';
 import ManageCategories from './ManageCategories';
@@ -118,14 +118,14 @@ export default function DashboardClient({ initialTransactions, accounts, categor
         </div>
       </main>
 
-      <Sheet open={isAddTxSheetOpen} onOpenChange={setAddTxSheetOpen}>
-        <SheetContent className="sm:max-w-2xl w-full overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="font-headline text-2xl">Add New Transaction</SheetTitle>
-          </SheetHeader>
+      <Dialog open={isAddTxSheetOpen} onOpenChange={setAddTxSheetOpen}>
+        <DialogContent className="sm:max-w-3xl w-full overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl">Add New Transaction</DialogTitle>
+          </DialogHeader>
           <AddTransactionForm accounts={accounts} onFinished={() => setAddTxSheetOpen(false)} />
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

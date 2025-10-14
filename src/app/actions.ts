@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
@@ -20,6 +20,25 @@ export async function createTransactionAction(data: Omit<Transaction, 'id' | 'da
     return { success: false, message: 'Failed to create transaction.' };
   }
 }
+
+export async function updateTransactionAction(id: string, data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
+  try {
+    await updateTransaction(id, {
+      ...data,
+      date: data.date.toISOString(),
+    });
+    
+    revalidatePath('/');
+    revalidatePath('/transactions');
+    revalidatePath('/accounts');
+    
+    return { success: true, message: 'Transaction updated successfully.' };
+  } catch (error) {
+     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to update transaction: ${errorMessage}` };
+  }
+}
+
 
 export async function createCategoryAction(name: string) {
     if (!name || name.trim().length === 0) {
