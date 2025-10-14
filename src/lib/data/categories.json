@@ -2,7 +2,7 @@
 [
   {
     "id": "cat_cash",
-    "name": "Cash",
+    "name": "Cash & Bank",
     "bookId": "book_default"
   },
   {
@@ -21,8 +21,23 @@
     "bookId": "book_default"
   },
   {
-    "id": "cat_1760481839544",
-    "name": "STAFF",
+    "id": "cat_revenue",
+    "name": "Revenue",
     "bookId": "book_default"
+  },
+  {
+    "id": "cat_bg_cash",
+    "name": "BG Cash Accounts",
+    "bookId": "book_1760481482686"
+  },
+  {
+    "id": "cat_bg_main",
+    "name": "BG Main",
+    "bookId": "book_1760481482686"
+  },
+  {
+    "id": "cat_bg_clients",
+    "name": "BG Clients",
+    "bookId": "book_1760481482686"
   }
 ]
