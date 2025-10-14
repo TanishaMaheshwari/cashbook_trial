@@ -40,8 +40,8 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-semibold mb-2 text-chart-3">Debits</h4>
-                    <Separator className="mb-2 bg-chart-3/20" />
+                    <h4 className="font-semibold mb-2 text-chart-2">To</h4>
+                    <Separator className="mb-2 bg-chart-2/20" />
                     <ul className="space-y-1 text-sm">
                       {tx.entries.filter(e => e.type === 'debit').map((entry, i) => (
                         <li key={i} className="flex justify-between">
@@ -52,8 +52,8 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2 text-chart-2">Credits</h4>
-                    <Separator className="mb-2 bg-chart-2/20"/>
+                    <h4 className="font-semibold mb-2 text-chart-3">From</h4>
+                    <Separator className="mb-2 bg-chart-3/20"/>
                     <ul className="space-y-1 text-sm">
                       {tx.entries.filter(e => e.type === 'credit').map((entry, i) => (
                         <li key={i} className="flex justify-between">

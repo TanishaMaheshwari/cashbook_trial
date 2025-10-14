@@ -30,8 +30,8 @@ export default function StatCards({ stats }: StatCardsProps) {
     <div>
       <h2 className="text-2xl font-headline mb-4">Dashboard Overview</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Debits" value={formatCurrency(stats.totalDebit)} icon={ArrowDownCircle} colorClass="text-chart-3" />
-        <StatCard title="Total Credits" value={formatCurrency(stats.totalCredit)} icon={ArrowUpCircle} colorClass="text-chart-2" />
+        <StatCard title="Total Flow In" value={formatCurrency(stats.totalDebit)} icon={ArrowDownCircle} colorClass="text-chart-2" />
+        <StatCard title="Total Flow Out" value={formatCurrency(stats.totalCredit)} icon={ArrowUpCircle} colorClass="text-chart-3" />
         <StatCard title="Difference" value={formatCurrency(stats.difference)} icon={Scale} colorClass={stats.difference !== 0 ? 'text-destructive' : 'text-chart-2'} />
         {stats.selectedCategoryBalance && (
           <StatCard key={stats.selectedCategoryBalance.id} title={stats.selectedCategoryBalance.name} value={formatCurrency(stats.selectedCategoryBalance.balance)} icon={Scale} />

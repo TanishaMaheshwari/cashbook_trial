@@ -35,7 +35,7 @@ const formSchema = z.object({
     return Math.abs(totalDebits - totalCredits) < 0.01;
   },
   {
-    message: 'Total debits must equal total credits.',
+    message: 'Total "To" amounts must equal total "From" amounts.',
     path: ['entries'],
   }
 );
@@ -179,8 +179,8 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
                           <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="debit">Debit</SelectItem>
-                          <SelectItem value="credit">Credit</SelectItem>
+                          <SelectItem value="debit">To</SelectItem>
+                          <SelectItem value="credit">From</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -201,12 +201,12 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
 
         <div className="bg-muted p-4 rounded-lg space-y-2">
             <div className="flex justify-between font-mono text-sm">
-                <span>Total Debits:</span>
-                <span className="text-chart-3 font-semibold">{formatCurrency(totalDebits)}</span>
+                <span>Total To:</span>
+                <span className="text-chart-2 font-semibold">{formatCurrency(totalDebits)}</span>
             </div>
             <div className="flex justify-between font-mono text-sm">
-                <span>Total Credits:</span>
-                <span className="text-chart-2 font-semibold">{formatCurrency(totalCredits)}</span>
+                <span>Total From:</span>
+                <span className="text-chart-3 font-semibold">{formatCurrency(totalCredits)}</span>
             </div>
              <div className="flex justify-between font-mono text-sm font-bold border-t pt-2 mt-2">
                 <span>Difference:</span>
