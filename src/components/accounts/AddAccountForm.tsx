@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Account, Category } from '@/lib/types';
+import type { Category } from '@/lib/types';
 import { useTransition } from 'react';
 import { createAccountAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -16,12 +16,8 @@ import { useBooks } from '@/context/BookContext';
 const formSchema = z.object({
   name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
-  openingDebit: z.coerce.number().min(0).optional(),
-  openingCredit: z.coerce.number().min(0).optional(),
-})
-.refine(data => !(data.openingDebit && data.openingCredit), {
-    message: "Opening balance can be either a debit or a credit, not both.",
-    path: ["openingDebit"],
+  openingBalance: z.coerce.number().min(0).optional(),
+  balanceType: z.enum(['debit', 'credit']).default('debit'),
 });
 
 
@@ -40,8 +36,8 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     defaultValues: {
       name: '',
       categoryId: '',
-      openingDebit: 0,
-      openingCredit: 0
+      openingBalance: 0,
+      balanceType: 'debit',
     },
   });
 
@@ -101,13 +97,13 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
         <div>
             <FormLabel>Opening Balance (Optional)</FormLabel>
             <FormDescription>If this account has a starting balance, enter it here.</FormDescription>
-            <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-3 gap-4 mt-2">
                 <FormField
                 control={form.control}
-                name="openingDebit"
+                name="openingBalance"
                 render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Debit (Dr)</FormLabel>
+                    <FormItem className="col-span-2">
+                    <FormLabel className="sr-only">Opening Balance</FormLabel>
                     <FormControl>
                         <Input type="number" step="0.01" placeholder="0.00" {...field} />
                     </FormControl>
@@ -117,13 +113,19 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
                 />
                 <FormField
                 control={form.control}
-                name="openingCredit"
+                name="balanceType"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Credit (Cr)</FormLabel>
-                    <FormControl>
-                        <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                    </FormControl>
+                    <FormLabel className="sr-only">Balance Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue/></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                           <SelectItem value="debit">Dr</SelectItem>
+                           <SelectItem value="credit">Cr</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
@@ -133,7 +135,7 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>
-            {isPending ? 'Saving...' : 'Save Account'}
+            {isPending ? 'Creating...' : 'Create Account'}
           </Button>
         </div>
       </form>

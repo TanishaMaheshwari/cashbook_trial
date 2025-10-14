@@ -1,4 +1,4 @@
-import type { Account, Category, Transaction, AccountType, Book } from '@/lib/types';
+import type { Account, Category, Transaction, Book } from '@/lib/types';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -218,7 +218,7 @@ export const deleteTransaction = async (bookId: string, id: string): Promise<voi
   await writeData<Transaction>(transactionsFilePath, allTransactions);
 };
 
-export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId'> & { openingDebit?: number, openingCredit?: number }): Promise<Account> => {
+export const addAccount = async (bookId: string, account: Omit<Account, 'id' | 'bookId' | 'openingBalance'> & { openingBalance?: number, balanceType?: 'debit' | 'credit' }): Promise<Account> => {
     const allAccounts = await readData<Account>(accountsFilePath);
     const newAccount: Account = {
         name: account.name,
@@ -229,9 +229,35 @@ export const addAccount = async (bookId: string, account: Omit<Account, 'id' | '
     allAccounts.push(newAccount);
     await writeData<Account>(accountsFilePath, allAccounts);
 
-    const openingBalance = account.openingDebit || account.openingCredit;
+    const openingBalance = account.openingBalance;
     if (openingBalance && openingBalance > 0) {
-      console.warn("Opening balance was provided, but automatic transaction creation is disabled. Please create a manual transaction for the opening balance.");
+        const openingBalanceAccountId = 'acc_opening_balance';
+        let allAccountsWithOB = await readData<Account>(accountsFilePath);
+        let obEquityAccount = allAccountsWithOB.find(a => a.id === openingBalanceAccountId);
+        
+        if (!obEquityAccount) {
+            obEquityAccount = { id: openingBalanceAccountId, name: 'Opening Balance Equity', categoryId: 'cat_capital', bookId: bookId };
+            allAccountsWithOB.push(obEquityAccount);
+            await writeData<Account>(accountsFilePath, allAccountsWithOB);
+        }
+
+        const transaction: Omit<Transaction, 'id' | 'bookId'> = {
+            date: new Date().toISOString(),
+            description: `Opening Balance for ${newAccount.name}`,
+            entries: [
+                {
+                    accountId: newAccount.id,
+                    amount: openingBalance,
+                    type: account.balanceType || 'debit',
+                },
+                {
+                    accountId: openingBalanceAccountId,
+                    amount: openingBalance,
+                    type: (account.balanceType || 'debit') === 'debit' ? 'credit' : 'debit',
+                },
+            ]
+        };
+        await addTransaction(bookId, transaction);
     }
     return newAccount;
 };

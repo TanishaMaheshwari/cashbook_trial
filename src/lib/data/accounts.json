@@ -5,5 +5,17 @@
     "type": "asset",
     "id": "acc_1760482126852",
     "bookId": "book_default"
+  },
+  {
+    "name": "LALIT JI",
+    "categoryId": "cat_capital",
+    "id": "acc_1760482495322",
+    "bookId": "book_default"
+  },
+  {
+    "name": "Prakaha Hinger",
+    "categoryId": "cat_party",
+    "id": "acc_1760482509843",
+    "bookId": "book_default"
   }
 ]
