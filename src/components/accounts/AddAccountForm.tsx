@@ -47,7 +47,6 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     startTransition(async () => {
       const result = await createAccountAction(activeBook.id, values);
       if (result.success) {
-        toast({ title: 'Success', description: result.message });
         onFinished();
         form.reset();
       } else {
