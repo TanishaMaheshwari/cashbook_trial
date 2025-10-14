@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -88,7 +89,7 @@ export default function AccountLedgerClient({ account, ledgerEntries, finalBalan
         <CardContent className="grid md:grid-cols-3 gap-4 text-sm">
             <div>
                 <p className="text-muted-foreground">Category</p>
-                <p><Badge variant="secondary" className="capitalize">{categoryName}</Badge></p>
+                <div><Badge variant="secondary" className="capitalize">{categoryName}</Badge></div>
             </div>
              <div>
                 <p className="text-muted-foreground">Final Balance</p>

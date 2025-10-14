@@ -1,5 +1,26 @@
 [
   {
+    "description": "Cash paid to Ankit ji",
+    "date": "2025-10-14T23:48:21.463Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484974343",
+        "type": "debit",
+        "amount": 84600,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 84600,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760485732530",
+    "bookId": "book_default"
+  },
+  {
     "description": "Cash paid to hm",
     "date": "2025-10-14T23:39:00.613Z",
     "entries": [
