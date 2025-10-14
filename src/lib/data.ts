@@ -100,3 +100,11 @@ export const addCategory = async (name: string): Promise<Category> => {
   categories.push(newCategory);
   return newCategory;
 };
+
+export const deleteTransaction = async (id: string): Promise<void> => {
+  const index = transactions.findIndex(t => t.id === id);
+  if (index === -1) {
+    throw new Error('Transaction not found.');
+  }
+  transactions.splice(index, 1);
+};
