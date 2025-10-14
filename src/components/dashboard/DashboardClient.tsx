@@ -103,6 +103,16 @@ export default function DashboardClient({ initialTransactions, accounts, categor
             stats={stats}
           />
           
+           {selectedCategoryName && stats.accountsInSelectedCategory && (
+            <CategoryAccounts
+                categoryName={selectedCategoryName}
+                accounts={stats.accountsInSelectedCategory}
+                categories={categories}
+                selectedCategoryId={selectedCategoryId}
+                onCategoryChange={setSelectedCategoryId}
+            />
+           )}
+          
           <RecentTransactions transactions={initialTransactions} accounts={accounts} />
         </div>
       </main>

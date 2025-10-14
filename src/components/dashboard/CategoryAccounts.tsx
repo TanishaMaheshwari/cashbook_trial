@@ -28,7 +28,7 @@ type CategoryAccountsProps = {
 export default function CategoryAccounts({ categoryName, accounts, categories, selectedCategoryId, onCategoryChange }: CategoryAccountsProps) {
   const isDebitAccount = (type: Account['type']) => ['asset', 'expense'].includes(type);
 
-  if (!accounts || accounts.length === 0) {
+  if (!accounts) {
     return (
         <Card>
             <CardHeader>
@@ -75,12 +75,16 @@ export default function CategoryAccounts({ categoryName, accounts, categories, s
                 </SelectContent>
             </Select>
         </CardTitle>
+        <CardDescription>
+            Breakdown of accounts in the selected category.
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-2">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="h-auto py-2">Account Name</TableHead>
+              <TableHead className="h-auto py-2">Type</TableHead>
               <TableHead className="text-right h-auto py-2">Balance</TableHead>
             </TableRow>
           </TableHeader>
@@ -91,6 +95,9 @@ export default function CategoryAccounts({ categoryName, accounts, categories, s
                   <Link href={`/accounts/${account.id}`} className="font-medium text-primary hover:underline">
                     {account.name}
                   </Link>
+                </TableCell>
+                <TableCell className="py-2">
+                  <Badge variant="secondary" className="capitalize">{account.type}</Badge>
                 </TableCell>
                 <TableCell className={cn(
                     "text-right py-2",
