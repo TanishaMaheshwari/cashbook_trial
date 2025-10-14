@@ -2,7 +2,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions, restoreItem, deletePermanently } from '@/lib/data';
 import type { Transaction, Account } from '@/lib/types';
 
 export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
@@ -75,6 +75,7 @@ export async function deleteTransactionAction(bookId: string, transactionId: str
     revalidatePath('/');
     revalidatePath('/transactions');
     revalidatePath('/accounts');
+    revalidatePath('/recycle-bin');
     return { success: true, message: 'Transaction deleted successfully.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
@@ -88,6 +89,7 @@ export async function deleteMultipleTransactionsAction(bookId: string, transacti
         revalidatePath('/');
         revalidatePath('/transactions');
         revalidatePath('/accounts');
+        revalidatePath('/recycle-bin');
         return { success: true, message: `${transactionIds.length} transactions deleted.` };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
@@ -96,10 +98,11 @@ export async function deleteMultipleTransactionsAction(bookId: string, transacti
 }
 
 
-export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'>) {
+export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId' | 'openingBalance' | 'openingBalanceType'> & { openingBalance?: number, openingBalanceType?: 'debit' | 'credit' }) {
     try {
         await addAccount(bookId, data);
         revalidatePath('/accounts');
+        revalidatePath('/transactions');
         revalidatePath('/');
         return { success: true, message: 'Account created successfully.' };
     } catch (error) {
@@ -124,6 +127,7 @@ export async function deleteAccountAction(bookId: string, accountId: string) {
     try {
         await deleteAccount(bookId, accountId);
         revalidatePath('/accounts');
+        revalidatePath('/recycle-bin');
         revalidatePath('/');
         return { success: true, message: 'Account deleted successfully.' };
     } catch (error) {
@@ -136,6 +140,7 @@ export async function deleteMultipleAccountsAction(bookId: string, accountIds: s
     try {
         await deleteMultipleAccounts(bookId, accountIds);
         revalidatePath('/accounts');
+        revalidatePath('/recycle-bin');
         revalidatePath('/');
         return { success: true };
     } catch (error) {
@@ -184,10 +189,36 @@ export async function deleteBookAction(id: string) {
   try {
     await deleteBook(id);
     revalidatePath('/settings');
-     revalidatePath('/'); // To update the book list
+    revalidatePath('/recycle-bin');
+    revalidatePath('/'); // To update the book list
     return { success: true, message: 'Book deleted.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return { success: false, message: `Failed to delete book: ${errorMessage}` };
   }
+}
+
+
+// --- Recycle Bin Actions ---
+export async function restoreItemAction(item: any) {
+    try {
+        await restoreItem(item);
+        revalidatePath('/recycle-bin');
+        revalidatePath('/'); // Revalidate all pages for safety
+        return { success: true, message: `${item.type} restored successfully.` };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to restore: ${errorMessage}` };
+    }
+}
+
+export async function deletePermanentlyAction(item: any) {
+    try {
+        await deletePermanently(item);
+        revalidatePath('/recycle-bin');
+        return { success: true, message: 'Item permanently deleted.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to delete permanently: ${errorMessage}` };
+    }
 }

@@ -17,6 +17,8 @@ import { useBooks } from '@/context/BookContext';
 const formSchema = z.object({
   name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
+  openingBalance: z.coerce.number().min(0, "Opening balance can't be negative.").default(0),
+  openingBalanceType: z.enum(['debit', 'credit']).default('debit'),
 });
 
 
@@ -35,6 +37,8 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     defaultValues: {
       name: '',
       categoryId: '',
+      openingBalance: 0,
+      openingBalanceType: 'debit',
     },
   });
 
@@ -90,6 +94,47 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
             </FormItem>
           )}
         />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="openingBalance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Opening Balance</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
+            <div>
+                 <FormField
+                  control={form.control}
+                  name="openingBalanceType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="debit">Dr</SelectItem>
+                            <SelectItem value="credit">Cr</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
+        </div>
         
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>

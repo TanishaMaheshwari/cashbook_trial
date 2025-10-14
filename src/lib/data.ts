@@ -42,7 +42,8 @@ const writeData = async <T>(filePath: string, data: T[]): Promise<void> => {
 };
 
 export const getRecycleBinItems = async (): Promise<any[]> => {
-    return await readData<any>(recycleBinFilePath);
+    const items = await readData<any>(recycleBinFilePath);
+    return items.sort((a,b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
 };
 
 export const addToRecycleBin = async (item: any | any[]) => {
@@ -56,6 +57,49 @@ export const addToRecycleBin = async (item: any | any[]) => {
     const newBin = [...itemsToAdd, ...bin];
     await writeData<any>(recycleBinFilePath, newBin);
 }
+
+// --- Recycle Bin Actions ---
+export const restoreItem = async (item: any): Promise<void> => {
+    let allItems: any[];
+    let filePath: string;
+
+    switch (item.type) {
+        case 'account':
+            filePath = accountsFilePath;
+            allItems = await readData<Account>(filePath);
+            break;
+        case 'transaction':
+            filePath = transactionsFilePath;
+            allItems = await readData<Transaction>(filePath);
+            break;
+        case 'category':
+            filePath = categoriesFilePath;
+            allItems = await readData<Category>(filePath);
+            break;
+        case 'book':
+            filePath = booksFilePath;
+            allItems = await readData<Book>(filePath);
+            break;
+        default:
+            throw new Error(`Unknown item type for restore: ${item.type}`);
+    }
+
+    const { deletedAt, type, ...originalItem } = item;
+    allItems.push(originalItem);
+    await writeData(filePath, allItems);
+
+    // Remove from recycle bin
+    let bin = await readData<any>(recycleBinFilePath);
+    bin = bin.filter(i => i.id !== item.id || i.type !== item.type);
+    await writeData<any>(recycleBinFilePath, bin);
+};
+
+export const deletePermanently = async (item: any): Promise<void> => {
+    let bin = await readData<any>(recycleBinFilePath);
+    bin = bin.filter(i => i.id !== item.id || i.type !== item.type);
+    await writeData<any>(recycleBinFilePath, bin);
+};
+
 
 // --- Book Functions ---
 
@@ -96,37 +140,77 @@ export const deleteBook = async (id: string): Promise<void> => {
       throw new Error('Cannot delete the default book.');
   }
   let books = await getBooks();
-  const index = books.findIndex(b => b.id === id);
-   if (index === -1) {
+  const bookToDelete = books.find(b => b.id === id);
+   if (!bookToDelete) {
     throw new Error('Book not found.');
   }
-  const [deletedBook] = books.splice(index, 1);
-  await addToRecycleBin({ ...deletedBook, type: 'book' });
-  await writeData<Book>(booksFilePath, books);
   
-  // Also delete associated data
+  // Find associated data before deleting book reference
   let allTransactions = await readData<Transaction>(transactionsFilePath);
   let allAccounts = await readData<Account>(accountsFilePath);
   let allCategories = await readData<Category>(categoriesFilePath);
+  
+  const transactionsToBin = allTransactions.filter(t => t.bookId === id);
+  const accountsToBin = allAccounts.filter(a => a.bookId === id);
+  const categoriesToBin = allCategories.filter(c => c.bookId === id);
 
-  await writeData(transactionsFilePath, allTransactions.filter(t => t.bookId !== id));
-  await writeData(accountsFilePath, allAccounts.filter(a => a.bookId !== id));
-  await writeData(categoriesFilePath, allCategories.filter(c => c.bookId !== id));
+  await addToRecycleBin([
+      { ...bookToDelete, type: 'book' },
+      ...transactionsToBin.map(t => ({ ...t, type: 'transaction' })),
+      ...accountsToBin.map(a => ({ ...a, type: 'account' })),
+      ...categoriesToBin.map(c => ({ ...c, type: 'category' }))
+  ]);
+  
+  // Filter out the deleted book and its data
+  const remainingBooks = books.filter(b => b.id !== id);
+  const remainingTransactions = allTransactions.filter(t => t.bookId !== id);
+  const remainingAccounts = allAccounts.filter(a => a.bookId !== id);
+  const remainingCategories = allCategories.filter(c => c.bookId !== id);
 
+  await writeData(booksFilePath, remainingBooks);
+  await writeData(transactionsFilePath, remainingTransactions);
+  await writeData(accountsFilePath, remainingAccounts);
+  await writeData(categoriesFilePath, remainingCategories);
 };
 
 
 // --- Other Data Functions ---
+const getOpeningBalanceEquityAccount = async(bookId: string): Promise<Account> => {
+    const allAccounts = await readData<Account>(accountsFilePath);
+    let obeAccount = allAccounts.find(a => a.id === `acc_opening_balance_equity_${bookId}`);
+    
+    if (!obeAccount) {
+        // Find or create the equity category
+        const allCategories = await readData<Category>(categoriesFilePath);
+        let equityCategory = allCategories.find(c => c.bookId === bookId && c.name.toLowerCase() === 'equity');
+        if (!equityCategory) {
+            equityCategory = { id: `cat_equity_${bookId}`, name: 'Equity', bookId };
+            allCategories.push(equityCategory);
+            await writeData<Category>(categoriesFilePath, allCategories);
+        }
+
+        obeAccount = {
+            id: `acc_opening_balance_equity_${bookId}`,
+            name: 'Opening Balance Equity',
+            categoryId: equityCategory.id,
+            bookId: bookId,
+        };
+        allAccounts.push(obeAccount);
+        await writeData<Account>(accountsFilePath, allAccounts);
+    }
+    return obeAccount;
+}
+
 export const getCategories = async (bookId: string): Promise<Category[]> => {
   const categories = await readData<Category>(categoriesFilePath);
   const bookCategories = categories.filter(c => c.bookId === bookId);
 
   if (bookCategories.length === 0 && bookId === 'book_default') {
       const defaultCategories: Category[] = [
-        { id: 'cat_cash', name: 'Cash', bookId },
-        { id: 'cat_capital', name: 'Capital', bookId },
-        { id: 'cat_party', name: 'Parties', bookId },
-        { id: 'cat_expense', name: 'Expenses', bookId },
+        { id: 'cat_cash_default', name: 'Cash', bookId },
+        { id: 'cat_capital_default', name: 'Capital', bookId },
+        { id: 'cat_party_default', name: 'Parties', bookId },
+        { id: 'cat_expense_default', name: 'Expenses', bookId },
       ];
       const allCategories = [...categories, ...defaultCategories];
       await writeData<Category>(categoriesFilePath, allCategories);
@@ -198,24 +282,23 @@ await writeData<Category>(categoriesFilePath, allCategories);
 
 export const deleteCategory = async (bookId: string, id: string): Promise<void> => {
     const accounts = await getAccounts(bookId);
+    if (id.startsWith('cat_equity_')) {
+        throw new Error('Cannot delete the system-generated Equity category.');
+    }
     const isCategoryInUse = accounts.some(acc => acc.categoryId === id);
     if (isCategoryInUse) {
         throw new Error('Cannot delete category. It is currently assigned to one or more accounts.');
     }
 
     let allCategories = await readData<Category>(categoriesFilePath);
-    const bookCategories = allCategories.filter(c => c.bookId === bookId);
-    const otherBookCategories = allCategories.filter(c => c.bookId !== bookId);
-
-    const index = bookCategories.findIndex(c => c.id === id);
+    const index = allCategories.findIndex(c => c.id === id && c.bookId === bookId);
     if (index === -1) {
         throw new Error('Category not found in this book.');
     }
-    const [deletedCategory] = bookCategories.splice(index, 1);
+    const [deletedCategory] = allCategories.splice(index, 1);
     await addToRecycleBin({ ...deletedCategory, type: 'category' });
 
-    const finalCategories = [...otherBookCategories, ...bookCategories];
-    await writeData<Category>(categoriesFilePath, finalCategories);
+    await writeData<Category>(categoriesFilePath, allCategories);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
@@ -244,10 +327,12 @@ export const deleteMultipleTransactions = async (bookId: string, transactionIds:
     await writeData<Transaction>(transactionsFilePath, remainingTransactions);
 };
 
-export const addAccount = async (bookId: string, accountData: Omit<Account, 'id' | 'bookId'>): Promise<Account> => {
+export const addAccount = async (
+  bookId: string, 
+  accountData: Omit<Account, 'id' | 'bookId'>
+): Promise<Account> => {
     const allAccounts = await readData<Account>(accountsFilePath);
     
-    // Check for duplicate account name within the same book
     const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === accountData.name.toLowerCase());
     if (existingAccount) {
         throw new Error(`An account named "${accountData.name}" already exists in this book.`);
@@ -259,9 +344,31 @@ export const addAccount = async (bookId: string, accountData: Omit<Account, 'id'
         name: accountData.name,
         categoryId: accountData.categoryId,
     };
-
     allAccounts.push(newAccount);
     await writeData<Account>(accountsFilePath, allAccounts);
+
+    // If there's an opening balance, create a transaction for it
+    if (accountData.openingBalance && accountData.openingBalance > 0) {
+        const obeAccount = await getOpeningBalanceEquityAccount(bookId);
+
+        const newAccountEntry = {
+            accountId: newAccount.id,
+            amount: accountData.openingBalance,
+            type: accountData.openingBalanceType || 'debit',
+        };
+
+        const obeAccountEntry = {
+            accountId: obeAccount.id,
+            amount: accountData.openingBalance,
+            type: newAccountEntry.type === 'debit' ? 'credit' : 'debit',
+        };
+
+        await addTransaction(bookId, {
+            date: new Date().toISOString(),
+            description: `Opening Balance for ${newAccount.name}`,
+            entries: [newAccountEntry, obeAccountEntry],
+        });
+    }
 
     return newAccount;
 };
@@ -272,6 +379,14 @@ export const updateAccount = async (bookId: string, accountId: string, data: Par
   if (index === -1) {
     throw new Error('Account not found in this book.');
   }
+  
+  if (data.name) {
+    const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === data.name?.toLowerCase() && acc.id !== accountId);
+    if (existingAccount) {
+        throw new Error(`An account named "${data.name}" already exists in this book.`);
+    }
+  }
+
   const updatedAccount = { ...allAccounts[index], ...data };
   allAccounts[index] = updatedAccount;
   await writeData<Account>(accountsFilePath, allAccounts);
@@ -279,8 +394,10 @@ export const updateAccount = async (bookId: string, accountId: string, data: Par
 };
 
 export const deleteAccount = async (bookId: string, id: string): Promise<void> => {
+    if (id.startsWith('acc_opening_balance_equity_')) {
+        throw new Error('Cannot delete the system-generated Opening Balance Equity account.');
+    }
     const transactions = await getTransactions(bookId);
-    // Check if account has transactions
     const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === id));
     if (hasTransactions) {
         throw new Error('Cannot delete account with existing transactions.');
@@ -303,6 +420,9 @@ export const deleteMultipleAccounts = async (bookId: string, accountIds: string[
     let accountsToDelete = allAccounts.filter(acc => acc.bookId === bookId && accountIds.includes(acc.id));
 
     for (const account of accountsToDelete) {
+        if (account.id.startsWith('acc_opening_balance_equity_')) {
+             throw new Error(`Cannot delete the system-generated Opening Balance Equity account.`);
+        }
         const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === account.id));
         if (hasTransactions) {
             throw new Error(`Cannot delete account "${account.name}" because it has existing transactions.`);
