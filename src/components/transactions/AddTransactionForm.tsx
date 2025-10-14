@@ -146,13 +146,6 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
     return { totalDebits: debits, totalCredits: credits };
   }, [watchedEntries]);
 
-  const handleAmountSync = (index: number, amount: number) => {
-    if (!isSplit && fields.length === 2) {
-        const otherIndex = index === 0 ? 1 : 0;
-        form.setValue(`entries.${otherIndex}.amount`, amount);
-    }
-  }
-
   const creditFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'credit');
   const debitFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'debit');
 
@@ -202,7 +195,11 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                   onChange={(e) => {
                       const amount = parseFloat(e.target.value) || 0;
                       formField.onChange(amount);
-                      handleAmountSync(index, amount);
+                      // Sync amounts for simple (non-split) transactions
+                      if (!isSplit && fields.length === 2) {
+                        const otherIndex = index === 0 ? 1 : 0;
+                        form.setValue(`entries.${otherIndex}.amount`, amount, { shouldValidate: true });
+                      }
                   }}
                   className="bg-background"
                 />
