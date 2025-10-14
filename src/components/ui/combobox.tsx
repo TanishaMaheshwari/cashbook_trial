@@ -54,7 +54,7 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-white"
+          className="w-full justify-between bg-background"
           disabled={disabled}
         >
           {selectedOption ? selectedOption.label : placeholder}
