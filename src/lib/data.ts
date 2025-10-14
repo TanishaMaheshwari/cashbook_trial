@@ -1,9 +1,10 @@
-import type { Account, Category, Transaction, AccountType } from '@/lib/types';
+import type { Account, Category, Transaction, AccountType, Book } from '@/lib/types';
 import fs from 'fs';
 import path from 'path';
 
 const dataDir = path.join(process.cwd(), 'src', 'lib', 'data');
 
+const booksFilePath = path.join(dataDir, 'books.json');
 const categoriesFilePath = path.join(dataDir, 'categories.json');
 const accountsFilePath = path.join(dataDir, 'accounts.json');
 const transactionsFilePath = path.join(dataDir, 'transactions.json');
@@ -38,7 +39,50 @@ const addToRecycleBin = (item: any) => {
 }
 
 
-// Data access functions
+// --- Book Functions ---
+
+export const getBooks = async (): Promise<Book[]> => {
+  return readData<Book>(booksFilePath);
+};
+
+export const addBook = async (name: string): Promise<Book> => {
+  const books = await getBooks();
+  if (books.find(b => b.name.toLowerCase() === name.toLowerCase())) {
+    throw new Error('A book with this name already exists.');
+  }
+  const newBook: Book = { id: `book_${Date.now()}`, name };
+  books.push(newBook);
+  writeData<Book>(booksFilePath, books);
+  return newBook;
+};
+
+export const updateBook = async (id: string, name: string): Promise<Book> => {
+  const books = await getBooks();
+  const index = books.findIndex(b => b.id === id);
+  if (index === -1) {
+    throw new Error('Book not found.');
+  }
+  books[index].name = name;
+  writeData<Book>(booksFilePath, books);
+  return books[index];
+};
+
+export const deleteBook = async (id: string): Promise<void> => {
+  if (id === 'book_default') {
+      throw new Error('Cannot delete the default book.');
+  }
+  let books = await getBooks();
+  const index = books.findIndex(b => b.id === id);
+   if (index === -1) {
+    throw new Error('Book not found.');
+  }
+  const [deletedBook] = books.splice(index, 1);
+  addToRecycleBin({ ...deletedBook, type: 'book' });
+  writeData<Book>(booksFilePath, books);
+};
+
+
+// --- Other Data Functions ---
 export const getCategories = async (): Promise<Category[]> => {
   return readData<Category>(categoriesFilePath);
 };

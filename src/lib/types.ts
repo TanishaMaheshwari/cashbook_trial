@@ -30,3 +30,8 @@ export type Transaction = {
   entries: TransactionEntry[];
   highlight?: 'yellow' | 'blue' | 'green';
 };
+
+export type Book = {
+    id: string;
+    name: string;
+};

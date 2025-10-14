@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
@@ -113,5 +113,39 @@ export async function updateTransactionHighlightAction(transactionId: string, hi
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return { success: false, message: `Failed to update highlight: ${errorMessage}` };
+  }
+}
+
+// --- Book Actions ---
+export async function addBookAction(name: string) {
+  try {
+    await addBook(name);
+    revalidatePath('/settings');
+    return { success: true, message: `Book '${name}' created.` };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to create book: ${errorMessage}` };
+  }
+}
+
+export async function updateBookAction(id: string, name: string) {
+  try {
+    await updateBook(id, name);
+    revalidatePath('/settings');
+    return { success: true, message: 'Book name updated.' };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to update book: ${errorMessage}` };
+  }
+}
+
+export async function deleteBookAction(id: string) {
+  try {
+    await deleteBook(id);
+    revalidatePath('/settings');
+    return { success: true, message: 'Book deleted.' };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to delete book: ${errorMessage}` };
   }
 }

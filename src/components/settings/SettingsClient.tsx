@@ -3,22 +3,29 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Moon, Sun, Trash2, Book, Paintbrush, Repeat } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Trash2, Book, Paintbrush } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import ManageBooks from './ManageBooks';
+import type { Book as BookType } from '@/lib/types';
+
 
 type Theme = 'light' | 'dark';
 type TransactionView = 'to_from' | 'dr_cr';
 
-export default function SettingsClient() {
+type SettingsClientProps = {
+  initialBooks: BookType[];
+}
+
+export default function SettingsClient({ initialBooks }: SettingsClientProps) {
   const { toast } = useToast();
   const [theme, setTheme] = useState<Theme>('light');
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
-
+  
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     const storedView = localStorage.getItem('transactionView') as TransactionView | null;
@@ -29,6 +36,7 @@ export default function SettingsClient() {
     if (storedView) {
       setTransactionView(storedView);
     }
+    
     setIsMounted(true);
   }, []);
 
@@ -110,20 +118,7 @@ export default function SettingsClient() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <Book className="w-8 h-8 text-primary" />
-            <div>
-              <CardTitle>Book Management</CardTitle>
-              <CardDescription>Manage your financial books.</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             <Button className="w-full">Create New Book</Button>
-             <Button variant="outline" className="w-full">Edit Current Book</Button>
-             <Button variant="destructive" className="w-full">Delete Current Book</Button>
-          </CardContent>
-        </Card>
+        <ManageBooks initialBooks={initialBooks} />
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
