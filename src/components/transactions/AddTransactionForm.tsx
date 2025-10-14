@@ -39,6 +39,7 @@ const formSchema = z.object({
   (data) => {
     const totalDebits = data.entries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
     const totalCredits = data.entries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
+    // Use a small epsilon for floating point comparison
     return Math.abs(totalDebits - totalCredits) < 0.01;
   },
   {
@@ -49,13 +50,14 @@ const formSchema = z.object({
 
 type AddTransactionFormProps = {
   accounts: Account[];
+  categories: Category[];
   onFinished: () => void;
   initialData?: Transaction | null;
 };
 
 type TransactionView = 'to_from' | 'dr_cr';
 
-export default function AddTransactionForm({ accounts, onFinished, initialData }: AddTransactionFormProps) {
+export default function AddTransactionForm({ accounts, categories, onFinished, initialData }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
@@ -154,8 +156,6 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
 
   const creditFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'credit');
   const debitFields = fields.map((field, index) => ({ field, index })).filter(({ field }) => field.type === 'debit');
-  
-  const dummyCategories: Category[] = [];
 
   const accountOptions = useMemo(() => accounts.map(acc => ({ value: acc.id, label: acc.name })), [accounts]);
 
@@ -163,9 +163,9 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
   const toLabel = transactionView === 'dr_cr' ? 'Debit Account' : 'To Account';
 
   const EntryCard = ({ index, type }: { index: number, type: 'credit' | 'debit' }) => (
-    <Card className={cn("w-full", type === 'credit' ? 'bg-blue-50/50 dark:bg-blue-950/20' : 'bg-green-50/50 dark:bg-green-950/20')}>
+    <Card className={cn("w-full", type === 'credit' ? 'bg-red-50/50 dark:bg-red-950/20' : 'bg-green-50/50 dark:bg-green-950/20')}>
       <CardContent className="p-4 space-y-4">
-        <h4 className={cn("font-semibold", type === 'credit' ? 'text-blue-700' : 'text-green-700')}>
+        <h4 className={cn("font-semibold", type === 'credit' ? 'text-red-700' : 'text-green-700')}>
             {type === 'credit' ? fromLabel : toLabel}
         </h4>
          <FormField
@@ -173,7 +173,7 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
           name={`entries.${index}.accountId`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{type === 'credit' ? fromLabel : toLabel}</FormLabel>
+              <FormLabel className="sr-only">{type === 'credit' ? fromLabel : toLabel}</FormLabel>
                 <FormControl>
                     <Combobox
                         options={accountOptions}
@@ -230,7 +230,7 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
 
          {isSplit && (
             <div className="flex justify-end">
-                <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => remove(index)} disabled={fields.length <= 2}>
+                <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => remove(index)} disabled={(type === 'credit' && creditFields.length <= 1) || (type === 'debit' && debitFields.length <= 1)}>
                   <Trash2 className="mr-2 h-4 w-4" /> Remove
                 </Button>
             </div>
@@ -274,6 +274,20 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
         
         <div className="space-y-6">
              <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Narration</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Description of transaction..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+             <FormField
                 control={form.control}
                 name="useSeparateNarration"
                 render={({ field }) => (
@@ -291,19 +305,6 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
                 )}
              />
 
-             <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Narration</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Description of transaction..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="space-y-4">
@@ -324,18 +325,35 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
                 </div>
             </div>
 
-            <FormField
-                control={form.control}
-                name="useSeparateNarration"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                           <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} checked={isSplit} />
-                        </FormControl>
-                         <label htmlFor="enable-split" className="text-sm font-medium leading-none">Enable Split Entry</label>
-                    </FormItem>
-                )}
-             />
+            <div className="flex items-center justify-between">
+                <FormField
+                    control={form.control}
+                    name="useSeparateNarration" // This is a dummy usage to place the checkbox
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                               <Checkbox id="enable-split" onCheckedChange={(checked) => setIsSplit(!!checked)} checked={isSplit} />
+                            </FormControl>
+                             <label htmlFor="enable-split" className="text-sm font-medium leading-none cursor-pointer">Enable Split / Compound Entry</label>
+                        </FormItem>
+                    )}
+                 />
+
+                 <Dialog open={isAddAccountOpen} onOpenChange={setAddAccountOpen}>
+                  <DialogTrigger asChild>
+                     <Button variant="outline">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create New Account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="font-headline text-2xl">Add New Account</DialogTitle>
+                    </DialogHeader>
+                    <AddAccountForm categories={categories} onFinished={() => setAddAccountOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+            </div>
 
             {(isSplit || (totalCredits > 0 || totalDebits > 0)) && (
                <div className="bg-muted p-4 rounded-lg space-y-2">
@@ -357,25 +375,10 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
         </div>
 
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-end">
             <Button type="submit" disabled={isPending} className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 {isPending ? (isEditMode ? 'Saving...' : 'Recording...') : (isEditMode ? 'Save Changes' : 'Record Transaction')}
             </Button>
-
-            <Dialog open={isAddAccountOpen} onOpenChange={setAddAccountOpen}>
-              <DialogTrigger asChild>
-                 <Button variant="outline">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Account
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="font-headline text-2xl">Add New Account</DialogTitle>
-                </DialogHeader>
-                <AddAccountForm categories={dummyCategories} onFinished={() => setAddAccountOpen(false)} />
-              </DialogContent>
-            </Dialog>
         </div>
       </form>
     </Form>

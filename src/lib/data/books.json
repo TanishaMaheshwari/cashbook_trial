@@ -1,7 +1,10 @@
-
 [
   {
     "id": "book_default",
     "name": "CASHBOOK"
+  },
+  {
+    "id": "book_1760481482686",
+    "name": "BG"
   }
 ]

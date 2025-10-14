@@ -2,7 +2,6 @@
 
 import type { Book } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { getBooks } from '@/lib/data';
 
 interface BookContextType {
   books: Book[];
@@ -13,29 +12,25 @@ interface BookContextType {
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
 
-export const BookProvider = ({ children }: { children: ReactNode }) => {
-  const [books, setBooks] = useState<Book[]>([]);
+export const BookProvider = ({ children, initialBooks }: { children: ReactNode, initialBooks: Book[] }) => {
+  const [books, setBooks] = useState<Book[]>(initialBooks);
   const [activeBook, setActiveBookState] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadBooks = async () => {
-      setIsLoading(true);
-      const fetchedBooks = await getBooks();
-      setBooks(fetchedBooks);
+    // Books are now passed in, so we just need to set the active one.
+    const storedBookId = localStorage.getItem('activeBookId');
+    const bookToActivate = books.find(b => b.id === storedBookId) || books[0] || null;
+    
+    setActiveBookState(bookToActivate);
+    if (bookToActivate) {
+        localStorage.setItem('activeBookId', bookToActivate.id);
+    }
+    setIsLoading(false);
+    // We update the books state if the initialBooks prop changes.
+    setBooks(initialBooks);
 
-      const storedBookId = localStorage.getItem('activeBookId');
-      const bookToActivate = fetchedBooks.find(b => b.id === storedBookId) || fetchedBooks[0] || null;
-      
-      setActiveBookState(bookToActivate);
-      if (bookToActivate) {
-          localStorage.setItem('activeBookId', bookToActivate.id);
-      }
-      setIsLoading(false);
-    };
-
-    loadBooks();
-  }, []);
+  }, [initialBooks]);
   
   const setActiveBook = (book: Book | null) => {
     setActiveBookState(book);

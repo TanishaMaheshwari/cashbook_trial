@@ -1,6 +1,6 @@
 'use client';
 
-import type { Account, Transaction } from '@/lib/types';
+import type { Account, Category, Transaction } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -43,6 +43,7 @@ import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } fro
 type RecentTransactionsProps = {
   transactions: Transaction[];
   accounts: Account[];
+  categories: Category[];
 };
 
 type TransactionView = 'to_from' | 'dr_cr';
@@ -55,7 +56,7 @@ const highlightClasses: Record<HighlightColor, string> = {
   green: 'bg-green-100/70 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/40',
 };
 
-export default function RecentTransactions({ transactions: initialTransactions, accounts }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions: initialTransactions, accounts, categories }: RecentTransactionsProps) {
   const getAccountName = (accountId: string) => accounts.find(a => a.id === accountId)?.name || 'Unknown Account';
   const pathname = usePathname();
   const isTransactionsPage = pathname === '/transactions';
@@ -312,8 +313,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                 <TableCell>
                   <div className="font-medium">{tx.description}</div>
                   <div className="text-xs text-muted-foreground">
-                    <span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
-                    <span className="text-red-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-green-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
@@ -417,6 +418,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           </DialogHeader>
             <AddTransactionForm
               accounts={accounts}
+              categories={categories}
               onFinished={onSheetFinished}
               initialData={editingTransaction}
             />

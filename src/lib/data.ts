@@ -1,6 +1,9 @@
 import type { Account, Category, Transaction, AccountType, Book } from '@/lib/types';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// This file contains functions to read and write data from the local filesystem.
+// It is intended to be used only on the server side.
 
 const dataDir = path.join(process.cwd(), 'src', 'lib', 'data');
 
@@ -13,12 +16,19 @@ const recycleBinFilePath = path.join(dataDir, 'recycle-bin.json');
 const readData = <T>(filePath: string): T[] => {
   try {
     if (!fs.existsSync(filePath)) {
+        // If the file doesn't exist, create it with an empty array.
+        fs.writeFileSync(filePath, '[]', 'utf8');
         return [];
     }
     const jsonString = fs.readFileSync(filePath, 'utf8');
+    // If the file is empty, return an empty array.
+    if (!jsonString) {
+        return [];
+    }
     return JSON.parse(jsonString) as T[];
   } catch (error) {
     console.error(`Error reading ${filePath}:`, error);
+    // In case of a parsing error or other issue, return an empty array to prevent crashes.
     return [];
   }
 };
@@ -31,18 +41,23 @@ const writeData = <T>(filePath: string, data: T[]): void => {
   }
 };
 
-const addToRecycleBin = (item: any) => {
+export const addToRecycleBin = (item: any) => {
     const bin = readData<any>(recycleBinFilePath);
     item.deletedAt = new Date().toISOString();
-    bin.unshift(item);
+    bin.unshift(item); // Add to the beginning of the array
     writeData<any>(recycleBinFilePath, bin);
 }
-
 
 // --- Book Functions ---
 
 export const getBooks = async (): Promise<Book[]> => {
-  return readData<Book>(booksFilePath);
+  const books = readData<Book>(booksFilePath);
+  if (books.length === 0) {
+      const defaultBook = { id: 'book_default', name: 'CASHBOOK' };
+      writeData<Book>(booksFilePath, [defaultBook]);
+      return [defaultBook];
+  }
+  return books;
 };
 
 export const addBook = async (name: string): Promise<Book> => {
@@ -84,11 +99,34 @@ export const deleteBook = async (id: string): Promise<void> => {
 
 // --- Other Data Functions ---
 export const getCategories = async (): Promise<Category[]> => {
-  return readData<Category>(categoriesFilePath);
+  const categories = readData<Category>(categoriesFilePath);
+  if (categories.length === 0) {
+      const defaultCategories: Category[] = [
+        { id: 'cat_cash', name: 'Cash' },
+        { id: 'cat_capital', name: 'Capital' },
+        { id: 'cat_party', name: 'Parties' },
+        { id: 'cat_revenue', name: 'Revenue' },
+        { id: 'cat_expense', name: 'Expenses' },
+      ];
+      writeData<Category>(categoriesFilePath, defaultCategories);
+      return defaultCategories;
+  }
+  return categories;
 };
 
 export const getAccounts = async (): Promise<Account[]> => {
-  return readData<Account>(accountsFilePath);
+  const accounts = readData<Account>(accountsFilePath);
+    if (accounts.length === 0) {
+        const defaultAccount: Account = { 
+            id: 'acc_equity_opening', 
+            name: 'Opening Balance Equity', 
+            categoryId: 'cat_capital', 
+            type: 'equity' 
+        };
+        writeData<Account>(accountsFilePath, [defaultAccount]);
+        return [defaultAccount];
+    }
+    return accounts;
 };
 
 export const getTransactions = async (): Promise<Transaction[]> => {
@@ -156,7 +194,7 @@ export const deleteTransaction = async (id: string): Promise<void> => {
   writeData<Transaction>(transactionsFilePath, transactions);
 };
 
-export const addAccount = async (account: Omit<Account, 'id'>): Promise<Account> => {
+export const addAccount = async (account: Omit<Account, 'id' | 'openingBalance'> & { openingBalance?: number }): Promise<Account> => {
     const accounts = await getAccounts();
     const newAccount: Account = {
         name: account.name,
@@ -170,6 +208,7 @@ export const addAccount = async (account: Omit<Account, 'id'>): Promise<Account>
 
     if (account.openingBalance && account.openingBalance > 0) {
       const isDebitAccount = ['asset', 'expense'].includes(account.type);
+      
       const openingBalanceTransaction: Omit<Transaction, 'id'> = {
         date: new Date().toISOString(),
         description: `Opening balance for ${account.name}`,
@@ -180,7 +219,7 @@ export const addAccount = async (account: Omit<Account, 'id'>): Promise<Account>
             amount: account.openingBalance,
           },
           {
-            accountId: 'acc_equity_opening',
+            accountId: 'acc_equity_opening', // This is a special account for this purpose.
             type: isDebitAccount ? 'credit' : 'debit',
             amount: account.openingBalance,
           },

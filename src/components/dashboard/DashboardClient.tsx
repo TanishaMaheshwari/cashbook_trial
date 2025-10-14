@@ -113,7 +113,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
             />
            )}
           
-          <RecentTransactions transactions={initialTransactions} accounts={accounts} />
+          <RecentTransactions transactions={initialTransactions} accounts={accounts} categories={categories} />
         </div>
       </main>
 
@@ -122,7 +122,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <DialogHeader>
             <DialogTitle className="font-headline text-2xl">Add New Transaction</DialogTitle>
           </DialogHeader>
-          <AddTransactionForm accounts={accounts} onFinished={() => setAddTxSheetOpen(false)} />
+          <AddTransactionForm accounts={accounts} categories={categories} onFinished={() => setAddTxSheetOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>
