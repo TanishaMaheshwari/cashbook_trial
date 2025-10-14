@@ -3,7 +3,7 @@
 import type { Account, Category, Transaction } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Folder, PlusCircle } from 'lucide-react';
+import { Folder, PlusCircle, Settings } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
@@ -82,6 +82,12 @@ export default function DashboardClient({ initialTransactions, accounts, categor
                   All Categories
                 </Link>
               </Button>
+               <Button variant="ghost" size="icon" asChild>
+                <Link href="/settings">
+                  <Settings />
+                  <span className="sr-only">Settings</span>
+                </Link>
+              </Button>
               <Button onClick={() => setAddTxSheetOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
@@ -96,15 +102,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <StatCards 
             stats={stats}
           />
-          {stats.accountsInSelectedCategory && selectedCategoryName && categories && (
-              <CategoryAccounts 
-                categoryName={selectedCategoryName}
-                accounts={stats.accountsInSelectedCategory} 
-                categories={categories}
-                selectedCategoryId={selectedCategoryId}
-                onCategoryChange={setSelectedCategoryId}
-              />
-          )}
+          
           <RecentTransactions transactions={initialTransactions} accounts={accounts} />
         </div>
       </main>

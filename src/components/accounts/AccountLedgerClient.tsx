@@ -15,6 +15,9 @@ import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, AccountType } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
+
+type TransactionView = 'to_from' | 'dr_cr';
 
 type LedgerEntry = {
   transactionId: string;
@@ -31,8 +34,24 @@ type AccountLedgerClientProps = {
 };
 
 export default function AccountLedgerClient({ account, ledgerEntries }: AccountLedgerClientProps) {
+  const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
+    if (storedView) {
+      setTransactionView(storedView);
+    }
+    setIsMounted(true);
+  }, []);
+
+
   const isDebitAccount = account.type === 'asset' || account.type === 'expense';
   const finalBalance = ledgerEntries.length > 0 ? ledgerEntries[0].balance : 0;
+
+  if (!isMounted) {
+    return null; // Or a loading skeleton
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -88,8 +107,8 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="text-right">To</TableHead>
-                <TableHead className="text-right">From</TableHead>
+                <TableHead className="text-right">{transactionView === 'dr_cr' ? 'Debit' : 'To'}</TableHead>
+                <TableHead className="text-right">{transactionView === 'dr_cr' ? 'Credit' : 'From'}</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
@@ -101,7 +120,7 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
                    <TableCell className="text-right text-green-600">
                     {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
                   </TableCell>
-                  <TableCell className="text-right text-blue-600">
+                  <TableCell className="text-right text-red-600">
                     {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
                   </TableCell>
                   <TableCell className="text-right">

@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useTransition, useState, useMemo } from 'react';
+import { useTransition, useState, useMemo, useEffect } from 'react';
 import { deleteTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
@@ -37,6 +37,8 @@ type RecentTransactionsProps = {
   transactions: Transaction[];
   accounts: Account[];
 };
+
+type TransactionView = 'to_from' | 'dr_cr';
 
 export default function RecentTransactions({ transactions: initialTransactions, accounts }: RecentTransactionsProps) {
   const getAccountName = (accountId: string) => accounts.find(a => a.id === accountId)?.name || 'Unknown Account';
@@ -52,6 +54,17 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
+  const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
+    if (storedView) {
+      setTransactionView(storedView);
+    }
+    setIsMounted(true);
+  }, []);
 
 
   const handleDelete = (transactionId: string) => {
@@ -118,6 +131,10 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         setSortDirection('desc');
     }
   }
+  
+  if (!isMounted) {
+    return <Card><CardHeader><CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle></CardHeader><CardContent><p>Loading...</p></CardContent></Card>;
+  }
 
 
   return (
@@ -174,8 +191,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                 <TableCell>
                   <div className="font-medium">{tx.description}</div>
                   <div className="text-xs text-muted-foreground">
-                    <span className="text-green-600 font-semibold">To:</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
-                    <span className="text-blue-600 font-semibold mx-2">From:</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-red-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>

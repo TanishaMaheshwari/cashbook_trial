@@ -1,0 +1,147 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Moon, Sun, Trash2, Book, PaintBrush, Repeat } from 'lucide-react';
+import Link from 'next/link';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
+
+type Theme = 'light' | 'dark';
+type TransactionView = 'to_from' | 'dr_cr';
+
+export default function SettingsClient() {
+  const { toast } = useToast();
+  const [theme, setTheme] = useState<Theme>('light');
+  const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme') as Theme | null;
+    const storedView = localStorage.getItem('transactionView') as TransactionView | null;
+    if (storedTheme) {
+      setTheme(storedTheme);
+      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+    }
+    if (storedView) {
+      setTransactionView(storedView);
+    }
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null; // or a loading spinner
+  }
+  
+  const handleThemeChange = (isDark: boolean) => {
+    const newTheme = isDark ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', isDark);
+    toast({
+      title: `Theme changed to ${newTheme}`,
+    });
+  };
+  
+  const handleTransactionViewChange = (view: TransactionView) => {
+    setTransactionView(view);
+    localStorage.setItem('transactionView', view);
+    toast({
+      title: `Transaction view set to "${view === 'to_from' ? 'To/From' : 'Dr/Cr'}"`,
+      description: "Refresh may be required for all views to update.",
+    });
+  }
+
+  return (
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+       <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-headline">Settings</h1>
+        <Button variant="outline" asChild>
+          <Link href="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <PaintBrush className="w-8 h-8 text-primary" />
+            <div>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>Customize the look and feel.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <Label htmlFor="dark-mode" className="flex items-center gap-2">
+                <Moon className="w-4 h-4" />
+                Dark Mode
+                <Sun className="w-4 h-4" />
+              </Label>
+              <Switch
+                id="dark-mode"
+                checked={theme === 'dark'}
+                onCheckedChange={handleThemeChange}
+              />
+            </div>
+             <div className="space-y-3 rounded-lg border p-3">
+                <Label>Transaction Display</Label>
+                <p className="text-sm text-muted-foreground">Choose how to display transaction entries.</p>
+                <RadioGroup 
+                    defaultValue={transactionView} 
+                    onValueChange={(value: TransactionView) => handleTransactionViewChange(value)}
+                    className="flex gap-4 pt-2"
+                >
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="to_from" id="to_from" />
+                        <Label htmlFor="to_from">To / From</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="dr_cr" id="dr_cr" />
+                        <Label htmlFor="dr_cr">Debit / Credit</Label>
+                    </div>
+                </RadioGroup>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Book className="w-8 h-8 text-primary" />
+            <div>
+              <CardTitle>Book Management</CardTitle>
+              <CardDescription>Manage your financial books.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <Button className="w-full">Create New Book</Button>
+             <Button variant="outline" className="w-full">Edit Current Book</Button>
+             <Button variant="destructive" className="w-full">Delete Current Book</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-4">
+            <Trash2 className="w-8 h-8 text-primary" />
+            <div>
+              <CardTitle>Recycle Bin</CardTitle>
+              <CardDescription>Restore deleted items.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground text-center py-8">
+                Recycle bin is empty. Deleted items will appear here for 30 days.
+            </p>
+             <Button variant="secondary" className="w-full" disabled>View Recycle Bin</Button>
+          </CardContent>
+        </Card>
+
+      </div>
+    </div>
+  );
+}
