@@ -10,14 +10,6 @@ import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import StatCards from './StatCards';
 import ManageCategories from './ManageCategories';
 import RecentTransactions from './RecentTransactions';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from '../ui/label';
 import Link from 'next/link';
 import { List, Users } from 'lucide-react';
 import CategoryAccounts from './CategoryAccounts';
@@ -116,24 +108,12 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:px-8">
         <div className="space-y-8">
-          <div className="flex justify-end items-end">
-            <div className="w-full max-w-xs space-y-2">
-              <Label htmlFor="category-select">Select Category</Label>
-              <Select onValueChange={setSelectedCategoryId} defaultValue={selectedCategoryId}>
-                <SelectTrigger id="category-select">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <StatCards stats={stats} />
+          <StatCards 
+            stats={stats}
+            categories={categories}
+            selectedCategoryId={selectedCategoryId}
+            onCategoryChange={setSelectedCategoryId}
+          />
           {stats.accountsInSelectedCategory && selectedCategoryName && (
               <CategoryAccounts 
                 categoryName={selectedCategoryName}
