@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -81,7 +82,7 @@ export async function deleteTransactionAction(bookId: string, transactionId: str
   }
 }
 
-export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'> & { openingBalance?: number, balanceType?: 'debit' | 'credit' }) {
+export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'>) {
     try {
         await addAccount(bookId, data);
         revalidatePath('/accounts');

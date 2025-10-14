@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "date": "2025-10-14T22:59:05.121Z",
+    "description": "Opening Balance for NIKKY BHAYIA2",
+    "entries": [
+      {
+        "accountId": "acc_1760482745114",
+        "amount": 55000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance",
+        "amount": 55000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760482745123",
+    "bookId": "book_default"
+  }
+]
