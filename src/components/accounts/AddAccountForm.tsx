@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
 
 const formSchema = z.object({
-  name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
+  name: z.string().min(1, 'Account name is required.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
   openingBalance: z.coerce.number().min(0, "Opening balance can't be negative.").default(0),
   openingBalanceType: z.enum(['debit', 'credit']).default('debit'),
