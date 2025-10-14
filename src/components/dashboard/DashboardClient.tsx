@@ -8,7 +8,6 @@ import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import StatCards from './StatCards';
-import ManageCategories from './ManageCategories';
 import RecentTransactions from './RecentTransactions';
 import Link from 'next/link';
 import { List, Users } from 'lucide-react';
@@ -115,14 +114,14 @@ export default function DashboardClient({ initialTransactions, accounts, categor
         <div className="space-y-8">
           <StatCards 
             stats={stats}
-            categories={categories}
-            selectedCategoryId={selectedCategoryId}
-            onCategoryChange={setSelectedCategoryId}
           />
           {stats.accountsInSelectedCategory && selectedCategoryName && (
               <CategoryAccounts 
                 categoryName={selectedCategoryName}
                 accounts={stats.accountsInSelectedCategory} 
+                categories={categories}
+                selectedCategoryId={selectedCategoryId}
+                onCategoryChange={setSelectedCategoryId}
               />
           )}
           <RecentTransactions transactions={initialTransactions} accounts={accounts} />

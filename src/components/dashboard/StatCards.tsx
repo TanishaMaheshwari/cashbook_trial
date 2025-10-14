@@ -20,9 +20,6 @@ type StatCardsProps = {
     difference: number;
     selectedCategoryBalance?: { id: string; name: string; balance: number };
   };
-  categories: Category[];
-  selectedCategoryId?: string;
-  onCategoryChange: (id: string) => void;
 };
 
 const StatCard = ({ title, value, icon: Icon, colorClass }: { title: React.ReactNode; value: string; icon: React.ElementType; colorClass?: string }) => (
@@ -32,12 +29,12 @@ const StatCard = ({ title, value, icon: Icon, colorClass }: { title: React.React
       <Icon className={`h-5 w-5 ${colorClass || 'text-muted-foreground'}`} />
     </CardHeader>
     <CardContent>
-      <div className="font-bold text-2xl">{value}</div>
+      <div className="text-2xl">{value}</div>
     </CardContent>
   </Card>
 );
 
-export default function StatCards({ stats, categories, selectedCategoryId, onCategoryChange }: StatCardsProps) {
+export default function StatCards({ stats }: StatCardsProps) {
   return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Flow In" value={formatCurrency(stats.totalDebit)} icon={ArrowDownCircle} colorClass="text-chart-2" />
@@ -46,20 +43,7 @@ export default function StatCards({ stats, categories, selectedCategoryId, onCat
         {stats.selectedCategoryBalance && (
           <StatCard
             key={stats.selectedCategoryBalance.id}
-            title={
-                <Select onValueChange={onCategoryChange} defaultValue={selectedCategoryId}>
-                    <SelectTrigger className="border-none !bg-transparent p-0 h-auto focus:ring-0 focus:ring-offset-0">
-                        <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                    {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
-            }
+            title={stats.selectedCategoryBalance.name}
             value={formatCurrency(stats.selectedCategoryBalance.balance)}
             icon={Scale}
         />
