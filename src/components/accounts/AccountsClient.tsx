@@ -49,8 +49,7 @@ type AccountsClientProps = {
 
 export default function AccountsClient({ initialAccounts, categories, totals }: AccountsClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDescriptor, setSortDescriptor] = useState('name-asc');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
   const getCategoryName = (categoryId: string) => {
@@ -104,9 +103,12 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
         getCategoryName(account.categoryId).toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+    
+    const [sortField, sortDirection] = sortDescriptor.split('-') as ['name' | 'balance' | 'type' | 'category', 'asc' | 'desc'];
+
 
     accounts.sort((a, b) => {
-      let aValue, bValue;
+      let aValue: any, bValue: any;
       
       switch(sortField) {
         case 'category':
@@ -117,18 +119,24 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
           aValue = a.balance;
           bValue = b.balance;
           break;
-        default: // name or type
-          aValue = a[sortField as keyof Account];
-          bValue = b[sortField as keyof Account];
+        case 'type':
+            aValue = a.type;
+            bValue = b.type;
+            break;
+        default: // name
+          aValue = a.name;
+          bValue = b.name;
       }
 
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
     });
 
     return accounts;
-  }, [initialAccounts, searchTerm, sortField, sortDirection, categories]);
+  }, [initialAccounts, searchTerm, sortDescriptor, categories]);
 
   const handleSelect = (accountId: string, checked: boolean) => {
     if(checked) {
@@ -143,16 +151,6 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       setSelectedAccounts(filteredAndSortedAccounts.map(a => a.id));
     } else {
       setSelectedAccounts([]);
-    }
-  }
-
-
-  const handleSort = (field: string) => {
-    if(sortField === field) {
-        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-        setSortField(field);
-        setSortDirection('asc');
     }
   }
 
@@ -204,34 +202,21 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
             </div>
             <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 text-sm">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-muted-foreground">Filter:</label>
-                    <Select defaultValue="all">
-                        <SelectTrigger className="w-[120px] h-9">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Accounts</SelectItem>
-                        </SelectContent>
-                    </Select>
-                 </div>
-                 <div className="flex items-center gap-2 text-sm">
                     <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                     <label className="text-muted-foreground">Sort by:</label>
-                    <Select value={sortField} onValueChange={setSortField}>
-                        <SelectTrigger className="w-[100px] h-9">
+                    <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+                        <SelectTrigger className="w-[180px] h-9">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="name">Name</SelectItem>
-                            <SelectItem value="balance">Balance</SelectItem>
-                            <SelectItem value="type">Type</SelectItem>
-                            <SelectItem value="category">Category</SelectItem>
+                            <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                            <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                            <SelectItem value="balance-desc">Balance (Highest First)</SelectItem>
+                            <SelectItem value="balance-asc">Balance (Lowest First)</SelectItem>
+                            <SelectItem value="type-asc">Type</SelectItem>
+                            <SelectItem value="category-asc">Category</SelectItem>
                         </SelectContent>
                     </Select>
-                     <Button variant="ghost" size="icon" onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}>
-                        {sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-                     </Button>
                  </div>
             </div>
         </CardContent>

@@ -65,8 +65,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortDescriptor, setSortDescriptor] = useState('date-desc');
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -166,6 +165,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         }
     }
     
+    const [sortField, sortDirection] = sortDescriptor.split('-') as ['date' | 'amount' | 'description', 'asc' | 'desc'];
+
     const sorted = filtered.sort((a, b) => {
       let aValue: any;
       let bValue: any;
@@ -173,31 +174,27 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       if (sortField === 'date') {
         aValue = new Date(a.date).getTime();
         bValue = new Date(b.date).getTime();
-      } else { // amount
+      } else if (sortField === 'amount') {
         aValue = a.entries.find(e => e.type === 'debit')?.amount || 0;
         bValue = b.entries.find(e => e.type === 'debit')?.amount || 0;
+      } else { // description
+        aValue = a.description;
+        bValue = b.description;
       }
       
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
     });
 
     if (!isTransactionsPage) {
         return sorted.slice(0, 5);
     }
     return sorted;
-  }, [initialTransactions, isTransactionsPage, searchTerm, sortField, sortDirection, dateRangePreset, customDateRange]);
+  }, [initialTransactions, isTransactionsPage, searchTerm, sortDescriptor, dateRangePreset, customDateRange]);
 
-  const handleSort = (field: 'date' | 'amount') => {
-    if(sortField === field) {
-        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-        setSortField(field);
-        setSortDirection('desc');
-    }
-  }
-  
   if (!isMounted) {
     return <Card><CardHeader><CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle></CardHeader><CardContent><p>Loading...</p></CardContent></Card>;
   }
@@ -219,6 +216,18 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full sm:w-auto md:w-64"
             />
+             <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+              <SelectTrigger className="w-full sm:w-auto md:w-[180px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date-desc">Most Recent</SelectItem>
+                <SelectItem value="date-asc">Oldest First</SelectItem>
+                <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
               <SelectTrigger className="w-full sm:w-auto md:w-[180px]">
                 <SelectValue placeholder="Select a date range" />
@@ -287,15 +296,11 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           <TableHeader>
             <TableRow>
               <TableHead>
-                 <Button variant="ghost" onClick={() => handleSort('date')}>
-                    Date <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
+                 Date
               </TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="text-right">
-                  <Button variant="ghost" onClick={() => handleSort('amount')}>
-                    Amount <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </Button>
+                    Amount
               </TableHead>
               {isTransactionsPage && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
