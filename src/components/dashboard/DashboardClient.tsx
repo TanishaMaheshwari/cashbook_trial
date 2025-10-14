@@ -91,7 +91,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:px-8">
         <div className="space-y-8">
           <div className="flex justify-between items-end">
              <div>
@@ -122,9 +122,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
         <SheetContent className="sm:max-w-2xl w-full overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="font-headline text-2xl">Add New Transaction</SheetTitle>
-            <SheetDescription>
-              Record a new financial transaction. Ensure debits and credits are balanced.
-            </SheetDescription>
           </SheetHeader>
           <AddTransactionForm accounts={accounts} onFinished={() => setAddTxSheetOpen(false)} />
         </SheetContent>
