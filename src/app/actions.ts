@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
@@ -48,10 +48,23 @@ export async function createCategoryAction(name: string) {
         await addCategory(name);
         revalidatePath('/');
         revalidatePath('/accounts');
+        revalidatePath('/categories');
         return { success: true, message: `Category '${name}' created.` };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, message: `Failed to create category: ${errorMessage}` };
+    }
+}
+
+export async function deleteCategoryAction(categoryId: string) {
+    try {
+        await deleteCategory(categoryId);
+        revalidatePath('/categories');
+        revalidatePath('/accounts');
+        return { success: true, message: 'Category deleted successfully.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to delete category: ${errorMessage}` };
     }
 }
 

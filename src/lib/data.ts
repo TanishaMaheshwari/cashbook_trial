@@ -183,6 +183,23 @@ export const addCategory = async (name: string): Promise<Category> => {
   return newCategory;
 };
 
+export const deleteCategory = async (id: string): Promise<void> => {
+    const accounts = await getAccounts();
+    const isCategoryInUse = accounts.some(acc => acc.categoryId === id);
+    if (isCategoryInUse) {
+        throw new Error('Cannot delete category. It is currently assigned to one or more accounts.');
+    }
+
+    let categories = await getCategories();
+    const index = categories.findIndex(c => c.id === id);
+    if (index === -1) {
+        throw new Error('Category not found.');
+    }
+    const [deletedCategory] = categories.splice(index, 1);
+    addToRecycleBin({ ...deletedCategory, type: 'category' });
+    writeData<Category>(categoriesFilePath, categories);
+};
+
 export const deleteTransaction = async (id: string): Promise<void> => {
   let transactions = await getTransactions();
   const index = transactions.findIndex(t => t.id === id);

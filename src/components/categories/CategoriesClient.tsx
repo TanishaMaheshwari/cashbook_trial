@@ -1,14 +1,17 @@
 'use client';
 
 import type { Account, Category } from '@/lib/types';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MoreVertical, PlusCircle } from 'lucide-react';
+import { ArrowLeft, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, cn } from '@/lib/utils';
 import Link from 'next/link';
 import ManageCategories from '@/components/dashboard/ManageCategories';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { deleteCategoryAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -32,6 +35,19 @@ const categoryColors = [
 
 export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
   const [openManageCategories, setOpenManageCategories] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleDelete = (categoryId: string) => {
+    startTransition(async () => {
+      const result = await deleteCategoryAction(categoryId);
+      if (result.success) {
+        toast({ title: "Success", description: result.message });
+      } else {
+        toast({ title: "Error", description: result.message, variant: "destructive" });
+      }
+    });
+  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -65,12 +81,38 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled>
                             Edit Category
                         </DropdownMenuItem>
-                         <DropdownMenuItem className="text-destructive">
-                            Delete Category
-                        </DropdownMenuItem>
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Category
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this category. You cannot delete a category that has accounts assigned to it.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() => handleDelete(category.id)}
+                                        disabled={isPending}
+                                        className="bg-destructive hover:bg-destructive/90"
+                                    >
+                                        {isPending ? 'Deleting...' : 'Delete'}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </CardHeader>
