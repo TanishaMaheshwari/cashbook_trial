@@ -140,7 +140,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           {stats.accountsInSelectedCategory && selectedCategoryName && (
               <CategoryAccounts 
                 categoryName={selectedCategoryName}
-                accounts={stats.accountsIn_selectedCategory} 
+                accounts={stats.accountsInSelectedCategory} 
               />
           )}
           <RecentTransactions transactions={initialTransactions} accounts={accounts} />

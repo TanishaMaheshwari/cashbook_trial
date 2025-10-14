@@ -1,7 +1,7 @@
 'use client';
 
 import type { Account } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,10 @@ export default function CategoryAccounts({ categoryName, accounts }: CategoryAcc
         </Card>
     );
   }
+  
+  const totalDebit = accounts.filter(a => isDebitAccount(a.type)).reduce((sum, a) => sum + a.balance, 0);
+  const totalCredit = accounts.filter(a => !isDebitAccount(a.type)).reduce((sum, a) => sum + a.balance, 0);
+
 
   const accountTypeColors: { [key: string]: string } = {
     asset: 'bg-green-100 text-green-800',
@@ -65,7 +69,7 @@ export default function CategoryAccounts({ categoryName, accounts }: CategoryAcc
                   </Badge>
                 </TableCell>
                 <TableCell className={cn(
-                    "text-right font-mono",
+                    "text-right",
                     isDebitAccount(account.type) ? "text-green-600" : "text-red-600"
                 )}>
                   {formatCurrency(account.balance)}
@@ -76,6 +80,16 @@ export default function CategoryAccounts({ categoryName, accounts }: CategoryAcc
           </TableBody>
         </Table>
       </CardContent>
+      <CardFooter className="justify-end gap-4 text-sm border-t pt-4">
+        <div className="font-semibold">
+            <span className="text-muted-foreground mr-2">Total Debit:</span>
+            <span className="text-green-600">{formatCurrency(totalDebit)}</span>
+        </div>
+        <div className="font-semibold">
+            <span className="text-muted-foreground mr-2">Total Credit:</span>
+            <span className="text-red-600">{formatCurrency(totalCredit)}</span>
+        </div>
+      </CardFooter>
     </Card>
   );
 }

@@ -61,7 +61,7 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
              <div>
                 <p className="text-muted-foreground">Final Balance</p>
                 <p className={cn(
-                    "font-bold text-lg font-mono",
+                    "font-bold text-lg",
                     isDebitAccount ? "text-blue-600" : "text-green-600"
                 )}>
                     {formatCurrency(finalBalance)}
@@ -93,13 +93,13 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
                 <TableRow key={`${entry.transactionId}-${index}`}>
                   <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
                   <TableCell>{entry.description}</TableCell>
-                   <TableCell className="text-right font-mono text-blue-600">
+                   <TableCell className="text-right text-blue-600">
                     {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-green-600">
+                  <TableCell className="text-right text-green-600">
                     {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
                   </TableCell>
-                  <TableCell className={cn("text-right font-mono", isDebitAccount ? "text-blue-600" : "text-green-600")}>
+                  <TableCell className={cn("text-right", isDebitAccount ? "text-blue-600" : "text-green-600")}>
                     {formatCurrency(entry.balance)}
                   </TableCell>
                 </TableRow>

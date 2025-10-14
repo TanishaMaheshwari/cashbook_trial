@@ -178,7 +178,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                     <span className="text-blue-600 font-semibold mx-2">From:</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-mono">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
                  {isTransactionsPage && (
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

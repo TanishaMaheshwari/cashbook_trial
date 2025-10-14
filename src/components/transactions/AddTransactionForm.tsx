@@ -316,15 +316,15 @@ export default function AddTransactionForm({ accounts, onFinished, initialData }
 
                 {(isSplit || (totalCredits > 0 || totalDebits > 0)) && (
                    <div className="bg-muted p-4 rounded-lg space-y-2">
-                      <div className="flex justify-between font-mono text-sm">
+                      <div className="flex justify-between text-sm">
                           <span>Total To:</span>
                           <span className="text-green-600 font-semibold">{formatCurrency(totalDebits)}</span>
                       </div>
-                      <div className="flex justify-between font-mono text-sm">
+                      <div className="flex justify-between text-sm">
                           <span>Total From:</span>
                           <span className="text-blue-600 font-semibold">{formatCurrency(totalCredits)}</span>
                       </div>
-                       <div className="flex justify-between font-mono text-sm font-bold border-t pt-2 mt-2">
+                       <div className="flex justify-between text-sm font-bold border-t pt-2 mt-2">
                           <span>Difference:</span>
                           <span className={cn(Math.abs(totalDebits-totalCredits) > 0.01 ? 'text-destructive' : 'text-green-600')}>{formatCurrency(totalDebits-totalCredits)}</span>
                       </div>

@@ -209,7 +209,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">All Accounts ({filteredAndSortedAccounts.length} of {initialAccounts.length})</CardTitle>
-            <div className="text-sm font-mono">
+            <div className="text-sm">
                 <span className="text-green-600 mr-4">Total Dr: {formatCurrency(totals.debit)}</span>
                 <span className="text-red-600">Total Cr: {formatCurrency(totals.credit)}</span>
             </div>
@@ -226,7 +226,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                           {getCategoryName(account.categoryId)}
                         </Badge>
                     </div>
-                    <div className="col-span-1 text-center font-mono">
+                    <div className="col-span-1 text-center">
                         {isDebitAccount(account.type) && account.balance !== 0 ? (
                            <>
                              <p className="text-green-600 font-semibold">{formatCurrency(account.balance)}</p>
@@ -234,7 +234,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                            </>
                         ) : '-'}
                     </div>
-                    <div className="col-span-1 text-center font-mono">
+                    <div className="col-span-1 text-center">
                         {!isDebitAccount(account.type) && account.balance !== 0 ? (
                            <>
                             <p className="text-red-600 font-semibold">{formatCurrency(account.balance)}</p>
@@ -242,7 +242,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                            </>
                         ) : '-'}
                     </div>
-                    <div className="col-span-1 text-center font-mono">
+                    <div className="col-span-1 text-center">
                       {account.balance === 0 && (
                         <>
                           <p className="font-semibold">{formatCurrency(0)}</p>
