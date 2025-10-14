@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
@@ -89,6 +89,18 @@ export async function deleteAccountAction(accountId: string) {
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, message: `Failed to delete account: ${errorMessage}` };
+    }
+}
+
+export async function deleteMultipleAccountsAction(accountIds: string[]) {
+    try {
+        await deleteMultipleAccounts(accountIds);
+        revalidatePath('/accounts');
+        revalidatePath('/');
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to delete accounts: ${errorMessage}` };
     }
 }
 

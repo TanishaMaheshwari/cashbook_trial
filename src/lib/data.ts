@@ -7,9 +7,13 @@ const dataDir = path.join(process.cwd(), 'src', 'lib', 'data');
 const categoriesFilePath = path.join(dataDir, 'categories.json');
 const accountsFilePath = path.join(dataDir, 'accounts.json');
 const transactionsFilePath = path.join(dataDir, 'transactions.json');
+const recycleBinFilePath = path.join(dataDir, 'recycle-bin.json');
 
 const readData = <T>(filePath: string): T[] => {
   try {
+    if (!fs.existsSync(filePath)) {
+        return [];
+    }
     const jsonString = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(jsonString) as T[];
   } catch (error) {
@@ -25,6 +29,13 @@ const writeData = <T>(filePath: string, data: T[]): void => {
     console.error(`Error writing to ${filePath}:`, error);
   }
 };
+
+const addToRecycleBin = (item: any) => {
+    const bin = readData<any>(recycleBinFilePath);
+    item.deletedAt = new Date().toISOString();
+    bin.unshift(item);
+    writeData<any>(recycleBinFilePath, bin);
+}
 
 
 // Data access functions
@@ -96,7 +107,8 @@ export const deleteTransaction = async (id: string): Promise<void> => {
   if (index === -1) {
     throw new Error('Transaction not found.');
   }
-  transactions.splice(index, 1);
+  const [deletedTransaction] = transactions.splice(index, 1);
+  addToRecycleBin({ ...deletedTransaction, type: 'transaction' });
   writeData<Transaction>(transactionsFilePath, transactions);
 };
 
@@ -150,4 +162,21 @@ export const deleteAccount = async (id: string): Promise<void> => {
     }
     accounts.splice(index, 1);
     writeData<Account>(accountsFilePath, accounts);
+};
+
+export const deleteMultipleAccounts = async (accountIds: string[]): Promise<void> => {
+    const transactions = await getTransactions();
+    const accounts = await getAccounts();
+
+    let accountsToDelete = accounts.filter(acc => accountIds.includes(acc.id));
+    
+    for (const account of accountsToDelete) {
+        const hasTransactions = transactions.some(t => t.entries.some(e => e.accountId === account.id));
+        if (hasTransactions) {
+            throw new Error(`Cannot delete account "${account.name}" because it has existing transactions.`);
+        }
+    }
+
+    const remainingAccounts = accounts.filter(acc => !accountIds.includes(acc.id));
+    writeData<Account>(accountsFilePath, remainingAccounts);
 };
