@@ -3,7 +3,7 @@
 import type { Account, Category, Transaction } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { Folder, PlusCircle } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
@@ -96,7 +96,12 @@ export default function DashboardClient({ initialTransactions, accounts, categor
                   All Accounts
                 </Link>
               </Button>
-              <ManageCategories categories={categories} />
+               <Button variant="outline" asChild>
+                <Link href="/categories">
+                  <Folder className="mr-2 h-4 w-4" />
+                  All Categories
+                </Link>
+              </Button>
               <Button onClick={() => setAddTxSheetOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
