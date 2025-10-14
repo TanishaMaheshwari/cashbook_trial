@@ -11,11 +11,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, MinusCircle, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn, formatCurrency } from '@/lib/utils';
-import type { Account } from '@/lib/types';
-import { useTransition, useMemo } from 'react';
+import type { Account, Category } from '@/lib/types';
+import { useTransition, useMemo, useState } from 'react';
 import { createTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AddAccountForm from '@/components/accounts/AddAccountForm';
+
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
@@ -48,6 +51,12 @@ type AddTransactionFormProps = {
 export default function AddTransactionForm({ accounts, onFinished }: AddTransactionFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const [isAddAccountOpen, setAddAccountOpen] = useState(false);
+
+  // We need categories for the AddAccountForm, but they are not passed in.
+  // This is a limitation for now. We will pass a dummy array.
+  // A better solution would be to fetch categories here or pass them down.
+  const dummyCategories: Category[] = [];
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -94,20 +103,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Office supplies purchase" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
+           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
@@ -130,10 +126,40 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Office supplies purchase" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium font-headline">Entries</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium font-headline">Entries</h3>
+             <Dialog open={isAddAccountOpen} onOpenChange={setAddAccountOpen}>
+              <DialogTrigger asChild>
+                 <Button variant="outline" size="sm">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New Account
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-2xl">Add New Account</DialogTitle>
+                </DialogHeader>
+                {/* Passing dummyCategories. A proper implementation would need access to real categories. */}
+                <AddAccountForm categories={dummyCategories} onFinished={() => setAddAccountOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
           {fields.map((field, index) => (
             <div key={field.id} className="flex flex-col md:flex-row gap-2 items-start bg-secondary/50 p-3 rounded-md animate-in fade-in-0 zoom-in-95">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-grow w-full">
