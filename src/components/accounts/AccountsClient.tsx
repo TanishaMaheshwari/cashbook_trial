@@ -136,7 +136,11 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
             <TableBody>
               {initialAccounts.map((account) => (
                 <TableRow key={account.id}>
-                  <TableCell className="font-medium">{account.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/accounts/${account.id}`} className="hover:underline text-primary">
+                      {account.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{getCategoryName(account.categoryId)}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">{account.type}</Badge>

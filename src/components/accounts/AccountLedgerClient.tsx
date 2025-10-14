@@ -1,0 +1,118 @@
+'use client';
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import type { Account, AccountType } from '@/lib/types';
+import { formatCurrency, cn } from '@/lib/utils';
+
+type LedgerEntry = {
+  transactionId: string;
+  date: string;
+  description: string;
+  debit: number;
+  credit: number;
+  balance: number;
+};
+
+type AccountLedgerClientProps = {
+  account: Account;
+  ledgerEntries: LedgerEntry[];
+};
+
+export default function AccountLedgerClient({ account, ledgerEntries }: AccountLedgerClientProps) {
+  const isDebitAccount = account.type === 'asset' || account.type === 'expense';
+  const finalBalance = ledgerEntries.length > 0 ? ledgerEntries[0].balance : 0;
+
+  return (
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/accounts">
+            <ArrowLeft />
+            <span className="sr-only">Back to Accounts</span>
+          </Link>
+        </Button>
+        <div>
+            <h1 className="text-3xl font-headline">{account.name}</h1>
+            <p className="text-muted-foreground">Account Ledger</p>
+        </div>
+      </div>
+      
+      <Card className="mb-6">
+        <CardHeader>
+            <CardTitle className="text-lg">Account Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="grid md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <p className="text-muted-foreground">Account Type</p>
+                <p><Badge variant="secondary" className="capitalize">{account.type}</Badge></p>
+            </div>
+             <div>
+                <p className="text-muted-foreground">Final Balance</p>
+                <p className={cn(
+                    "font-bold text-lg font-mono",
+                    isDebitAccount ? "text-blue-600" : "text-green-600"
+                )}>
+                    {formatCurrency(finalBalance)}
+                    <span className="text-xs text-muted-foreground ml-1">{isDebitAccount ? 'Dr' : 'Cr'}</span>
+                </p>
+            </div>
+        </CardContent>
+      </Card>
+
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Transactions</CardTitle>
+          <CardDescription>All transactions involving this account.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-right">To</TableHead>
+                <TableHead className="text-right">From</TableHead>
+                <TableHead className="text-right">Balance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ledgerEntries.map((entry, index) => (
+                <TableRow key={`${entry.transactionId}-${index}`}>
+                  <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{entry.description}</TableCell>
+                   <TableCell className="text-right font-mono text-blue-600">
+                    {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-green-600">
+                    {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                  </TableCell>
+                  <TableCell className={cn("text-right font-mono", isDebitAccount ? "text-blue-600" : "text-green-600")}>
+                    {formatCurrency(entry.balance)}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {ledgerEntries.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24">No transactions found for this account.</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
