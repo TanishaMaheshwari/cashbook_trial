@@ -3,17 +3,16 @@
 import type { Account, Category, Transaction } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Folder, PlusCircle, Settings } from 'lucide-react';
+import { Folder, PlusCircle, Settings, List, Users, MoreVertical } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import StatCards from './StatCards';
 import RecentTransactions from './RecentTransactions';
 import Link from 'next/link';
-import { List, Users } from 'lucide-react';
 import CategoryAccounts from './CategoryAccounts';
 import { useBooks } from '@/context/BookContext';
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -40,11 +39,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
                 const totalDebit = accountEntries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
                 const totalCredit = accountEntries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
                 let balance = 0;
-                if (account.type === 'asset' || account.type === 'expense') {
-                    balance = totalDebit - totalCredit;
-                } else {
-                    balance = totalCredit - totalDebit;
-                }
+                balance = totalDebit - totalCredit;
                 return { ...account, balance };
             })
             .filter(acc => acc.balance !== 0);
@@ -72,34 +67,72 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <div className="flex items-center justify-between h-16">
             <Logo />
             <div className="flex items-center gap-2">
-               <Button variant="outline" asChild>
-                <Link href="/transactions">
-                  <List className="mr-2 h-4 w-4" />
-                  All Transactions
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/accounts">
-                  <Users className="mr-2 h-4 w-4" />
-                  All Accounts
-                </Link>
-              </Button>
-               <Button variant="outline" asChild>
-                <Link href="/categories">
-                  <Folder className="mr-2 h-4 w-4" />
-                  All Categories
-                </Link>
-              </Button>
-               <Button variant="ghost" size="icon" asChild>
-                <Link href="/settings">
-                  <Settings />
-                  <span className="sr-only">Settings</span>
-                </Link>
-              </Button>
+               {/* Desktop Menu */}
+               <div className="hidden md:flex items-center gap-2">
+                 <Button variant="outline" asChild>
+                   <Link href="/transactions">
+                     <List className="mr-2 h-4 w-4" />
+                     All Transactions
+                   </Link>
+                 </Button>
+                 <Button variant="outline" asChild>
+                   <Link href="/accounts">
+                     <Users className="mr-2 h-4 w-4" />
+                     All Accounts
+                   </Link>
+                 </Button>
+                 <Button variant="outline" asChild>
+                   <Link href="/categories">
+                     <Folder className="mr-2 h-4 w-4" />
+                     All Categories
+                   </Link>
+                 </Button>
+                 <Button variant="ghost" size="icon" asChild>
+                   <Link href="/settings">
+                     <Settings />
+                     <span className="sr-only">Settings</span>
+                   </Link>
+                 </Button>
+               </div>
+
               <Button onClick={() => setAddTxSheetOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
               </Button>
+              
+               {/* Mobile Menu */}
+               <div className="md:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical />
+                        <span className="sr-only">More options</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/transactions">
+                          <List className="mr-2 h-4 w-4" /> All Transactions
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                         <Link href="/accounts">
+                           <Users className="mr-2 h-4 w-4" /> All Accounts
+                         </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                         <Link href="/categories">
+                           <Folder className="mr-2 h-4 w-4" /> All Categories
+                         </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                         <Link href="/settings">
+                           <Settings className="mr-2 h-4 w-4" /> Settings
+                         </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+               </div>
             </div>
           </div>
         </div>

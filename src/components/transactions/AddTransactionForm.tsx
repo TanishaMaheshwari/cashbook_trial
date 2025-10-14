@@ -261,7 +261,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button variant="outline" className={cn('w-[240px] pl-3 text-left font-normal bg-background', !field.value && 'text-muted-foreground')}>
+                        <Button variant="outline" className={cn('w-full sm:w-[240px] pl-3 text-left font-normal bg-background', !field.value && 'text-muted-foreground')}>
                           {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -330,7 +330,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                 </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <FormField
                     control={form.control}
                     name="useSeparateNarration" // This is a dummy usage to place the checkbox

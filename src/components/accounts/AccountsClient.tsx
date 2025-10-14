@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
@@ -186,23 +186,23 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
             <Button variant="outline" asChild>
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+                Back
               </Link>
             </Button>
         </div>
       </div>
       
       <Card>
-        <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex-grow md:flex-grow-0 flex flex-wrap gap-4">
+        <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <div className="flex-grow flex flex-col md:flex-row gap-4">
                 <Input
                   placeholder="Search accounts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-full md:w-64 lg:w-80"
+                  className="w-full md:w-64 lg:w-80"
                 />
                  <Select value={filter} onValueChange={setFilter}>
-                    <SelectTrigger className="w-full md:w-[180px] h-9">
+                    <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -215,36 +215,34 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                     </SelectContent>
                 </Select>
             </div>
-            <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-2 text-sm">
-                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-muted-foreground">Sort by:</label>
-                    <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
-                        <SelectTrigger className="w-[180px] h-9">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                            <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-                            <SelectItem value="balance-desc">Balance (Highest First)</SelectItem>
-                            <SelectItem value="balance-asc">Balance (Lowest First)</SelectItem>
-                            <SelectItem value="category-asc">Category</SelectItem>
-                        </SelectContent>
-                    </Select>
-                 </div>
+            <div className="flex items-center gap-2 text-sm">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <label className="text-muted-foreground">Sort by:</label>
+                <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                        <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                        <SelectItem value="balance-desc">Balance (Highest First)</SelectItem>
+                        <SelectItem value="balance-asc">Balance (Lowest First)</SelectItem>
+                        <SelectItem value="category-asc">Category</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
             <div className="flex items-center gap-4">
                 {selectedAccounts.length > 0 ? (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Selected ({selectedAccounts.length})
+                        Delete ({selectedAccounts.length})
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -266,110 +264,189 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                     <CardTitle className="text-lg">All Accounts ({filteredAndSortedAccounts.length} of {initialAccounts.length})</CardTitle>
                 )}
             </div>
-            <div className="text-sm">
+            <div className="text-sm hidden md:block">
                 <span className="text-green-600 mr-4">Total Dr: {formatCurrency(totals.debit)}</span>
                 <span className="text-red-600">Total Cr: {formatCurrency(totals.credit)}</span>
             </div>
         </CardHeader>
         <CardContent className="p-0">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-12">
-                           <Checkbox 
-                                checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
-                                onCheckedChange={(checked) => handleSelectAll(!!checked)}
-                           />
-                        </TableHead>
-                        <TableHead>Account</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead className="text-right">Debit</TableHead>
-                        <TableHead className="text-right">Credit</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {filteredAndSortedAccounts.map((account) => (
-                    <TableRow key={account.id} data-state={selectedAccounts.includes(account.id) ? 'selected' : undefined}>
-                        <TableCell>
-                           <Checkbox 
-                                checked={selectedAccounts.includes(account.id)}
-                                onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
-                           />
-                        </TableCell>
-                        <TableCell>
-                           <Link href={`/accounts/${account.id}`} className="hover:underline">
-                                <p className="font-semibold text-primary">{account.name}</p>
-                            </Link>
-                        </TableCell>
-                        <TableCell>
-                             <Badge variant="secondary" className='capitalize text-xs'>
-                                {getCategoryName(account.categoryId)}
-                            </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
+          {/* Mobile Card View */}
+          <div className="md:hidden">
+            <div className="flex items-center px-4 py-2 border-b">
+                <Checkbox 
+                    checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
+                    onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                    className="mr-4"
+                />
+                <span className="text-sm text-muted-foreground">Select All</span>
+            </div>
+             {filteredAndSortedAccounts.map((account) => (
+                <div key={account.id} className="flex items-start gap-4 p-4 border-b last:border-b-0" data-state={selectedAccounts.includes(account.id) ? 'selected' : undefined}>
+                    <Checkbox 
+                        checked={selectedAccounts.includes(account.id)}
+                        onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
+                        className="mt-1"
+                    />
+                    <div className="flex-1">
+                        <Link href={`/accounts/${account.id}`} className="hover:underline">
+                            <p className="font-semibold text-primary">{account.name}</p>
+                        </Link>
+                        <Badge variant="secondary" className='capitalize text-xs mt-1'>
+                            {getCategoryName(account.categoryId)}
+                        </Badge>
+                        <div className="mt-2">
                              {account.balance >= 0 ? (
-                                <span className="text-green-600 font-semibold">{formatCurrency(account.balance)}</span>
-                            ) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                             {account.balance < 0 ? (
-                                <span className="text-red-600 font-semibold">{formatCurrency(Math.abs(account.balance))}</span>
-                            ) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                           <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleEdit(account)}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        <span>Edit</span>
+                                <p><span className="text-sm text-muted-foreground">Debit: </span><span className="font-semibold text-green-600">{formatCurrency(account.balance)}</span></p>
+                            ) : (
+                                <p><span className="text-sm text-muted-foreground">Credit: </span><span className="font-semibold text-red-600">{formatCurrency(Math.abs(account.balance))}</span></p>
+                            )}
+                        </div>
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(account)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                                <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        <span>Delete</span>
                                     </DropdownMenuItem>
-                                     <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                                                <span className="text-destructive">Delete</span>
-                                            </DropdownMenuItem>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete this account.
-                                            You cannot delete an account that has transactions.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction
-                                            onClick={() => handleDelete(account.id)}
-                                            disabled={isPending}
-                                            className="bg-destructive hover:bg-destructive/90"
-                                          >
-                                            {isPending ? 'Deleting...' : 'Delete'}
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                ))}
-                 {filteredAndSortedAccounts.length === 0 && (
-                     <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
-                            No accounts found.
-                        </TableCell>
-                     </TableRow>
-                 )}
-                </TableBody>
-            </Table>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this account.
+                                    You cannot delete an account that has transactions.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                    onClick={() => handleDelete(account.id)}
+                                    disabled={isPending}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                    >
+                                    {isPending ? 'Deleting...' : 'Delete'}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Table>
+                  <TableHeader>
+                      <TableRow>
+                          <TableHead className="w-12">
+                             <Checkbox 
+                                  checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
+                                  onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                             />
+                          </TableHead>
+                          <TableHead>Account</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead className="text-right">Debit</TableHead>
+                          <TableHead className="text-right">Credit</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      {filteredAndSortedAccounts.map((account) => (
+                      <TableRow key={account.id} data-state={selectedAccounts.includes(account.id) ? 'selected' : undefined}>
+                          <TableCell>
+                             <Checkbox 
+                                  checked={selectedAccounts.includes(account.id)}
+                                  onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
+                             />
+                          </TableCell>
+                          <TableCell>
+                             <Link href={`/accounts/${account.id}`} className="hover:underline">
+                                  <p className="font-semibold text-primary">{account.name}</p>
+                              </Link>
+                          </TableCell>
+                          <TableCell>
+                               <Badge variant="secondary" className='capitalize text-xs'>
+                                  {getCategoryName(account.categoryId)}
+                              </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                               {account.balance >= 0 ? (
+                                  <span className="text-green-600 font-semibold">{formatCurrency(account.balance)}</span>
+                              ) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                               {account.balance < 0 ? (
+                                  <span className="text-red-600 font-semibold">{formatCurrency(Math.abs(account.balance))}</span>
+                              ) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                             <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                          <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => handleEdit(account)}>
+                                          <Edit className="mr-2 h-4 w-4" />
+                                          <span>Edit</span>
+                                      </DropdownMenuItem>
+                                       <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                  <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                                                  <span className="text-destructive">Delete</span>
+                                              </DropdownMenuItem>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              This action cannot be undone. This will permanently delete this account.
+                                              You cannot delete an account that has transactions.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() => handleDelete(account.id)}
+                                              disabled={isPending}
+                                              className="bg-destructive hover:bg-destructive/90"
+                                            >
+                                              {isPending ? 'Deleting...' : 'Delete'}
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                  </DropdownMenuContent>
+                              </DropdownMenu>
+                          </TableCell>
+                      </TableRow>
+                  ))}
+                   {filteredAndSortedAccounts.length === 0 && (
+                       <TableRow>
+                          <TableCell colSpan={6} className="h-24 text-center">
+                              No accounts found.
+                          </TableCell>
+                       </TableRow>
+                   )}
+                  </TableBody>
+              </Table>
+            </div>
         </CardContent>
       </Card>
       

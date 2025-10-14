@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useTransition, useState, useMemo, useEffect } from 'react';
-import { deleteTransactionAction, updateTransactionHighlightAction } from '@/app/actions';
+import { deleteTransactionAction, updateTransactionHighlightAction, restoreItemAction, deletePermanentlyAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import Link from 'next/link';
@@ -210,44 +210,46 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   return (
     <>
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
         {isTransactionsPage && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
             <Input
               placeholder="Filter by description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-auto md:w-64"
+              className="w-full md:w-auto"
             />
-             <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date-desc">Most Recent</SelectItem>
-                <SelectItem value="date-asc">Oldest First</SelectItem>
-                <SelectItem value="amount-desc">Highest Amount</SelectItem>
-                <SelectItem value="amount-asc">Lowest Amount</SelectItem>
-                <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a date range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="this_week">This Week</SelectItem>
-                <SelectItem value="this_month">This Month</SelectItem>
-                <SelectItem value="last_30_days">Last 30 Days</SelectItem>
-                <SelectItem value="last_90_days">Last 90 Days</SelectItem>
-                <SelectItem value="custom">Custom Range</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+                <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+                <SelectTrigger className="w-full flex-1 md:w-[180px]">
+                    <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="date-desc">Most Recent</SelectItem>
+                    <SelectItem value="date-asc">Oldest First</SelectItem>
+                    <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                    <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                    <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
+                </SelectContent>
+                </Select>
+                <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
+                <SelectTrigger className="w-full flex-1 md:w-[180px]">
+                    <SelectValue placeholder="Select a date range" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                    <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+                </Select>
+            </div>
             {dateRangePreset === 'custom' && (
                 <Popover>
                     <PopoverTrigger asChild>
@@ -255,7 +257,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                         id="date"
                         variant={"outline"}
                         className={cn(
-                        "w-[300px] justify-start text-left font-normal",
+                        "w-full md:w-[300px] justify-start text-left font-normal",
                         !customDateRange && "text-muted-foreground"
                         )}
                     >
@@ -286,7 +288,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                     </PopoverContent>
                 </Popover>
             )}
-             <Button onClick={handleAdd}>
+             <Button onClick={handleAdd} className="w-full md:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
             </Button>
@@ -299,111 +301,165 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           <p className="text-muted-foreground">No transactions match your criteria.</p>
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                 Date
-              </TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">
-                    Amount
-              </TableHead>
-              {isTransactionsPage && <TableHead className="text-right">Actions</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+         {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
             {transactions.map(tx => (
-              <TableRow key={tx.id} className={cn(tx.highlight && highlightClasses[tx.highlight])}>
-                <TableCell className="w-28">{new Date(tx.date).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <div className="font-medium">{tx.description}</div>
-                  <div className="text-xs text-muted-foreground">
-                    <span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
-                    <span className="text-red-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
-                 {isTransactionsPage && (
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-1 border border-yellow-400 bg-yellow-200/50 hover:bg-yellow-200/80 text-yellow-700 data-[active=true]:bg-yellow-300"
-                        data-active={tx.highlight === 'yellow'}
-                        onClick={() => handleHighlight(tx.id, 'yellow', tx.highlight)}
-                        disabled={isHighlightPending}
-                      >
-                        <span className='font-bold text-xs'>1</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-1 border border-blue-400 bg-blue-200/50 hover:bg-blue-200/80 text-blue-700 data-[active=true]:bg-blue-300"
-                        data-active={tx.highlight === 'blue'}
-                        onClick={() => handleHighlight(tx.id, 'blue', tx.highlight)}
-                        disabled={isHighlightPending}
-                      >
-                        <span className='font-bold text-xs'>2</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-1 border border-green-400 bg-green-200/50 hover:bg-green-200/80 text-green-700 data-[active=true]:bg-green-300"
-                        data-active={tx.highlight === 'green'}
-                        onClick={() => handleHighlight(tx.id, 'green', tx.highlight)}
-                        disabled={isHighlightPending}
-                      >
-                        <span className='font-bold text-xs'>3</span>
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                           <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">More actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                           <DropdownMenuItem onClick={() => handleEdit(tx)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              <span>Edit</span>
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      <span>Delete</span>
-                                  </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this transaction.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDelete(tx.id)}
-                                    disabled={isPending}
-                                    className="bg-destructive hover:bg-destructive/90"
-                                  >
-                                    {isPending ? 'Deleting...' : 'Delete'}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+              <Card key={tx.id} className={cn('w-full', tx.highlight && highlightClasses[tx.highlight])}>
+                <CardContent className="p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold">{tx.description}</p>
+                      <p className="text-sm text-muted-foreground">{new Date(tx.date).toLocaleDateString()}</p>
                     </div>
-                  </TableCell>
-                )}
-              </TableRow>
+                    <p className="font-semibold text-lg">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</p>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <p><span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}</p>
+                    <p><span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}</p>
+                  </div>
+                  {isTransactionsPage && (
+                    <div className="flex items-center justify-end gap-2 border-t pt-3 mt-2">
+                       <Button variant="ghost" size="sm" onClick={() => handleEdit(tx)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
+                       <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete this transaction.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(tx.id)}
+                                disabled={isPending}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                {isPending ? 'Deleting...' : 'Delete'}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+          
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                     Date
+                  </TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">
+                        Amount
+                  </TableHead>
+                  {isTransactionsPage && <TableHead className="text-right">Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.map(tx => (
+                  <TableRow key={tx.id} className={cn(tx.highlight && highlightClasses[tx.highlight])}>
+                    <TableCell className="w-28">{new Date(tx.date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{tx.description}</div>
+                      <div className="text-xs text-muted-foreground">
+                        <span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                        <span className="text-red-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
+                     {isTransactionsPage && (
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-1 border border-yellow-400 bg-yellow-200/50 hover:bg-yellow-200/80 text-yellow-700 data-[active=true]:bg-yellow-300"
+                            data-active={tx.highlight === 'yellow'}
+                            onClick={() => handleHighlight(tx.id, 'yellow', tx.highlight)}
+                            disabled={isHighlightPending}
+                          >
+                            <span className='font-bold text-xs'>1</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-1 border border-blue-400 bg-blue-200/50 hover:bg-blue-200/80 text-blue-700 data-[active=true]:bg-blue-300"
+                            data-active={tx.highlight === 'blue'}
+                            onClick={() => handleHighlight(tx.id, 'blue', tx.highlight)}
+                            disabled={isHighlightPending}
+                          >
+                            <span className='font-bold text-xs'>2</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-1 border border-green-400 bg-green-200/50 hover:bg-green-200/80 text-green-700 data-[active=true]:bg-green-300"
+                            data-active={tx.highlight === 'green'}
+                            onClick={() => handleHighlight(tx.id, 'green', tx.highlight)}
+                            disabled={isHighlightPending}
+                          >
+                            <span className='font-bold text-xs'>3</span>
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                               <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">More actions</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                               <DropdownMenuItem onClick={() => handleEdit(tx)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  <span>Edit</span>
+                                </DropdownMenuItem>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          <span>Delete</span>
+                                      </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete this transaction.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDelete(tx.id)}
+                                        disabled={isPending}
+                                        className="bg-destructive hover:bg-destructive/90"
+                                      >
+                                        {isPending ? 'Deleting...' : 'Delete'}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       )}
       </CardContent>
        {!isTransactionsPage && transactions.length > 0 && (
