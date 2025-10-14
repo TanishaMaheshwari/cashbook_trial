@@ -40,6 +40,10 @@ const writeData = async <T>(filePath: string, data: T[]): Promise<void> => {
   }
 };
 
+export const getRecycleBinItems = async (): Promise<any[]> => {
+    return await readData<any>(recycleBinFilePath);
+};
+
 export const addToRecycleBin = async (item: any) => {
     const bin = await readData<any>(recycleBinFilePath);
     item.deletedAt = new Date().toISOString();

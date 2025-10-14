@@ -138,11 +138,13 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
               <CardDescription>Restore deleted items.</CardDescription>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground text-center py-8">
-                Recycle bin is empty. Deleted items will appear here for 30 days.
+          <CardContent className="flex flex-col justify-center items-center text-center space-y-4 pt-6">
+            <p className="text-sm text-muted-foreground">
+                Deleted items will appear here for 30 days before being permanently removed.
             </p>
-             <Button variant="secondary" className="w-full" disabled>View Recycle Bin</Button>
+             <Button variant="secondary" className="w-full" asChild>
+                <Link href="/recycle-bin">View Recycle Bin</Link>
+            </Button>
           </CardContent>
         </Card>
 
