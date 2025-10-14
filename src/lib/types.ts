@@ -13,6 +13,7 @@ export type Account = {
   name: string;
   categoryId: string;
   type: AccountType;
+  openingBalance?: number;
 };
 
 export type TransactionEntry = {

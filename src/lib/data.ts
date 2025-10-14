@@ -13,6 +13,7 @@ let accounts: Account[] = [
   { id: 'acc_cash_hand', name: 'Cash in Hand', categoryId: 'cat_cash', type: 'asset' },
   { id: 'acc_bank', name: 'Bank Account', categoryId: 'cat_cash', type: 'asset' },
   { id: 'acc_capital', name: 'Owner\'s Capital', categoryId: 'cat_capital', type: 'equity' },
+  { id: 'acc_equity_opening', name: 'Opening Balance Equity', categoryId: 'cat_capital', type: 'equity' },
   { id: 'acc_supplier_a', name: 'Supplier A', categoryId: 'cat_party', type: 'liability' },
   { id: 'acc_customer_b', name: 'Customer B', categoryId: 'cat_party', type: 'asset' }, // Accounts Receivable
   { id: 'acc_sales', name: 'Product Sales', categoryId: 'cat_revenue', type: 'revenue' },
@@ -111,10 +112,33 @@ export const deleteTransaction = async (id: string): Promise<void> => {
 
 export const addAccount = async (account: Omit<Account, 'id'>): Promise<Account> => {
     const newAccount: Account = {
-        ...account,
+        name: account.name,
+        categoryId: account.categoryId,
+        type: account.type,
         id: `acc_${Date.now()}`,
     };
     accounts.push(newAccount);
+
+    if (account.openingBalance && account.openingBalance > 0) {
+      const isDebitAccount = ['asset', 'expense'].includes(account.type);
+      const openingBalanceTransaction: Omit<Transaction, 'id'> = {
+        date: new Date().toISOString(),
+        description: `Opening balance for ${account.name}`,
+        entries: [
+          {
+            accountId: newAccount.id,
+            type: isDebitAccount ? 'debit' : 'credit',
+            amount: account.openingBalance,
+          },
+          {
+            accountId: 'acc_equity_opening',
+            type: isDebitAccount ? 'credit' : 'debit',
+            amount: account.openingBalance,
+          },
+        ],
+      };
+      await addTransaction(openingBalanceTransaction);
+    }
     return newAccount;
 };
 

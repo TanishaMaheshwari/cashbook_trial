@@ -18,6 +18,7 @@ const formSchema = z.object({
   name: z.string().min(3, 'Account name must be at least 3 characters.').max(100),
   categoryId: z.string().min(1, 'Category is required.'),
   type: z.enum(accountTypes, { required_error: 'Account type is required.' }),
+  openingBalance: z.coerce.number().min(0, 'Opening balance cannot be negative.').optional(),
 });
 
 type AddAccountFormProps = {
@@ -35,6 +36,7 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
       name: '',
       categoryId: '',
       type: undefined,
+      openingBalance: 0,
     },
   });
 
@@ -112,6 +114,23 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
                     <FormMessage />
                 </FormItem>
             )}
+        />
+
+        <FormField
+          control={form.control}
+          name="openingBalance"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Opening Balance (Optional)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" placeholder="e.g., 10000" {...field} />
+              </FormControl>
+              <FormDescription>
+                If this account has a starting balance, enter it here.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <div className="flex justify-end pt-4">
