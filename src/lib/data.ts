@@ -237,6 +237,18 @@ export const addAccount = async (bookId: string, account: Omit<Account, 'id' | '
     return newAccount;
 };
 
+export const updateAccount = async (bookId: string, accountId: string, data: Partial<Omit<Account, 'id' | 'bookId'>>): Promise<Account> => {
+  const allAccounts = await readData<Account>(accountsFilePath);
+  const index = allAccounts.findIndex(a => a.id === accountId && a.bookId === bookId);
+  if (index === -1) {
+    throw new Error('Account not found in this book.');
+  }
+  const updatedAccount = { ...allAccounts[index], ...data };
+  allAccounts[index] = updatedAccount;
+  await writeData<Account>(accountsFilePath, allAccounts);
+  return updatedAccount;
+};
+
 export const deleteAccount = async (bookId: string, id: string): Promise<void> => {
     const transactions = await getTransactions(bookId);
     // Check if account has transactions

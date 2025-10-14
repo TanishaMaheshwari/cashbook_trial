@@ -2,7 +2,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount } from '@/lib/data';
 import type { Transaction, Account } from '@/lib/types';
 
 export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
@@ -91,6 +91,18 @@ export async function createAccountAction(bookId: string, data: Omit<Account, 'i
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, message: `Failed to create account: ${errorMessage}` };
+    }
+}
+
+export async function updateAccountAction(bookId: string, accountId: string, data: Partial<Omit<Account, 'id' | 'bookId'>>) {
+    try {
+        await updateAccount(bookId, accountId, data);
+        revalidatePath('/accounts');
+        revalidatePath('/');
+        return { success: true, message: 'Account updated successfully.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to update account: ${errorMessage}` };
     }
 }
 

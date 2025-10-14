@@ -1,4 +1,3 @@
-
 [
   {
     "name": "HMS",
@@ -24,5 +23,12 @@
     "categoryId": "cat_party",
     "id": "acc_1760482745114",
     "bookId": "book_default"
+  },
+  {
+    "name": "NEERAJ",
+    "categoryId": "cat_expense",
+    "id": "acc_1760482855447",
+    "bookId": "book_default",
+    "openingBalance": 25000
   }
 ]

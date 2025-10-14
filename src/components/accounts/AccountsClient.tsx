@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -36,6 +37,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Checkbox } from '../ui/checkbox';
 import { useBooks } from '@/context/BookContext';
+import EditAccountForm from './EditAccountForm';
+
 
 type AccountWithBalance = Account & { balance: number };
 
@@ -63,6 +66,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [isAddSheetOpen, setAddSheetOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<AccountWithBalance | null>(null);
 
   const handleDelete = (accountId: string) => {
     if (!activeBook) return;
@@ -90,12 +94,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   };
 
 
-  const handleEdit = (account: Account) => {
-    toast({
-      title: "Edit Not Implemented",
-      description: "The edit functionality is not yet available.",
-    });
-    console.log("Editing account:", account);
+  const handleEdit = (account: AccountWithBalance) => {
+    setEditingAccount(account);
   };
   
   const filteredAndSortedAccounts = useMemo(() => {
@@ -372,8 +372,22 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
             </Table>
         </CardContent>
       </Card>
+      
+      {editingAccount && (
+        <Dialog open={!!editingAccount} onOpenChange={(isOpen) => !isOpen && setEditingAccount(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="font-headline text-2xl">Edit Account</DialogTitle>
+            </DialogHeader>
+            <EditAccountForm 
+              account={editingAccount} 
+              categories={categories} 
+              onFinished={() => setEditingAccount(null)} 
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
     </div>
   );
 }
-
-    
