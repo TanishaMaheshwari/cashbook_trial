@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight } from '@/lib/data';
 import type { Transaction, Account, AccountType } from '@/lib/types';
 
 export async function createTransactionAction(data: Omit<Transaction, 'id' | 'date'> & { date: Date }) {
@@ -90,4 +90,16 @@ export async function deleteAccountAction(accountId: string) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, message: `Failed to delete account: ${errorMessage}` };
     }
+}
+
+export async function updateTransactionHighlightAction(transactionId: string, highlight: Transaction['highlight'] | null) {
+  try {
+    await updateTransactionHighlight(transactionId, highlight);
+    revalidatePath('/transactions');
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to update highlight: ${errorMessage}` };
+  }
 }

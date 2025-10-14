@@ -59,10 +59,24 @@ export const updateTransaction = async (id: string, transaction: Omit<Transactio
   if (index === -1) {
     throw new Error('Transaction not found.');
   }
-  const updatedTransaction = { ...transaction, id };
+  const updatedTransaction = { ...transactions[index], ...transaction, id };
   transactions[index] = updatedTransaction;
   writeData<Transaction>(transactionsFilePath, transactions);
   return updatedTransaction;
+};
+
+export const updateTransactionHighlight = async (id: string, highlight: Transaction['highlight'] | null): Promise<void> => {
+    const transactions = await getTransactions();
+    const index = transactions.findIndex(t => t.id === id);
+    if (index === -1) {
+        throw new Error('Transaction not found.');
+    }
+    if (highlight) {
+        transactions[index].highlight = highlight;
+    } else {
+        delete transactions[index].highlight;
+    }
+    writeData<Transaction>(transactionsFilePath, transactions);
 };
 
 export const addCategory = async (name: string): Promise<Category> => {

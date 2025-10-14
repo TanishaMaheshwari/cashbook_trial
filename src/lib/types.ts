@@ -28,4 +28,5 @@ export type Transaction = {
   date: string; // ISO string
   description: string;
   entries: TransactionEntry[];
+  highlight?: 'yellow' | 'blue' | 'green';
 };
