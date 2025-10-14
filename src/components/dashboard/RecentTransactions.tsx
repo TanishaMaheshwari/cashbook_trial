@@ -13,7 +13,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, MoreVertical } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, MoreVertical, Calendar as CalendarIcon } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,12 @@ import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
+import { DateRange } from 'react-day-picker';
+import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
@@ -41,6 +47,7 @@ type RecentTransactionsProps = {
 
 type TransactionView = 'to_from' | 'dr_cr';
 type HighlightColor = 'yellow' | 'blue' | 'green';
+type DateRangePreset = 'all' | 'this_week' | 'this_month' | 'last_30_days' | 'last_90_days' | 'custom';
 
 const highlightClasses: Record<HighlightColor, string> = {
   yellow: 'bg-yellow-100/70 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/40',
@@ -66,6 +73,9 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   
   const [transactionView, setTransactionView] = useState<TransactionView>('to_from');
   const [isMounted, setIsMounted] = useState(false);
+
+  const [dateRangePreset, setDateRangePreset] = useState<DateRangePreset>('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
     const storedView = localStorage.getItem('transactionView') as TransactionView | null;
@@ -110,12 +120,50 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       }
     });
   };
+  
+  const handleDatePresetChange = (value: DateRangePreset) => {
+    setDateRangePreset(value);
+    if (value !== 'custom') {
+      setCustomDateRange(undefined);
+    }
+  }
 
   const transactions = useMemo(() => {
     let filtered = [...initialTransactions];
 
-    if (isTransactionsPage && searchTerm) {
-      filtered = filtered.filter(tx => tx.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (isTransactionsPage) {
+        if (searchTerm) {
+          filtered = filtered.filter(tx => tx.description.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        let dateFilterRange: DateRange | undefined = customDateRange;
+        if (dateRangePreset !== 'custom' && dateRangePreset !== 'all') {
+            const today = new Date();
+            switch (dateRangePreset) {
+                case 'this_week':
+                    dateFilterRange = { from: startOfWeek(today), to: endOfWeek(today) };
+                    break;
+                case 'this_month':
+                    dateFilterRange = { from: startOfMonth(today), to: endOfMonth(today) };
+                    break;
+                case 'last_30_days':
+                    dateFilterRange = { from: subDays(today, 30), to: today };
+                    break;
+                case 'last_90_days':
+                    dateFilterRange = { from: subDays(today, 90), to: today };
+                    break;
+            }
+        }
+        
+        if (dateFilterRange?.from) {
+             const from = dateFilterRange.from;
+             const to = dateFilterRange.to || dateFilterRange.from; // if `to` is not set, use `from`
+             
+             filtered = filtered.filter(tx => {
+                 const txDate = new Date(tx.date);
+                 return txDate >= from && txDate <= to;
+             });
+        }
     }
     
     const sorted = filtered.sort((a, b) => {
@@ -139,7 +187,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         return sorted.slice(0, 5);
     }
     return sorted;
-  }, [initialTransactions, isTransactionsPage, searchTerm, sortField, sortDirection]);
+  }, [initialTransactions, isTransactionsPage, searchTerm, sortField, sortDirection, dateRangePreset, customDateRange]);
 
   const handleSort = (field: 'date' | 'amount') => {
     if(sortField === field) {
@@ -158,31 +206,81 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   return (
     <>
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
-          {isTransactionsPage ? (
-            <div className="flex items-center gap-4 pt-4">
-              <Input
-                placeholder="Filter by description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
-              />
-            </div>
-          ) : <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+          <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
+          {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
         {isTransactionsPage && (
-          <Button onClick={handleAdd}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
+          <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-2">
+            <Input
+              placeholder="Filter by description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-auto md:w-64"
+            />
+            <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
+              <SelectTrigger className="w-full sm:w-auto md:w-[180px]">
+                <SelectValue placeholder="Select a date range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="this_week">This Week</SelectItem>
+                <SelectItem value="this_month">This Month</SelectItem>
+                <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
+            {dateRangePreset === 'custom' && (
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        id="date"
+                        variant={"outline"}
+                        className={cn(
+                        "w-full sm:w-auto md:w-[300px] justify-start text-left font-normal",
+                        !customDateRange && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {customDateRange?.from ? (
+                        customDateRange.to ? (
+                            <>
+                            {format(customDateRange.from, "LLL dd, y")} -{" "}
+                            {format(customDateRange.to, "LLL dd, y")}
+                            </>
+                        ) : (
+                            format(customDateRange.from, "LLL dd, y")
+                        )
+                        ) : (
+                        <span>Pick a date</span>
+                        )}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={customDateRange?.from}
+                        selected={customDateRange}
+                        onSelect={setCustomDateRange}
+                        numberOfMonths={2}
+                    />
+                    </PopoverContent>
+                </Popover>
+            )}
+             <Button onClick={handleAdd} className="w-full sm:w-auto">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Transaction
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent>
       {transactions.length === 0 ? (
         <div className="flex items-center justify-center h-40">
-          <p className="text-muted-foreground">No transactions yet.</p>
+          <p className="text-muted-foreground">No transactions match your criteria.</p>
         </div>
       ) : (
         <Table>
