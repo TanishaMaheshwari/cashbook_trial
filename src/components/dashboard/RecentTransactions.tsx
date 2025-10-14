@@ -1,7 +1,7 @@
 'use client';
 
 import type { Account, Transaction } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Pencil, Plus, Trash2, ArrowRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,23 +26,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useTransition } from 'react';
+import { useTransition, useState, useMemo } from 'react';
 import { deleteTransactionAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-
+import { Input } from '../ui/input';
+import Link from 'next/link';
 
 type RecentTransactionsProps = {
   transactions: Transaction[];
   accounts: Account[];
 };
 
-export default function RecentTransactions({ transactions, accounts }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions: initialTransactions, accounts }: RecentTransactionsProps) {
   const getAccountName = (accountId: string) => accounts.find(a => a.id === accountId)?.name || 'Unknown Account';
   const pathname = usePathname();
   const isTransactionsPage = pathname === '/transactions';
 
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
 
   const handleDelete = (transactionId: string) => {
     startTransition(async () => {
@@ -56,7 +62,6 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
   };
 
   const handleEdit = (transaction: Transaction) => {
-    // For now, we'll just log this. In a real app, you'd open an edit form.
     console.log('Editing transaction:', transaction);
     toast({
       title: "Edit Not Implemented",
@@ -64,12 +69,60 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
     });
   };
 
+  const transactions = useMemo(() => {
+    let filtered = [...initialTransactions];
+
+    if (isTransactionsPage && searchTerm) {
+      filtered = filtered.filter(tx => tx.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    
+    const sorted = filtered.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      if (sortField === 'date') {
+        aValue = new Date(a.date).getTime();
+        bValue = new Date(b.date).getTime();
+      } else { // amount
+        aValue = a.entries.find(e => e.type === 'debit')?.amount || 0;
+        bValue = b.entries.find(e => e.type === 'debit')?.amount || 0;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    if (!isTransactionsPage) {
+        return sorted.slice(0, 5);
+    }
+    return sorted;
+  }, [initialTransactions, isTransactionsPage, searchTerm, sortField, sortDirection]);
+
+  const handleSort = (field: 'date' | 'amount') => {
+    if(sortField === field) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+        setSortField(field);
+        setSortDirection('desc');
+    }
+  }
+
 
   return (
     <Card>
       <CardHeader>
          <CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
-        {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+        {isTransactionsPage ? (
+          <div className="flex items-center gap-4 pt-4">
+            <Input
+              placeholder="Filter by description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        ) : <CardDescription>A quick look at your latest financial activities.</CardDescription>}
       </CardHeader>
       <CardContent>
       {transactions.length === 0 ? (
@@ -80,9 +133,17 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
+              <TableHead>
+                 <Button variant="ghost" onClick={() => handleSort('date')}>
+                    Date <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+              </TableHead>
               <TableHead>Description</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">
+                  <Button variant="ghost" onClick={() => handleSort('amount')}>
+                    Amount <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+              </TableHead>
               {isTransactionsPage && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -140,6 +201,15 @@ export default function RecentTransactions({ transactions, accounts }: RecentTra
         </Table>
       )}
       </CardContent>
+       {!isTransactionsPage && transactions.length > 0 && (
+        <CardFooter className="justify-center border-t p-4">
+            <Button asChild variant="ghost" size="sm">
+                <Link href="/transactions">
+                View All Transactions <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }

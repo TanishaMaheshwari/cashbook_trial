@@ -114,7 +114,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
             </div>
           </div>
           <StatCards stats={stats} />
-          <RecentTransactions transactions={initialTransactions.slice(0, 5)} accounts={accounts} />
+          <RecentTransactions transactions={initialTransactions} accounts={accounts} />
         </div>
       </main>
 

@@ -11,12 +11,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, TrendingDown, TrendingUp, ArrowUpDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useTransition, useState } from 'react';
+import { useTransition, useState, useMemo } from 'react';
 import { deleteAccountAction } from '@/app/actions';
 import {
   AlertDialog,
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import AddAccountForm from './AddAccountForm';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type AccountWithBalance = Account & { balance: number };
 
@@ -56,6 +58,10 @@ const StatCard = ({ title, value, icon: Icon, colorClass }: { title: string; val
 );
 
 export default function AccountsClient({ initialAccounts, categories, totals }: AccountsClientProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
   };
@@ -84,6 +90,51 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   };
   
   const isDebitAccount = (type: Account['type']) => ['asset', 'expense'].includes(type);
+
+  const filteredAndSortedAccounts = useMemo(() => {
+    let accounts = [...initialAccounts];
+
+    if (searchTerm) {
+      accounts = accounts.filter(account =>
+        account.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    accounts.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch(sortField) {
+        case 'category':
+          aValue = getCategoryName(a.categoryId);
+          bValue = getCategoryName(b.categoryId);
+          break;
+        case 'balance':
+          aValue = a.balance;
+          bValue = b.balance;
+          break;
+        default: // name or type
+          aValue = a[sortField as keyof Account];
+          bValue = b[sortField as keyof Account];
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return accounts;
+  }, [initialAccounts, searchTerm, sortField, sortDirection, categories]);
+
+
+  const handleSort = (field: string) => {
+    if(sortField === field) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+        setSortField(field);
+        setSortDirection('asc');
+    }
+  }
+
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -118,23 +169,47 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
         <StatCard title="Total Credits" value={formatCurrency(totals.credit)} icon={TrendingDown} colorClass="text-green-500" />
       </div>
 
-      <Card>
+       <Card>
         <CardHeader>
           <CardTitle>Chart of Accounts</CardTitle>
+           <div className="flex items-center gap-4 pt-4">
+            <Input
+              placeholder="Filter by account name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Account Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => handleSort('name')}>
+                    Account Name <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                   <Button variant="ghost" onClick={() => handleSort('category')}>
+                    Category <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => handleSort('type')}>
+                    Type <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead className="text-right">
+                  <Button variant="ghost" onClick={() => handleSort('balance')}>
+                    Balance <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {initialAccounts.map((account) => (
+              {filteredAndSortedAccounts.map((account) => (
                 <TableRow key={account.id}>
                   <TableCell className="font-medium">
                     <Link href={`/accounts/${account.id}`} className="hover:underline text-primary">
