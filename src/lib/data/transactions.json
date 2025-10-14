@@ -1,5 +1,26 @@
-
 [
+  {
+    "description": "NLNOP ",
+    "date": "2025-10-14T23:04:45.977Z",
+    "entries": [
+      {
+        "accountId": "acc_bank",
+        "type": "debit",
+        "amount": 5000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_lalit",
+        "type": "credit",
+        "amount": 5000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760483119361",
+    "bookId": "book_default",
+    "highlight": "green"
+  },
   {
     "id": "txn_1",
     "date": "2025-09-01T10:00:00Z",
@@ -16,7 +37,8 @@
         "type": "credit",
         "amount": 500000
       }
-    ]
+    ],
+    "highlight": "yellow"
   },
   {
     "id": "txn_2",
@@ -34,7 +56,8 @@
         "type": "credit",
         "amount": 25000
       }
-    ]
+    ],
+    "highlight": "blue"
   },
   {
     "id": "txn_3",
@@ -52,7 +75,8 @@
         "type": "credit",
         "amount": 100000
       }
-    ]
+    ],
+    "highlight": "green"
   },
   {
     "id": "txn_4",
@@ -75,7 +99,8 @@
         "type": "credit",
         "amount": 125000
       }
-    ]
+    ],
+    "highlight": "blue"
   },
   {
     "id": "txn_5",
@@ -93,7 +118,8 @@
         "type": "credit",
         "amount": 200000
       }
-    ]
+    ],
+    "highlight": "yellow"
   },
   {
     "id": "txn_bg_1",

@@ -210,21 +210,21 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   return (
     <>
     <Card>
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <CardHeader className="flex flex-row items-center justify-between gap-4">
         <div>
           <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
         {isTransactionsPage && (
-          <div className="flex flex-col sm:flex-row w-full md:w-auto items-center gap-2">
+          <div className="flex items-center gap-2">
             <Input
               placeholder="Filter by description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-auto md:w-64"
+              className="w-auto md:w-64"
             />
              <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
-              <SelectTrigger className="w-full sm:w-auto md:w-[180px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
@@ -236,7 +236,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               </SelectContent>
             </Select>
             <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
-              <SelectTrigger className="w-full sm:w-auto md:w-[180px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a date range" />
               </SelectTrigger>
               <SelectContent>
@@ -255,7 +255,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                         id="date"
                         variant={"outline"}
                         className={cn(
-                        "w-full sm:w-auto md:w-[300px] justify-start text-left font-normal",
+                        "w-[300px] justify-start text-left font-normal",
                         !customDateRange && "text-muted-foreground"
                         )}
                     >
@@ -286,7 +286,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                     </PopoverContent>
                 </Popover>
             )}
-             <Button onClick={handleAdd} className="w-full sm:w-auto">
+             <Button onClick={handleAdd}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
             </Button>
@@ -319,8 +319,8 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                 <TableCell>
                   <div className="font-medium">{tx.description}</div>
                   <div className="text-xs text-muted-foreground">
-                    <span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
-                    <span className="text-green-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}
+                    <span className="text-red-600 font-semibold mx-2">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</TableCell>
