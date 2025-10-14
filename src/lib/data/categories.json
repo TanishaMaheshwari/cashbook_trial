@@ -1,4 +1,3 @@
-
 [
   {
     "id": "cat_cash",
@@ -39,5 +38,15 @@
     "id": "cat_bg_clients",
     "name": "BG Clients",
     "bookId": "book_1760481482686"
+  },
+  {
+    "id": "cat_equity_book_default",
+    "name": "Equity",
+    "bookId": "book_default"
+  },
+  {
+    "id": "cat_1760484573125",
+    "name": "VC",
+    "bookId": "book_default"
   }
 ]

@@ -291,14 +291,16 @@ export const deleteCategory = async (bookId: string, id: string): Promise<void> 
     }
 
     let allCategories = await readData<Category>(categoriesFilePath);
-    const index = allCategories.findIndex(c => c.id === id && c.bookId === bookId);
-    if (index === -1) {
+    const categoryToDelete = allCategories.find(c => c.id === id && c.bookId === bookId);
+    
+    if (!categoryToDelete) {
         throw new Error('Category not found in this book.');
     }
-    const [deletedCategory] = allCategories.splice(index, 1);
-    await addToRecycleBin({ ...deletedCategory, type: 'category' });
+    
+    await addToRecycleBin({ ...categoryToDelete, type: 'category' });
 
-    await writeData<Category>(categoriesFilePath, allCategories);
+    const remainingCategories = allCategories.filter(c => c.id !== id);
+    await writeData<Category>(categoriesFilePath, remainingCategories);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
@@ -375,21 +377,83 @@ export const addAccount = async (
 
 export const updateAccount = async (bookId: string, accountId: string, data: Partial<Omit<Account, 'id' | 'bookId'>>): Promise<Account> => {
   const allAccounts = await readData<Account>(accountsFilePath);
+  const allTransactions = await readData<Transaction>(transactionsFilePath);
+  
   const index = allAccounts.findIndex(a => a.id === accountId && a.bookId === bookId);
   if (index === -1) {
     throw new Error('Account not found in this book.');
   }
   
-  if (data.name) {
+  const originalAccount = allAccounts[index];
+
+  if (data.name && data.name !== originalAccount.name) {
     const existingAccount = allAccounts.find(acc => acc.bookId === bookId && acc.name.toLowerCase() === data.name?.toLowerCase() && acc.id !== accountId);
     if (existingAccount) {
         throw new Error(`An account named "${data.name}" already exists in this book.`);
     }
   }
 
-  const updatedAccount = { ...allAccounts[index], ...data };
+  const updatedAccount = { ...originalAccount, ...data };
   allAccounts[index] = updatedAccount;
+  
+  // --- Opening Balance Logic ---
+  const openingBalanceTxId = allTransactions.find(t => 
+      t.bookId === bookId &&
+      t.description === `Opening Balance for ${originalAccount.name}` &&
+      t.entries.some(e => e.accountId === accountId)
+  )?.id;
+
+  const newBalance = data.openingBalance;
+  const newType = data.openingBalanceType || 'debit';
+
+  // Case 1: OB existed, and is being updated to a non-zero value
+  if (openingBalanceTxId && newBalance && newBalance > 0) {
+      const obeAccount = await getOpeningBalanceEquityAccount(bookId);
+      const newEntries = [
+          { accountId: accountId, amount: newBalance, type: newType },
+          { accountId: obeAccount.id, amount: newBalance, type: newType === 'debit' ? 'credit' : 'debit' }
+      ];
+      await updateTransaction(bookId, openingBalanceTxId, {
+          date: new Date().toISOString(),
+          description: `Opening Balance for ${updatedAccount.name}`,
+          entries: newEntries
+      });
+  } 
+  // Case 2: OB existed, and is being updated to zero (or removed) -> delete the OB transaction
+  else if (openingBalanceTxId && (!newBalance || newBalance === 0)) {
+      await deleteTransaction(bookId, openingBalanceTxId);
+  }
+  // Case 3: OB did NOT exist, and is being created with a non-zero value
+  else if (!openingBalanceTxId && newBalance && newBalance > 0) {
+       const obeAccount = await getOpeningBalanceEquityAccount(bookId);
+        const newAccountEntry = {
+            accountId: accountId,
+            amount: newBalance,
+            type: newType,
+        };
+        const obeAccountEntry = {
+            accountId: obeAccount.id,
+            amount: newBalance,
+            type: newType === 'debit' ? 'credit' : 'debit',
+        };
+        await addTransaction(bookId, {
+            date: new Date().toISOString(),
+            description: `Opening Balance for ${updatedAccount.name}`,
+            entries: [newAccountEntry, obeAccountEntry],
+        });
+  }
+
+  // If the account name changed, update the description of the OB transaction if it exists
+  if (data.name && data.name !== originalAccount.name && openingBalanceTxId) {
+      const tx = allTransactions.find(t => t.id === openingBalanceTxId);
+      if (tx) {
+          await updateTransaction(bookId, openingBalanceTxId, { ...tx, description: `Opening Balance for ${data.name}`});
+      }
+  }
+  
+  // Write the final account data
   await writeData<Account>(accountsFilePath, allAccounts);
+
   return updatedAccount;
 };
 

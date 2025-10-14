@@ -1,6 +1,8 @@
+
 import { getAccounts, getCategories, getTransactions } from '@/lib/data';
 import AccountsClient from '@/components/accounts/AccountsClient';
 import { cookies } from 'next/headers';
+import type { Transaction } from '@/lib/types';
 
 export default async function AllAccountsPage() {
   const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
@@ -11,28 +13,35 @@ export default async function AllAccountsPage() {
     getTransactions(activeBookId),
   ]);
 
-  const accountsWithBalances = accounts.map((account) => {
+  const accountsWithDetails = accounts.map((account) => {
     const accountEntries = transactions.flatMap(t => t.entries).filter(e => e.accountId === account.id);
     const totalDebit = accountEntries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
     const totalCredit = accountEntries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
 
     const balance = totalDebit - totalCredit;
     
-    return { ...account, balance };
+    // Find the opening balance transaction
+    const openingBalanceTransaction = transactions.find(
+      (t) =>
+        t.description === `Opening Balance for ${account.name}` &&
+        t.entries.some((e) => e.accountId === account.id)
+    );
+
+    return { ...account, balance, openingBalanceTransaction: openingBalanceTransaction || null };
   });
 
-  const totalDebitBalance = accountsWithBalances
+  const totalDebitBalance = accountsWithDetails
     .filter(a => a.balance >= 0)
     .reduce((sum, a) => sum + a.balance, 0);
     
-  const totalCreditBalance = accountsWithBalances
+  const totalCreditBalance = accountsWithDetails
     .filter(a => a.balance < 0)
     .reduce((sum, a) => sum + Math.abs(a.balance), 0);
 
 
   return (
     <AccountsClient
-      initialAccounts={accountsWithBalances}
+      initialAccounts={accountsWithDetails}
       categories={categories}
       totals={{ debit: totalDebitBalance, credit: totalCreditBalance }}
     />

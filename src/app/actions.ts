@@ -116,6 +116,7 @@ export async function updateAccountAction(bookId: string, accountId: string, dat
         await updateAccount(bookId, accountId, data);
         revalidatePath('/accounts');
         revalidatePath('/');
+        revalidatePath('/transactions');
         return { success: true, message: 'Account updated successfully.' };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';

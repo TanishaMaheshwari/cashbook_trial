@@ -16,5 +16,29 @@
     "name": "Client A",
     "categoryId": "cat_bg_clients",
     "bookId": "book_1760481482686"
+  },
+  {
+    "id": "acc_1760484492379",
+    "bookId": "book_default",
+    "name": "Cash",
+    "categoryId": "cat_cash"
+  },
+  {
+    "id": "acc_opening_balance_equity_book_default",
+    "name": "Opening Balance Equity",
+    "categoryId": "cat_equity_book_default",
+    "bookId": "book_default"
+  },
+  {
+    "id": "acc_1760484514093",
+    "bookId": "book_default",
+    "name": "HM",
+    "categoryId": "cat_capital"
+  },
+  {
+    "id": "acc_1760484541813",
+    "bookId": "book_default",
+    "name": "Mahesh",
+    "categoryId": "cat_party"
   }
 ]

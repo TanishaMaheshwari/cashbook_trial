@@ -14,9 +14,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { Account, Category } from '@/lib/types';
+import type { Account, Category, Transaction } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { useTransition, useState, useMemo } from 'react';
 import { deleteAccountAction, deleteMultipleAccountsAction } from '@/app/actions';
 import {
@@ -41,9 +40,11 @@ import EditAccountForm from './EditAccountForm';
 
 
 type AccountWithBalance = Account & { balance: number };
+type InitialAccount = AccountWithBalance & { openingBalanceTransaction?: Transaction | null };
+
 
 type AccountsClientProps = {
-  initialAccounts: AccountWithBalance[];
+  initialAccounts: InitialAccount[];
   categories: Category[];
   totals: {
     debit: number;
@@ -63,19 +64,18 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
   };
   
-  const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [isAddSheetOpen, setAddSheetOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<AccountWithBalance | null>(null);
+  const [editingAccount, setEditingAccount] = useState<InitialAccount | null>(null);
 
   const handleDelete = (accountId: string) => {
     if (!activeBook) return;
     startTransition(async () => {
       const result = await deleteAccountAction(activeBook.id, accountId);
       if (result.success) {
-        toast({ title: "Success", description: result.message });
+        // toast({ title: "Success", description: result.message });
       } else {
-        toast({ title: "Error", description: result.message, variant: "destructive" });
+        // toast({ title: "Error", description: result.message, variant: "destructive" });
       }
     });
   };
@@ -85,16 +85,16 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     startTransition(async () => {
       const result = await deleteMultipleAccountsAction(activeBook.id, selectedAccounts);
       if (result.success) {
-        toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
+        // toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
         setSelectedAccounts([]);
       } else {
-        toast({ title: "Error", description: result.message, variant: "destructive" });
+        // toast({ title: "Error", description: result.message, variant: "destructive" });
       }
     });
   };
 
 
-  const handleEdit = (account: AccountWithBalance) => {
+  const handleEdit = (account: InitialAccount) => {
     setEditingAccount(account);
   };
   
@@ -459,7 +459,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
             <EditAccountForm 
               account={editingAccount} 
               categories={categories} 
-              onFinished={() => setEditingAccount(null)} 
+              onFinished={() => setEditingAccount(null)}
+              openingBalanceTransaction={editingAccount.openingBalanceTransaction}
             />
           </DialogContent>
         </Dialog>
