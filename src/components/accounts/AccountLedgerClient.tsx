@@ -36,17 +36,25 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/accounts">
-            <ArrowLeft />
-            <span className="sr-only">Back to Accounts</span>
-          </Link>
-        </Button>
-        <div>
-            <h1 className="text-3xl font-headline">{account.name}</h1>
-            <p className="text-muted-foreground">Account Ledger</p>
-        </div>
+      <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" asChild>
+              <Link href="/accounts">
+                <ArrowLeft />
+                <span className="sr-only">Back to Accounts</span>
+              </Link>
+            </Button>
+            <div>
+                <h1 className="text-3xl font-headline">{account.name}</h1>
+                <p className="text-muted-foreground">Account Ledger</p>
+            </div>
+          </div>
+          <Button variant="outline" asChild>
+              <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
       </div>
       
       <Card className="mb-6">
@@ -60,10 +68,7 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
             </div>
              <div>
                 <p className="text-muted-foreground">Final Balance</p>
-                <p className={cn(
-                    "font-bold text-lg",
-                    isDebitAccount ? "text-blue-600" : "text-green-600"
-                )}>
+                <p className="font-bold text-lg">
                     {formatCurrency(finalBalance)}
                     <span className="text-xs text-muted-foreground ml-1">{isDebitAccount ? 'Dr' : 'Cr'}</span>
                 </p>
@@ -93,13 +98,13 @@ export default function AccountLedgerClient({ account, ledgerEntries }: AccountL
                 <TableRow key={`${entry.transactionId}-${index}`}>
                   <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
                   <TableCell>{entry.description}</TableCell>
-                   <TableCell className="text-right text-blue-600">
+                   <TableCell className="text-right text-green-600">
                     {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
                   </TableCell>
-                  <TableCell className="text-right text-green-600">
+                  <TableCell className="text-right text-blue-600">
                     {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
                   </TableCell>
-                  <TableCell className={cn("text-right", isDebitAccount ? "text-blue-600" : "text-green-600")}>
+                  <TableCell className="text-right">
                     {formatCurrency(entry.balance)}
                   </TableCell>
                 </TableRow>

@@ -10,14 +10,13 @@ export default async function AllTransactionsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="icon" asChild>
+      <div className="flex items-center justify-end gap-4 mb-6">
+        <Button variant="outline" asChild>
           <Link href="/">
-            <ArrowLeft />
-            <span className="sr-only">Back to Dashboard</span>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
           </Link>
         </Button>
-        {/* The title is now inside the RecentTransactions component */}
       </div>
       <RecentTransactions transactions={transactions} accounts={accounts} />
     </div>
