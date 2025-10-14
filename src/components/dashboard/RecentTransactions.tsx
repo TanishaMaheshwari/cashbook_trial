@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useTransition, useState, useMemo, useEffect } from 'react';
-import { deleteTransactionAction, updateTransactionHighlightAction } from '@/app/actions';
+import { deleteTransactionAction, updateTransactionHighlightAction, deleteMultipleTransactionsAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import Link from 'next/link';
@@ -39,6 +39,7 @@ import { Calendar } from '../ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useBooks } from '@/context/BookContext';
+import { Checkbox } from '../ui/checkbox';
 
 
 type RecentTransactionsProps = {
@@ -69,6 +70,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDescriptor, setSortDescriptor] = useState('date-desc');
+  const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -98,6 +100,19 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       } else {
         toast({ title: 'Error', description: result.message, variant: 'destructive' });
       }
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (!activeBook || selectedTransactions.length === 0) return;
+    startTransition(async () => {
+        const result = await deleteMultipleTransactionsAction(activeBook.id, selectedTransactions);
+        if(result.success) {
+            toast({ title: "Success", description: result.message });
+            setSelectedTransactions([]);
+        } else {
+            toast({ title: "Error", description: result.message, variant: "destructive" });
+        }
     });
   };
 
@@ -202,6 +217,22 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     return sorted;
   }, [initialTransactions, isTransactionsPage, searchTerm, sortDescriptor, dateRangePreset, customDateRange]);
 
+  const handleSelect = (transactionId: string, checked: boolean) => {
+    if(checked) {
+      setSelectedTransactions(prev => [...prev, transactionId]);
+    } else {
+      setSelectedTransactions(prev => prev.filter(id => id !== transactionId));
+    }
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    if(checked) {
+      setSelectedTransactions(transactions.map(t => t.id));
+    } else {
+      setSelectedTransactions([]);
+    }
+  }
+
   if (!isMounted) {
     return <Card><CardHeader><CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle></CardHeader><CardContent><p>Loading...</p></CardContent></Card>;
   }
@@ -212,7 +243,32 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     <Card>
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
+          {selectedTransactions.length > 0 && isTransactionsPage ? (
+              <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                  <Button variant="destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete ({selectedTransactions.length})
+                  </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                  <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                      This will permanently delete {selectedTransactions.length} transactions. This action cannot be undone.
+                      </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleBulkDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
+                      {isPending ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                  </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+          ) : (
+            <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
+          )}
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
         {isTransactionsPage && (
@@ -306,46 +362,55 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           <div className="md:hidden space-y-4">
             {transactions.map(tx => (
               <Card key={tx.id} className={cn('w-full', tx.highlight && highlightClasses[tx.highlight])}>
-                <CardContent className="p-4 flex flex-col gap-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold">{tx.description}</p>
-                      <p className="text-sm text-muted-foreground">{new Date(tx.date).toLocaleDateString()}</p>
-                    </div>
-                    <p className="font-semibold text-lg">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</p>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <p><span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}</p>
-                    <p><span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}</p>
-                  </div>
+                <CardContent className="p-4 flex gap-3">
                   {isTransactionsPage && (
-                    <div className="flex items-center justify-end gap-2 border-t pt-3 mt-2">
-                       <Button variant="ghost" size="sm" onClick={() => handleEdit(tx)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
-                       <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this transaction.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(tx.id)}
-                                disabled={isPending}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                {isPending ? 'Deleting...' : 'Delete'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
+                    <Checkbox
+                        checked={selectedTransactions.includes(tx.id)}
+                        onCheckedChange={(checked) => handleSelect(tx.id, !!checked)}
+                        className="mt-1"
+                    />
                   )}
+                  <div className="flex-1 flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                        <div>
+                        <p className="font-semibold">{tx.description}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(tx.date).toLocaleDateString()}</p>
+                        </div>
+                        <p className="font-semibold text-lg">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</p>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                        <p><span className="text-green-600 font-semibold">{transactionView === 'dr_cr' ? 'Dr:' : 'To:'}</span> {tx.entries.filter(e => e.type === 'debit').map(e => getAccountName(e.accountId)).join(', ')}</p>
+                        <p><span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}</p>
+                    </div>
+                    {isTransactionsPage && (
+                        <div className="flex items-center justify-end gap-2 border-t pt-3 mt-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(tx)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this transaction.
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={() => handleDelete(tx.id)}
+                                    disabled={isPending}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                >
+                                    {isPending ? 'Deleting...' : 'Delete'}
+                                </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )}
+                   </div>
                 </CardContent>
               </Card>
             ))}
@@ -356,6 +421,14 @@ export default function RecentTransactions({ transactions: initialTransactions, 
             <Table>
               <TableHeader>
                 <TableRow>
+                   {isTransactionsPage && (
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedTransactions.length === transactions.length && transactions.length > 0}
+                        onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>
                      Date
                   </TableHead>
@@ -368,7 +441,15 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               </TableHeader>
               <TableBody>
                 {transactions.map(tx => (
-                  <TableRow key={tx.id} className={cn(tx.highlight && highlightClasses[tx.highlight])}>
+                  <TableRow key={tx.id} className={cn(tx.highlight && highlightClasses[tx.highlight])} data-state={selectedTransactions.includes(tx.id) ? 'selected' : undefined}>
+                    {isTransactionsPage && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedTransactions.includes(tx.id)}
+                          onCheckedChange={(checked) => handleSelect(tx.id, !!checked)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="w-28">{new Date(tx.date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="font-medium">{tx.description}</div>
@@ -483,6 +564,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               categories={categories}
               onFinished={onSheetFinished}
               initialData={editingTransaction}
+              bookId={activeBook?.id}
             />
         </DialogContent>
     </Dialog>

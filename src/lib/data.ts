@@ -45,11 +45,16 @@ export const getRecycleBinItems = async (): Promise<any[]> => {
     return await readData<any>(recycleBinFilePath);
 };
 
-export const addToRecycleBin = async (item: any) => {
+export const addToRecycleBin = async (item: any | any[]) => {
     const bin = await readData<any>(recycleBinFilePath);
-    item.deletedAt = new Date().toISOString();
-    bin.unshift(item); // Add to the beginning of the array
-    await writeData<any>(recycleBinFilePath, bin);
+    const itemsToAdd = Array.isArray(item) ? item : [item];
+    
+    itemsToAdd.forEach(i => {
+        i.deletedAt = new Date().toISOString();
+    });
+
+    const newBin = [...itemsToAdd, ...bin];
+    await writeData<any>(recycleBinFilePath, newBin);
 }
 
 // --- Book Functions ---
@@ -199,13 +204,18 @@ export const deleteCategory = async (bookId: string, id: string): Promise<void> 
     }
 
     let allCategories = await readData<Category>(categoriesFilePath);
-    const index = allCategories.findIndex(c => c.id === id && c.bookId === bookId);
+    const bookCategories = allCategories.filter(c => c.bookId === bookId);
+    const otherBookCategories = allCategories.filter(c => c.bookId !== bookId);
+
+    const index = bookCategories.findIndex(c => c.id === id);
     if (index === -1) {
-        throw new Error('Category not found.');
+        throw new Error('Category not found in this book.');
     }
-    const [deletedCategory] = allCategories.splice(index, 1);
+    const [deletedCategory] = bookCategories.splice(index, 1);
     await addToRecycleBin({ ...deletedCategory, type: 'category' });
-    await writeData<Category>(categoriesFilePath, allCategories);
+
+    const finalCategories = [...otherBookCategories, ...bookCategories];
+    await writeData<Category>(categoriesFilePath, finalCategories);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {
@@ -217,6 +227,21 @@ export const deleteTransaction = async (bookId: string, id: string): Promise<voi
   const [deletedTransaction] = allTransactions.splice(index, 1);
   await addToRecycleBin({ ...deletedTransaction, type: 'transaction' });
   await writeData<Transaction>(transactionsFilePath, allTransactions);
+};
+
+export const deleteMultipleTransactions = async (bookId: string, transactionIds: string[]): Promise<void> => {
+    let allTransactions = await readData<Transaction>(transactionsFilePath);
+    
+    const transactionsToDelete = allTransactions.filter(t => t.bookId === bookId && transactionIds.includes(t.id));
+    if (transactionsToDelete.length !== transactionIds.length) {
+        throw new Error('Some transactions could not be found for deletion.');
+    }
+
+    await addToRecycleBin(transactionsToDelete.map(t => ({...t, type: 'transaction'})));
+
+    const remainingTransactions = allTransactions.filter(t => !(t.bookId === bookId && transactionIds.includes(t.id)));
+
+    await writeData<Transaction>(transactionsFilePath, remainingTransactions);
 };
 
 export const addAccount = async (bookId: string, accountData: Omit<Account, 'id' | 'bookId'>): Promise<Account> => {

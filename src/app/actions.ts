@@ -2,7 +2,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions } from '@/lib/data';
 import type { Transaction, Account } from '@/lib/types';
 
 export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
@@ -81,6 +81,20 @@ export async function deleteTransactionAction(bookId: string, transactionId: str
     return { success: false, message: `Failed to delete transaction: ${errorMessage}` };
   }
 }
+
+export async function deleteMultipleTransactionsAction(bookId: string, transactionIds: string[]) {
+    try {
+        await deleteMultipleTransactions(bookId, transactionIds);
+        revalidatePath('/');
+        revalidatePath('/transactions');
+        revalidatePath('/accounts');
+        return { success: true, message: `${transactionIds.length} transactions deleted.` };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to delete transactions: ${errorMessage}` };
+    }
+}
+
 
 export async function createAccountAction(bookId: string, data: Omit<Account, 'id' | 'bookId'>) {
     try {
