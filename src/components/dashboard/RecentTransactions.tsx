@@ -23,10 +23,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useTransition, useState, useMemo, useEffect } from 'react';
-import { deleteTransactionAction, updateTransactionHighlightAction, restoreItemAction, deletePermanentlyAction } from '@/app/actions';
+import { deleteTransactionAction, updateTransactionHighlightAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import Link from 'next/link';
