@@ -20,6 +20,7 @@ import {
 import { Label } from '../ui/label';
 import Link from 'next/link';
 import { List, Users } from 'lucide-react';
+import CategoryAccounts from './CategoryAccounts';
 
 
 type DashboardClientProps = {
@@ -52,6 +53,25 @@ export default function DashboardClient({ initialTransactions, accounts, categor
     }).filter(cat => cat.balance !== 0);
     
     const selectedCategoryBalance = selectedCategoryId ? categoryBalances.find(c => c.id === selectedCategoryId) : undefined;
+    
+    let accountsInSelectedCategory;
+    if (selectedCategoryId) {
+        accountsInSelectedCategory = accounts
+            .filter(acc => acc.categoryId === selectedCategoryId)
+            .map(account => {
+                const accountEntries = initialTransactions.flatMap(t => t.entries).filter(e => e.accountId === account.id);
+                const totalDebit = accountEntries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
+                const totalCredit = accountEntries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
+                let balance = 0;
+                if (account.type === 'asset' || account.type === 'expense') {
+                    balance = totalDebit - totalCredit;
+                } else {
+                    balance = totalCredit - totalDebit;
+                }
+                return { ...account, balance };
+            })
+            .filter(acc => acc.balance !== 0);
+    }
 
     return {
       totalDebit,
@@ -59,8 +79,11 @@ export default function DashboardClient({ initialTransactions, accounts, categor
       difference: totalDebit - totalCredit,
       categoryBalances,
       selectedCategoryBalance,
+      accountsInSelectedCategory,
     };
   }, [initialTransactions, accounts, categories, selectedCategoryId]);
+
+  const selectedCategoryName = categories.find(c => c.id === selectedCategoryId)?.name;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -114,6 +137,12 @@ export default function DashboardClient({ initialTransactions, accounts, categor
             </div>
           </div>
           <StatCards stats={stats} />
+          {stats.accountsInSelectedCategory && selectedCategoryName && (
+              <CategoryAccounts 
+                categoryName={selectedCategoryName}
+                accounts={stats.accountsIn_selectedCategory} 
+              />
+          )}
           <RecentTransactions transactions={initialTransactions} accounts={accounts} />
         </div>
       </main>
