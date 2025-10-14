@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -62,7 +63,15 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
+        <Command
+          filter={(value, search) => {
+            const option = options.find(option => option.value.toLowerCase() === value.toLowerCase());
+            if (option) {
+              return option.label.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+            }
+            return 0;
+          }}
+        >
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{notFoundPlaceholder}</CommandEmpty>
@@ -70,9 +79,9 @@ export function Combobox({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.label}
-                  onSelect={() => {
-                    onChange(option.value)
+                  value={option.value}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue)
                     setOpen(false)
                   }}
                 >
