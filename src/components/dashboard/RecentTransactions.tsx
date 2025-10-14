@@ -23,6 +23,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useTransition, useState, useMemo, useEffect } from 'react';
 import { deleteTransactionAction, updateTransactionHighlightAction } from '@/app/actions';
@@ -215,7 +216,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
         {isTransactionsPage && (
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-end gap-2 w-full md:w-auto flex-wrap">
             <Input
               placeholder="Filter by description..."
               value={searchTerm}
