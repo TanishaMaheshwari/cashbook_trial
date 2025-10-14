@@ -50,26 +50,26 @@ export default function CategoryAccounts({ categoryName, accounts }: CategoryAcc
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Account Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
+              <TableHead className="h-auto py-2">Account Name</TableHead>
+              <TableHead className="h-auto py-2">Type</TableHead>
+              <TableHead className="text-right h-auto py-2">Balance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {accounts.map((account) => (
               <TableRow key={account.id}>
-                <TableCell>
+                <TableCell className="py-2">
                   <Link href={`/accounts/${account.id}`} className="font-medium text-primary hover:underline">
                     {account.name}
                   </Link>
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-2">
                    <Badge variant="secondary" className={cn(accountTypeColors[account.type] || 'bg-gray-100 text-gray-800', 'capitalize text-xs')}>
                     {account.type}
                   </Badge>
                 </TableCell>
                 <TableCell className={cn(
-                    "text-right",
+                    "text-right py-2",
                     isDebitAccount(account.type) ? "text-green-600" : "text-red-600"
                 )}>
                   {formatCurrency(account.balance)}
