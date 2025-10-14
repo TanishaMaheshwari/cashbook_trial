@@ -46,7 +46,8 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
     return {
       transactionId: tx.id,
       date: tx.date,
-      description: tx.description,
+      // Use entry description if available, otherwise fall back to transaction description
+      description: entry.description || tx.description,
       debit,
       credit,
       balance: runningBalance,

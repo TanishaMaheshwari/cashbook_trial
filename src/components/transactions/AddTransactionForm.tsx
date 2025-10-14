@@ -18,12 +18,15 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AddAccountForm from '@/components/accounts/AddAccountForm';
+import { Checkbox } from '../ui/checkbox';
+import { Textarea } from '../ui/textarea';
 
 
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
   type: z.enum(['debit', 'credit']),
   amount: z.coerce.number().positive('Amount must be positive.'),
+  description: z.string().optional(),
 });
 
 const formSchema = z.object({
@@ -52,6 +55,7 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [isAddAccountOpen, setAddAccountOpen] = useState(false);
+  const [showLineDescriptions, setShowLineDescriptions] = useState(false);
 
   // We need categories for the AddAccountForm, but they are not passed in.
   // This is a limitation for now. We will pass a dummy array.
@@ -64,8 +68,8 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
       description: '',
       date: new Date(),
       entries: [
-        { accountId: '', type: 'debit', amount: 0 },
-        { accountId: '', type: 'credit', amount: 0 },
+        { accountId: '', type: 'debit', amount: 0, description: '' },
+        { accountId: '', type: 'credit', amount: 0, description: '' },
       ],
     },
   });
@@ -102,44 +106,43 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Transaction Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" className={cn('pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Office supplies purchase" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Transaction Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className={cn('w-[240px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
+                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Transaction Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="e.g., Monthly office expenses" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -160,63 +163,95 @@ export default function AddTransactionForm({ accounts, onFinished }: AddTransact
               </DialogContent>
             </Dialog>
           </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+                id="show-line-descriptions"
+                checked={showLineDescriptions}
+                onCheckedChange={(checked) => setShowLineDescriptions(Boolean(checked))}
+            />
+            <label
+                htmlFor="show-line-descriptions"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+                Show line descriptions
+            </label>
+          </div>
+
           {fields.map((field, index) => (
-            <div key={field.id} className="flex flex-col md:flex-row gap-2 items-start bg-secondary/50 p-3 rounded-md animate-in fade-in-0 zoom-in-95">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-grow w-full">
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.accountId`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Account</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <div key={field.id} className="flex flex-col gap-2 bg-secondary/50 p-3 rounded-md animate-in fade-in-0 zoom-in-95">
+              <div className="flex items-start gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-grow w-full">
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.accountId`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="sr-only">Account</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="sr-only">Amount</FormLabel>
                         <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                          <Input type="number" step="0.01" placeholder="Amount" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          {accounts.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.amount`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Amount</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.01" placeholder="Amount" {...field} />
-                      </FormControl>
-                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.type`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Type</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="debit">To</SelectItem>
-                          <SelectItem value="credit">From</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.type`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="sr-only">Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="debit">To</SelectItem>
+                            <SelectItem value="credit">From</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="button" variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 shrink-0" onClick={() => remove(index)} disabled={fields.length <= 2}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-              <Button type="button" variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => remove(index)} disabled={fields.length <= 2}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {showLineDescriptions && (
+                <FormField
+                  control={form.control}
+                  name={`entries.${index}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">Line Description</FormLabel>
+                      <FormControl>
+                          <Input placeholder="Line item description (optional)" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
           ))}
           <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0 })}>

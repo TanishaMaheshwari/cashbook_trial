@@ -20,6 +20,7 @@ export type TransactionEntry = {
   accountId: string;
   amount: number;
   type: 'debit' | 'credit';
+  description?: string; // Optional description for the specific entry
 };
 
 export type Transaction = {
