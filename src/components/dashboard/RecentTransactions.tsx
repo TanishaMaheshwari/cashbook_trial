@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -13,7 +14,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -259,7 +260,17 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </AlertDialogContent>
               </AlertDialog>
           ) : (
-            <CardTitle className={isTransactionsPage ? 'text-xl' : ''}>{isTransactionsPage ? `All Transactions` : "Recent Transactions"}</CardTitle>
+            <div className="flex items-center gap-4">
+                <h1 className="text-3xl font-headline">All Transactions</h1>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/"><Scale /></Link>
+                    </Button>
+                     <Button variant="outline" size="icon" asChild>
+                        <Link href="/accounts"><Users /></Link>
+                    </Button>
+                </div>
+            </div>
           )}
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
@@ -533,3 +544,5 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     </>
   );
 }
+
+    
