@@ -13,7 +13,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, MoreVertical, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -487,7 +487,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
+                                <ArrowLeftRight className="h-4 w-4" />
                                 <span className="sr-only">More actions</span>
                               </Button>
                             </DropdownMenuTrigger>
