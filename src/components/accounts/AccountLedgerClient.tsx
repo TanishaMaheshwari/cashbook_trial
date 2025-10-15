@@ -99,7 +99,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     });
 
     return {
-      displayEntries: ledgerForDisplay.reverse(), // Most recent first
+      displayEntries: ledgerForDisplay.slice().reverse(), // Most recent first
       finalBalance: runningBalance,
       openingBalance: ob,
     };
