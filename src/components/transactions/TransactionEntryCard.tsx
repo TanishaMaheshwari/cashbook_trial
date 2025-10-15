@@ -80,7 +80,8 @@ const TransactionEntryCardComponent = ({
                   placeholder="0.00"
                   {...field}
                   onChange={(e) => {
-                      const amount = parseFloat(e.target.value) || 0;
+                      const value = e.target.value;
+                      const amount = value === '' ? '' : parseFloat(value);
                       field.onChange(amount);
                       if (!isSplit && fieldsLength === 2) {
                         const otherIndex = index === 0 ? 1 : 0;

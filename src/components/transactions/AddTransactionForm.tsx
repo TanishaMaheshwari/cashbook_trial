@@ -24,7 +24,7 @@ import { TransactionEntryCard } from './TransactionEntryCard';
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
   type: z.enum(['debit', 'credit']),
-  amount: z.coerce.number().positive('Amount must be positive.'),
+  amount: z.coerce.number({invalid_type_error: "Amount is required."}).positive('Amount must be positive.'),
   description: z.string().optional(),
 });
 
@@ -88,8 +88,8 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
       description: '',
       date: new Date(),
       entries: [
-        { accountId: '', type: 'debit', amount: 0, description: '' },
-        { accountId: '', type: 'credit', amount: 0, description: '' },
+        { accountId: '', type: 'debit', amount: '' as any, description: '' },
+        { accountId: '', type: 'credit', amount: '' as any, description: '' },
       ],
       useSeparateNarration: false,
     },
@@ -118,8 +118,8 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
             description: '',
             date: new Date(),
             entries: [
-                { accountId: '', type: 'debit', amount: 0, description: '' },
-                { accountId: '', type: 'credit', amount: 0, description: '' },
+                { accountId: '', type: 'debit', amount: '' as any, description: '' },
+                { accountId: '', type: 'credit', amount: '' as any, description: '' },
             ],
             useSeparateNarration: false,
         });
@@ -252,7 +252,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                       />
                     ))}
                     {isSplit && (
-                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: 0, description: '' })} className="w-full">
+                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'debit', amount: '' as any, description: '' })} className="w-full">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Debit' : 'To'} Account
                         </Button>
                     )}
@@ -274,7 +274,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                       />
                     ))}
                     {isSplit && (
-                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: 0, description: '' })} className="w-full">
+                        <Button type="button" variant="outline" size="sm" onClick={() => append({ accountId: '', type: 'credit', amount: '' as any, description: '' })} className="w-full">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add {transactionView === 'dr_cr' ? 'Credit' : 'From'} Account
                         </Button>
                     )}
