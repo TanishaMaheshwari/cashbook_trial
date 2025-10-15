@@ -292,8 +292,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                         className="mt-1"
                     />
                     <div className="flex-1">
-                        <Link href={`/accounts/${account.id}`} className="font-semibold text-primary hover:underline">
-                            {account.name}
+                        <Link href={`/accounts/${account.id}`} className="block">
+                            <p className="font-semibold text-primary hover:underline">{account.name}</p>
                         </Link>
                         <Badge variant="secondary" className='capitalize text-xs mt-1'>
                             {getCategoryName(account.categoryId)}
@@ -474,3 +474,4 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   );
 
     
+
