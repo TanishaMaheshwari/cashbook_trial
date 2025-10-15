@@ -14,7 +14,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -246,7 +246,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-headline">All Transactions</h1>
+              <h1 className="text-xl font-headline">All Transactions</h1>
               <div className="flex items-center gap-2">
                   <Button variant="outline" size="icon" asChild>
                       <Link href="/"><Scale /></Link>
@@ -263,25 +263,27 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         </div>
         <Card>
           <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-            <Input
-              placeholder="Filter by description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-auto"
-            />
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
-                <SelectTrigger className="w-full flex-1 md:w-[180px]">
-                    <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="date-desc">Most Recent</SelectItem>
-                    <SelectItem value="date-asc">Oldest First</SelectItem>
-                    <SelectItem value="amount-desc">Highest Amount</SelectItem>
-                    <SelectItem value="amount-asc">Lowest Amount</SelectItem>
-                    <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
-                </SelectContent>
-                </Select>
+              <Input
+                placeholder="Filter by description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full md:w-auto"
+              />
+              <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+              <SelectTrigger className="w-full flex-1 md:w-[180px]">
+                  <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="date-desc">Most Recent</SelectItem>
+                  <SelectItem value="date-asc">Oldest First</SelectItem>
+                  <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                  <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                  <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
+              </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
                 <SelectTrigger className="w-full flex-1 md:w-[180px]">
                     <SelectValue placeholder="Select a date range" />
@@ -484,7 +486,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                <Button variant="ghost" size="icon">
-                                <ArrowLeftRight className="h-4 w-4" />
+                                <MoreVertical className="h-4 w-4" />
                                 <span className="sr-only">More actions</span>
                               </Button>
                             </DropdownMenuTrigger>
@@ -560,5 +562,3 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     </>
   );
 }
-
-    

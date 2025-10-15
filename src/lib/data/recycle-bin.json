@@ -1,5 +1,46 @@
 [
   {
+    "description": "",
+    "date": "2025-10-15T00:35:44.507Z",
+    "entries": [
+      {
+        "accountId": "acc_1760488594039",
+        "type": "debit",
+        "amount": 500000,
+        "description": "SOLD TO NS"
+      },
+      {
+        "accountId": "acc_1760488637515",
+        "type": "credit",
+        "amount": 100000,
+        "description": "2"
+      },
+      {
+        "accountId": "acc_1760488663682",
+        "type": "credit",
+        "amount": 100000,
+        "description": "2"
+      },
+      {
+        "accountId": "acc_1760488673265",
+        "type": "credit",
+        "amount": 100000,
+        "description": "2"
+      },
+      {
+        "accountId": "acc_1760488655931",
+        "type": "credit",
+        "amount": 200000,
+        "description": "2"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1760488766000",
+    "bookId": "book_default",
+    "type": "transaction",
+    "deletedAt": "2025-10-15T00:41:17.174Z"
+  },
+  {
     "description": "Testing",
     "date": "2025-10-14T23:49:00.204Z",
     "entries": [

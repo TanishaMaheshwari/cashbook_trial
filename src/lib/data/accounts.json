@@ -88,5 +88,37 @@
     "bookId": "book_default",
     "name": "Kalyani",
     "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1760488594039",
+    "bookId": "book_default",
+    "name": "GVC",
+    "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760488637515",
+    "bookId": "book_default",
+    "name": "SGR",
+    "categoryId": "cat_1760484573125",
+    "openingBalance": 0,
+    "openingBalanceType": "debit"
+  },
+  {
+    "id": "acc_1760488655931",
+    "bookId": "book_default",
+    "name": "NEX",
+    "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760488663682",
+    "bookId": "book_default",
+    "name": "PH",
+    "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760488673265",
+    "bookId": "book_default",
+    "name": "LAB",
+    "categoryId": "cat_1760484573125"
   }
 ]
