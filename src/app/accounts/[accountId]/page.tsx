@@ -34,11 +34,9 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
   const category = categories.find(c => c.id === account.categoryId);
   const categoryName = category?.name || 'Uncategorized';
   
-  // Account types that normally have a debit balance
-  const debitBalanceAccounts = ['asset', 'expense'];
-  const accountCategoryType = category ? debitBalanceAccounts.find(t => category.name.toLowerCase().includes(t)) : undefined;
-  const normallyDebit = accountCategoryType === 'asset' || accountCategoryType === 'expense';
-
+  // Account types that normally have a debit balance. We now use the category name to infer this.
+  const debitBalanceCategories = ['asset', 'expense'];
+  const normallyDebit = category ? debitBalanceCategories.some(t => category.name.toLowerCase().includes(t)) : false;
 
   const relevantTransactions = transactions
     .filter((t) => t.entries.some((e) => e.accountId === accountId))
@@ -46,7 +44,7 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
 
   let runningBalance = 0;
 
-  const ledgerEntries: LedgerEntry[] = relevantTransactions.map((tx) => {
+  const allLedgerEntries: LedgerEntry[] = relevantTransactions.map((tx) => {
     const entry = tx.entries.find((e) => e.accountId === accountId)!;
     const debit = entry.type === 'debit' ? entry.amount : 0;
     const credit = entry.type === 'credit' ? entry.amount : 0;
@@ -60,7 +58,6 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
     return {
       transactionId: tx.id,
       date: tx.date,
-      // Use entry description if available, otherwise fall back to transaction description
       description: entry.description || tx.description,
       debit,
       credit,
@@ -68,10 +65,5 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
     };
   });
   
-  // Reverse for display purposes (most recent first)
-  const displayEntries = ledgerEntries.reverse();
-  const finalBalance = runningBalance;
-
-
-  return <AccountLedgerClient account={account} ledgerEntries={displayEntries} finalBalance={finalBalance} categoryName={categoryName}/>;
+  return <AccountLedgerClient account={account} allLedgerEntries={allLedgerEntries} categoryName={categoryName} normallyDebit={normallyDebit} />;
 }
