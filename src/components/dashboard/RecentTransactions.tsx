@@ -259,7 +259,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </AlertDialogContent>
               </AlertDialog>
           ) : (
-            <CardTitle>{isTransactionsPage ? `All Transactions (${transactions.length})` : "Recent Transactions"}</CardTitle>
+            <CardTitle className={isTransactionsPage ? 'text-xl' : ''}>{isTransactionsPage ? `All Transactions` : "Recent Transactions"}</CardTitle>
           )}
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
@@ -454,36 +454,6 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                      {isTransactionsPage && (
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 p-1 border border-yellow-400 bg-yellow-200/50 hover:bg-yellow-200/80 text-yellow-700 data-[active=true]:bg-yellow-300"
-                            data-active={tx.highlight === 'yellow'}
-                            onClick={() => handleHighlight(tx.id, 'yellow', tx.highlight)}
-                            disabled={isHighlightPending}
-                          >
-                            <span className='font-bold text-xs'>1</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 p-1 border border-blue-400 bg-blue-200/50 hover:bg-blue-200/80 text-blue-700 data-[active=true]:bg-blue-300"
-                            data-active={tx.highlight === 'blue'}
-                            onClick={() => handleHighlight(tx.id, 'blue', tx.highlight)}
-                            disabled={isHighlightPending}
-                          >
-                            <span className='font-bold text-xs'>2</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 p-1 border border-green-400 bg-green-200/50 hover:bg-green-200/80 text-green-700 data-[active=true]:bg-green-300"
-                            data-active={tx.highlight === 'green'}
-                            onClick={() => handleHighlight(tx.id, 'green', tx.highlight)}
-                            disabled={isHighlightPending}
-                          >
-                            <span className='font-bold text-xs'>3</span>
-                          </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                <Button variant="ghost" size="icon">
