@@ -256,13 +256,12 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </Button>
               </div>
           </div>
-          <Button onClick={handleAdd} className="w-full md:w-auto">
+          <Button onClick={handleAdd}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Transaction
           </Button>
         </div>
-        <Card>
-          <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Input
                 placeholder="Filter by description..."
@@ -336,8 +335,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </Popover>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
       </div>
     )}
     <Card>
