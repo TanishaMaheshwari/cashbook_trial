@@ -12,13 +12,20 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Share, FileImage, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useBooks } from '@/context/BookContext';
 import Header from '../layout/Header';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 type TransactionView = 'to_from' | 'dr_cr';
 
@@ -60,6 +67,10 @@ export default function AccountLedgerClient({ account, ledgerEntries, finalBalan
     return null; // Or a loading skeleton
   }
 
+  const handleShare = (format: 'pdf' | 'image') => {
+    alert(`Sharing as ${format} is not yet implemented.`);
+  }
+
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <Header backHref="/accounts" />
@@ -70,6 +81,24 @@ export default function AccountLedgerClient({ account, ledgerEntries, finalBalan
                 <p className="text-muted-foreground">Account Ledger</p>
             </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    <Share className="mr-2 h-4 w-4" />
+                    Share
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleShare('pdf')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Share as PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleShare('image')}>
+                    <FileImage className="mr-2 h-4 w-4" />
+                    <span>Share as Image</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <Card className="mb-6">
