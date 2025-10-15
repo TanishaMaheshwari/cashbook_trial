@@ -1,3 +1,4 @@
+
 import { getAccounts, getTransactions, getCategories } from '@/lib/data';
 import type { Account, Transaction, TransactionEntry } from '@/lib/types';
 import { notFound } from 'next/navigation';
@@ -29,8 +30,15 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
   if (!account) {
     notFound();
   }
+  
+  const category = categories.find(c => c.id === account.categoryId);
+  const categoryName = category?.name || 'Uncategorized';
+  
+  // Account types that normally have a debit balance
+  const debitBalanceAccounts = ['asset', 'expense'];
+  const accountCategoryType = category ? debitBalanceAccounts.find(t => category.name.toLowerCase().includes(t)) : undefined;
+  const normallyDebit = accountCategoryType === 'asset' || accountCategoryType === 'expense';
 
-  const categoryName = categories.find(c => c.id === account.categoryId)?.name || 'Uncategorized';
 
   const relevantTransactions = transactions
     .filter((t) => t.entries.some((e) => e.accountId === accountId))
@@ -43,7 +51,11 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
     const debit = entry.type === 'debit' ? entry.amount : 0;
     const credit = entry.type === 'credit' ? entry.amount : 0;
 
-    runningBalance += debit - credit;
+    if (normallyDebit) {
+        runningBalance += debit - credit;
+    } else {
+        runningBalance += credit - debit;
+    }
 
     return {
       transactionId: tx.id,
@@ -58,7 +70,7 @@ export default async function AccountLedgerPage({ params }: { params: { accountI
   
   // Reverse for display purposes (most recent first)
   const displayEntries = ledgerEntries.reverse();
-  const finalBalance = displayEntries.length > 0 ? displayEntries[0].balance : 0;
+  const finalBalance = runningBalance;
 
 
   return <AccountLedgerClient account={account} ledgerEntries={displayEntries} finalBalance={finalBalance} categoryName={categoryName}/>;
