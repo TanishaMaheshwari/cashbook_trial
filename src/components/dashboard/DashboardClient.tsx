@@ -14,6 +14,9 @@ import CategoryAccounts from './CategoryAccounts';
 import { useBooks } from '@/context/BookContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Header from '../layout/Header';
+import { Input } from '../ui/input';
+import { useRouter } from 'next/navigation';
+import { Combobox } from '../ui/combobox';
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -26,6 +29,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
   
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(categories[0]?.id);
+  const router = useRouter();
 
   const stats = useMemo(() => {
     const totalDebit = initialTransactions.flatMap(t => t.entries).filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
@@ -59,6 +63,14 @@ export default function DashboardClient({ initialTransactions, accounts, categor
   if (isBookLoading) {
       return <div>Loading...</div>; // Or a proper skeleton loader
   }
+  
+  const accountOptions = accounts.map(acc => ({ value: acc.id, label: acc.name }));
+  
+  const handleAccountSearchSelect = (accountId: string) => {
+      if (accountId) {
+          router.push(`/accounts/${accountId}`);
+      }
+  }
 
 
   return (
@@ -70,6 +82,20 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           <StatCards 
             stats={stats}
           />
+
+          <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button onClick={() => setAddTxSheetOpen(true)} size="lg" className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Transaction
+              </Button>
+               <Combobox
+                    options={accountOptions}
+                    onChange={handleAccountSearchSelect}
+                    placeholder="Search an account..."
+                    searchPlaceholder="Search account..."
+                    notFoundPlaceholder="No account found."
+                />
+          </div>
           
            {selectedCategoryName && stats.accountsInSelectedCategory && (
             <CategoryAccounts

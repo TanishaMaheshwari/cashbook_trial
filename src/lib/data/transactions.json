@@ -114,22 +114,25 @@
     "bookId": "book_default"
   },
   {
-    "date": "2025-10-14T23:58:23.756Z",
+    "date": "2025-10-13T18:30:00.000Z",
     "description": "Opening Balance for Cherub",
     "entries": [
       {
         "accountId": "acc_1760484836865",
+        "type": "debit",
         "amount": 1000000,
-        "type": "debit"
+        "description": ""
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
+        "type": "credit",
         "amount": 1000000,
-        "type": "credit"
+        "description": ""
       }
     ],
     "id": "txn_1760484836876",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "useSeparateNarration": false
   },
   {
     "date": "2025-10-14T23:33:38.342Z",

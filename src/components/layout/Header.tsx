@@ -73,7 +73,7 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                 </Button>
               </div>
 
-              <Button onClick={() => setAddTxSheetOpen(true)}>
+              <Button onClick={() => setAddTxSheetOpen(true)} className="hidden md:inline-flex">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Transaction
               </Button>
@@ -88,6 +88,9 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem onClick={() => setAddTxSheetOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
+                    </DropdownMenuItem>
                     {isDashboard && (
                       <>
                         <DropdownMenuItem asChild>
