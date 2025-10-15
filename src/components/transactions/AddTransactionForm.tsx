@@ -29,10 +29,17 @@ const transactionEntrySchema = z.object({
 });
 
 const formSchema = z.object({
-  description: z.string().min(1, 'Description is required.').max(100),
+  description: z.string().max(100),
   date: z.date({ required_error: 'Date is required.' }),
   entries: z.array(transactionEntrySchema).min(2, 'At least one debit and one credit entry are required.'),
   useSeparateNarration: z.boolean().default(false),
+})
+.refine(data => {
+    if (data.useSeparateNarration) return true;
+    return data.description.length > 0;
+}, {
+    message: 'Description is required.',
+    path: ['description'],
 })
 .refine(
   (data) => {
@@ -122,10 +129,18 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!bookId) return;
+
+    // Ensure description is empty if separate narration is used
+    const finalValues = {
+        ...values,
+        description: values.useSeparateNarration ? '' : values.description,
+    };
+
+
     startTransition(async () => {
       const result = isEditMode
-        ? await updateTransactionAction(bookId, initialData.id, values)
-        : await createTransactionAction(bookId, values);
+        ? await updateTransactionAction(bookId, initialData.id, finalValues)
+        : await createTransactionAction(bookId, finalValues);
 
       if (result.success) {
         onFinished();
@@ -184,19 +199,21 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
         </div>
         
         <div className="space-y-6">
-             <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Narration</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Description of transaction..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!useSeparateNarration && (
+                <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Narration</FormLabel>
+                    <FormControl>
+                        <Textarea placeholder="Description of transaction..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            )}
             
              <FormField
                 control={form.control}
