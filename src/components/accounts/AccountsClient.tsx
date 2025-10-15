@@ -292,8 +292,8 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                         className="mt-1"
                     />
                     <div className="flex-1">
-                        <Link href={`/accounts/${account.id}`} className="hover:underline">
-                            <p className="font-semibold text-primary">{account.name}</p>
+                        <Link href={`/accounts/${account.id}`} className="font-semibold text-primary hover:underline">
+                            {account.name}
                         </Link>
                         <Badge variant="secondary" className='capitalize text-xs mt-1'>
                             {getCategoryName(account.categoryId)}
@@ -377,9 +377,9 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                                   onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
                              />
                           </TableCell>
-                          <TableCell>
-                             <Link href={`/accounts/${account.id}`} className="hover:underline">
-                                  <p className="font-semibold text-primary">{account.name}</p>
+                          <TableCell className="font-semibold">
+                              <Link href={`/accounts/${account.id}`} className="text-primary hover:underline">
+                                  {account.name}
                               </Link>
                           </TableCell>
                           <TableCell>
