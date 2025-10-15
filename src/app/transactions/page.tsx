@@ -1,3 +1,4 @@
+
 import { getTransactions, getAccounts, getCategories } from '@/lib/data';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import { cookies } from 'next/headers';
@@ -14,7 +15,6 @@ export default async function AllTransactionsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      <Header accounts={accounts} categories={categories} />
       <RecentTransactions transactions={transactions} accounts={accounts} categories={categories} />
     </div>
   );
