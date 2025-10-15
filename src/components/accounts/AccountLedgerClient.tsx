@@ -11,11 +11,11 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share, FileImage, FileText, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Share, FileImage, FileText, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import { useBooks } from '@/context/BookContext';
 import Header from '../layout/Header';
 import {
@@ -28,6 +28,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 type LedgerEntry = {
   transactionId: string;
@@ -49,6 +51,9 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   const [isMounted, setIsMounted] = useState(false);
   const { activeBook } = useBooks();
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const ledgerRef = useRef<HTMLDivElement>(null);
+  const [isSharing, startSharingTransition] = useTransition();
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -101,8 +106,36 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   }, [allLedgerEntries, dateRange, normallyDebit]);
 
   const handleShare = (format: 'pdf' | 'image') => {
-    alert(`Sharing as ${format} is not yet implemented.`);
+    startSharingTransition(() => {
+        if (!ledgerRef.current) return;
+
+        html2canvas(ledgerRef.current, {
+            scale: 2,
+            useCORS: true,
+            onclone: (document) => {
+                // You can modify the cloned document here before capture if needed
+            }
+        }).then((canvas) => {
+            if (format === 'image') {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `${account.name}_Ledger.png`;
+                link.href = imgData;
+                link.click();
+            } else if (format === 'pdf') {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`${account.name}_Ledger.pdf`);
+            }
+        });
+    });
   }
+
 
   if (!isMounted) {
     return null; // Or a loading skeleton
@@ -143,17 +176,17 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        <Share className="mr-2 h-4 w-4" />
-                        Share
+                    <Button variant="outline" disabled={isSharing}>
+                        {isSharing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Share className="mr-2 h-4 w-4" />}
+                        {isSharing ? 'Generating...' : 'Share'}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleShare('pdf')}>
+                    <DropdownMenuItem onClick={() => handleShare('pdf')} disabled={isSharing}>
                         <FileText className="mr-2 h-4 w-4" />
                         <span>Share as PDF</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleShare('image')}>
+                    <DropdownMenuItem onClick={() => handleShare('image')} disabled={isSharing}>
                         <FileImage className="mr-2 h-4 w-4" />
                         <span>Share as Image</span>
                     </DropdownMenuItem>
@@ -162,84 +195,86 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
           </div>
       </div>
       
-      <div className="grid md:grid-cols-3 gap-6 text-sm">
+      <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
+        <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
+          <Card>
+              <CardHeader className="pb-2">
+                  <CardDescription>Category</CardDescription>
+                  <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
+              </CardHeader>
+          </Card>
+           <Card>
+              <CardHeader className="pb-2">
+                  <CardDescription>Opening Balance</CardDescription>
+                  <CardTitle className="text-base">
+                      {formatCurrency(Math.abs(openingBalance))}
+                      <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                  </CardTitle>
+              </CardHeader>
+          </Card>
+           <Card>
+              <CardHeader className="pb-2">
+                  <CardDescription>Balance as of {dateRange?.to ? format(dateRange.to, 'PPP') : 'Today'}</CardDescription>
+                  <CardTitle className="text-base font-bold">
+                      {formatCurrency(Math.abs(finalBalance))}
+                      <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
+                  </CardTitle>
+              </CardHeader>
+          </Card>
+        </div>
+
+
         <Card>
-            <CardHeader className="pb-2">
-                <CardDescription>Category</CardDescription>
-                <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
-            </CardHeader>
-        </Card>
-         <Card>
-            <CardHeader className="pb-2">
-                <CardDescription>Opening Balance</CardDescription>
-                <CardTitle className="text-base">
-                    {formatCurrency(Math.abs(openingBalance))}
-                    <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                </CardTitle>
-            </CardHeader>
-        </Card>
-         <Card>
-            <CardHeader className="pb-2">
-                <CardDescription>Balance as of {dateRange?.to ? format(dateRange.to, 'PPP') : 'Today'}</CardDescription>
-                <CardTitle className="text-base font-bold">
-                    {formatCurrency(Math.abs(finalBalance))}
-                    <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
-                </CardTitle>
-            </CardHeader>
+          <CardHeader>
+            <CardTitle>Ledger Entries</CardTitle>
+            <CardDescription>Transactions for the selected period.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">Debit</TableHead>
+                  <TableHead className="text-right">Credit</TableHead>
+                  <TableHead className="text-right">Balance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
+                  <TableCell className="text-right font-bold">
+                     {formatCurrency(Math.abs(openingBalance))}
+                     <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                  </TableCell>
+                </TableRow>
+
+                {displayEntries.map((entry, index) => (
+                  <TableRow key={`${entry.transactionId}-${index}`}>
+                    <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{entry.description}</TableCell>
+                     <TableCell className="text-right text-green-600">
+                      {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right text-red-600">
+                      {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Math.abs(entry.balance))}
+                       <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {displayEntries.length === 0 && (
+                  <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
         </Card>
       </div>
-
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Ledger Entries</CardTitle>
-          <CardDescription>Transactions for the selected period.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Debit</TableHead>
-                <TableHead className="text-right">Credit</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
-                <TableCell className="text-right font-bold">
-                   {formatCurrency(Math.abs(openingBalance))}
-                   <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                </TableCell>
-              </TableRow>
-
-              {displayEntries.map((entry, index) => (
-                <TableRow key={`${entry.transactionId}-${index}`}>
-                  <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{entry.description}</TableCell>
-                   <TableCell className="text-right text-green-600">
-                    {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
-                  </TableCell>
-                  <TableCell className="text-right text-red-600">
-                    {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(Math.abs(entry.balance))}
-                     <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {displayEntries.length === 0 && (
-                <TableRow>
-                    <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
