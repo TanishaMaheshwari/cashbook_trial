@@ -43,24 +43,28 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
             <div className="flex items-center gap-2">
               {/* Desktop Menu */}
               <div className="hidden md:flex items-center gap-2">
-                <Button variant={pathname.startsWith('/transactions') ? 'secondary' : 'outline'} asChild>
-                  <Link href="/transactions">
-                    <List className="mr-2 h-4 w-4" />
-                    All Transactions
-                  </Link>
-                </Button>
-                <Button variant={pathname.startsWith('/accounts') ? 'secondary' : 'outline'} asChild>
-                  <Link href="/accounts">
-                    <Users className="mr-2 h-4 w-4" />
-                    All Accounts
-                  </Link>
-                </Button>
-                <Button variant={pathname.startsWith('/categories') ? 'secondary' : 'outline'} asChild>
-                  <Link href="/categories">
-                    <Folder className="mr-2 h-4 w-4" />
-                    All Categories
-                  </Link>
-                </Button>
+                {isDashboard && (
+                  <>
+                    <Button variant={pathname.startsWith('/transactions') ? 'secondary' : 'outline'} asChild>
+                      <Link href="/transactions">
+                        <List className="mr-2 h-4 w-4" />
+                        All Transactions
+                      </Link>
+                    </Button>
+                    <Button variant={pathname.startsWith('/accounts') ? 'secondary' : 'outline'} asChild>
+                      <Link href="/accounts">
+                        <Users className="mr-2 h-4 w-4" />
+                        All Accounts
+                      </Link>
+                    </Button>
+                    <Button variant={pathname.startsWith('/categories') ? 'secondary' : 'outline'} asChild>
+                      <Link href="/categories">
+                        <Folder className="mr-2 h-4 w-4" />
+                        All Categories
+                      </Link>
+                    </Button>
+                  </>
+                )}
                 <Button variant="ghost" size="icon" asChild>
                   <Link href="/settings">
                     <Settings />
@@ -84,21 +88,25 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href="/transactions">
-                        <List className="mr-2 h-4 w-4" /> All Transactions
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/accounts">
-                        <Users className="mr-2 h-4 w-4" /> All Accounts
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/categories">
-                        <Folder className="mr-2 h-4 w-4" /> All Categories
-                      </Link>
-                    </DropdownMenuItem>
+                    {isDashboard && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/transactions">
+                            <List className="mr-2 h-4 w-4" /> All Transactions
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/accounts">
+                            <Users className="mr-2 h-4 w-4" /> All Accounts
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/categories">
+                            <Folder className="mr-2 h-4 w-4" /> All Categories
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link href="/settings">
                         <Settings className="mr-2 h-4 w-4" /> Settings
