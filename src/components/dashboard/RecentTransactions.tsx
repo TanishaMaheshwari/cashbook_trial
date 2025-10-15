@@ -227,12 +227,117 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   }
 
   if (!isMounted) {
-    return <Card><CardHeader><CardTitle>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle></CardHeader><CardContent><p>Loading...</p></CardContent></Card>;
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-headline">All Transactions</h1>
+        <Card>
+          <CardContent className="p-6">
+            <p>Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
 
   return (
     <>
+    {isTransactionsPage && (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-headline">All Transactions</h1>
+              <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" asChild>
+                      <Link href="/"><Scale /></Link>
+                  </Button>
+                   <Button variant="outline" size="icon" asChild>
+                      <Link href="/accounts"><Users /></Link>
+                  </Button>
+              </div>
+          </div>
+          <Button onClick={handleAdd} className="w-full md:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Transaction
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <Input
+              placeholder="Filter by description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-auto"
+            />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+                <SelectTrigger className="w-full flex-1 md:w-[180px]">
+                    <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="date-desc">Most Recent</SelectItem>
+                    <SelectItem value="date-asc">Oldest First</SelectItem>
+                    <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                    <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                    <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
+                </SelectContent>
+                </Select>
+                <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
+                <SelectTrigger className="w-full flex-1 md:w-[180px]">
+                    <SelectValue placeholder="Select a date range" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                    <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+                </Select>
+                 {dateRangePreset === 'custom' && (
+                  <Popover>
+                      <PopoverTrigger asChild>
+                      <Button
+                          id="date"
+                          variant={"outline"}
+                          className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !customDateRange && "text-muted-foreground"
+                          )}
+                      >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {customDateRange?.from ? (
+                          customDateRange.to ? (
+                              <>
+                              {format(customDateRange.from, "LLL dd, y")} -{" "}
+                              {format(customDateRange.to, "LLL dd, y")}
+                              </>
+                          ) : (
+                              format(customDateRange.from, "LLL dd, y")
+                          )
+                          ) : (
+                          <span>Pick a date</span>
+                          )}
+                      </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={customDateRange?.from}
+                          selected={customDateRange}
+                          onSelect={setCustomDateRange}
+                          numberOfMonths={2}
+                      />
+                      </PopoverContent>
+                  </Popover>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
     <Card>
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -260,99 +365,10 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </AlertDialogContent>
               </AlertDialog>
           ) : (
-            <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-headline">All Transactions</h1>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" asChild>
-                        <Link href="/"><Scale /></Link>
-                    </Button>
-                     <Button variant="outline" size="icon" asChild>
-                        <Link href="/accounts"><Users /></Link>
-                    </Button>
-                </div>
-            </div>
+             <CardTitle className={cn(isTransactionsPage && 'sr-only')}>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
           )}
           {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
-        {isTransactionsPage && (
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-end gap-2 w-full md:w-auto flex-wrap">
-            <Input
-              placeholder="Filter by description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-auto"
-            />
-            <div className="flex items-center gap-2">
-                <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
-                <SelectTrigger className="w-full flex-1 md:w-[180px]">
-                    <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="date-desc">Most Recent</SelectItem>
-                    <SelectItem value="date-asc">Oldest First</SelectItem>
-                    <SelectItem value="amount-desc">Highest Amount</SelectItem>
-                    <SelectItem value="amount-asc">Lowest Amount</SelectItem>
-                    <SelectItem value="description-asc">Narration (A-Z)</SelectItem>
-                </SelectContent>
-                </Select>
-                <Select value={dateRangePreset} onValueChange={handleDatePresetChange}>
-                <SelectTrigger className="w-full flex-1 md:w-[180px]">
-                    <SelectValue placeholder="Select a date range" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="this_month">This Month</SelectItem>
-                    <SelectItem value="last_30_days">Last 30 Days</SelectItem>
-                    <SelectItem value="last_90_days">Last 90 Days</SelectItem>
-                    <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-                </Select>
-            </div>
-            {dateRangePreset === 'custom' && (
-                <Popover>
-                    <PopoverTrigger asChild>
-                    <Button
-                        id="date"
-                        variant={"outline"}
-                        className={cn(
-                        "w-full md:w-[300px] justify-start text-left font-normal",
-                        !customDateRange && "text-muted-foreground"
-                        )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customDateRange?.from ? (
-                        customDateRange.to ? (
-                            <>
-                            {format(customDateRange.from, "LLL dd, y")} -{" "}
-                            {format(customDateRange.to, "LLL dd, y")}
-                            </>
-                        ) : (
-                            format(customDateRange.from, "LLL dd, y")
-                        )
-                        ) : (
-                        <span>Pick a date</span>
-                        )}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                    <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={customDateRange?.from}
-                        selected={customDateRange}
-                        onSelect={setCustomDateRange}
-                        numberOfMonths={2}
-                    />
-                    </PopoverContent>
-                </Popover>
-            )}
-             <Button onClick={handleAdd} className="w-full md:w-auto">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Transaction
-            </Button>
-          </div>
-        )}
       </CardHeader>
       <CardContent>
       {transactions.length === 0 ? (
