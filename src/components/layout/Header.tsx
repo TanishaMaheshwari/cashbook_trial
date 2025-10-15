@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Account, Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Folder, PlusCircle, Settings, List, Users, MoreVertical, ArrowLeft } from 'lucide-react';
+import { Folder, PlusCircle, Settings, List, Users, MoreVertical, ArrowLeft, ArrowLeftRight } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
@@ -80,19 +80,33 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
 
               {/* Mobile Menu */}
               <div className="md:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical />
-                      <span className="sr-only">More options</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     <DropdownMenuItem onClick={() => setAddTxSheetOpen(true)}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
-                    </DropdownMenuItem>
-                    {isDashboard && (
-                      <>
+                 {isDashboard ? (
+                    <div className="flex items-center gap-1">
+                         <Button variant="ghost" size="icon" asChild>
+                            <Link href="/transactions"><List /></Link>
+                        </Button>
+                         <Button variant="ghost" size="icon" asChild>
+                            <Link href="/accounts"><Users /></Link>
+                        </Button>
+                         <Button variant="ghost" size="icon" asChild>
+                            <Link href="/categories"><Folder /></Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" asChild>
+                            <Link href="/settings"><Settings /></Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical />
+                          <span className="sr-only">More options</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                         <DropdownMenuItem onClick={() => setAddTxSheetOpen(true)}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/transactions">
                             <List className="mr-2 h-4 w-4" /> All Transactions
@@ -108,15 +122,14 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                             <Folder className="mr-2 h-4 w-4" /> All Categories
                           </Link>
                         </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings">
-                        <Settings className="mr-2 h-4 w-4" /> Settings
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        <DropdownMenuItem asChild>
+                          <Link href="/settings">
+                            <Settings className="mr-2 h-4 w-4" /> Settings
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
