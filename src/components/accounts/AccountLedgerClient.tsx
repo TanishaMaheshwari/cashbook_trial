@@ -106,33 +106,41 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   }, [allLedgerEntries, dateRange, normallyDebit]);
 
   const handleShare = (format: 'pdf' | 'image') => {
-    startSharingTransition(() => {
+    startSharingTransition(async () => {
         if (!ledgerRef.current) return;
 
-        html2canvas(ledgerRef.current, {
+        const canvas = await html2canvas(ledgerRef.current, {
             scale: 2,
             useCORS: true,
-            onclone: (document) => {
-                // You can modify the cloned document here before capture if needed
-            }
-        }).then((canvas) => {
-            if (format === 'image') {
-                const imgData = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `${account.name}_Ledger.png`;
-                link.href = imgData;
-                link.click();
-            } else if (format === 'pdf') {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'px',
-                    format: [canvas.width, canvas.height]
-                });
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                pdf.save(`${account.name}_Ledger.pdf`);
-            }
         });
+
+        if (format === 'image') {
+            const imgData = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${account.name}_Ledger.png`;
+            link.href = imgData;
+            link.click();
+        } else if (format === 'pdf') {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            // Add title
+            pdf.setFontSize(20);
+            pdf.text(`${account.name} - Ledger`, pdfWidth / 2, 40, { align: 'center' });
+            if (activeBook) {
+              pdf.setFontSize(14);
+              pdf.text(activeBook.name, pdfWidth / 2, 60, { align: 'center' });
+            }
+
+            pdf.addImage(imgData, 'PNG', 0, 80, canvas.width, canvas.height);
+            pdf.save(`${account.name}_Ledger.pdf`);
+        }
     });
   }
 
@@ -249,7 +257,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                   </TableCell>
                 </TableRow>
 
-                {displayEntries.map((entry, index) => (
+                {displayEntries.slice().reverse().map((entry, index) => (
                   <TableRow key={`${entry.transactionId}-${index}`}>
                     <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
                     <TableCell>{entry.description}</TableCell>
