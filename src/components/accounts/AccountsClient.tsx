@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical, Scale, ArrowLeftRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -167,7 +167,17 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-headline">Accounts</h1>
+        <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-headline">Accounts</h1>
+            <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/"><Scale /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/transactions"><ArrowLeftRight /></Link>
+                </Button>
+            </div>
+        </div>
         <div className="flex items-center gap-2">
             <Dialog open={isAddSheetOpen} onOpenChange={setAddSheetOpen}>
               <DialogTrigger asChild>
@@ -462,4 +472,5 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
 
     </div>
   );
-}
+
+    
