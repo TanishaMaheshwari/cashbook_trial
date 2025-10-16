@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import ManageBooks from './ManageBooks';
 import type { Book as BookType } from '@/lib/types';
 import { useBooks } from '@/context/BookContext';
-import Header from '../layout/Header';
+import { Logo } from '@/components/icons/Logo';
 
 
 type Theme = 'light' | 'dark';
@@ -76,9 +76,9 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      <Header />
        <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
+            <Logo />
             <h1 className="text-3xl font-headline">Settings</h1>
             <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" asChild>

@@ -48,5 +48,15 @@
     "id": "cat_1760599855378",
     "name": "OTHER",
     "bookId": "book_default"
+  },
+  {
+    "id": "cat_1760637820112",
+    "name": "GOLD AND SILVER",
+    "bookId": "book_default"
+  },
+  {
+    "id": "cat_1760637847923",
+    "name": "RR",
+    "bookId": "book_default"
   }
 ]

@@ -1,26 +1,5 @@
 [
   {
-    "id": "cat_expense",
-    "name": "Expenses",
-    "bookId": "book_default",
-    "type": "category",
-    "deletedAt": "2025-10-16T17:56:08.086Z"
-  },
-  {
-    "id": "cat_expense",
-    "name": "Expenses",
-    "bookId": "book_default",
-    "type": "category",
-    "deletedAt": "2025-10-16T17:53:48.441Z"
-  },
-  {
-    "id": "cat_expense",
-    "name": "Expenses",
-    "bookId": "book_default",
-    "type": "category",
-    "deletedAt": "2025-10-16T17:53:41.985Z"
-  },
-  {
     "id": "acc_bg_client_a",
     "name": "Client A",
     "categoryId": "cat_bg_clients",
