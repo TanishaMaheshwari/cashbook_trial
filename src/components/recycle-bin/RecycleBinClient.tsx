@@ -3,7 +3,7 @@
 import { useState, useTransition, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Book, Folder, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Book, Folder, RotateCcw, Trash2, Home, Users, List } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
@@ -145,7 +145,20 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-headline">Recycle Bin</h1>
+        <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-headline">Recycle Bin</h1>
+             <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/"><Home /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/accounts"><Users /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/transactions"><List /></Link>
+                </Button>
+            </div>
+        </div>
         <Button variant="outline" asChild>
           <Link href="/settings">
             <ArrowLeft className="mr-2 h-4 w-4" />

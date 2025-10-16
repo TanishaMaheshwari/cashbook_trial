@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Moon, Sun, Trash2, Book, Paintbrush } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Trash2, Book, Paintbrush, Home, Users, List } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -78,7 +78,20 @@ export default function SettingsClient({ initialBooks }: SettingsClientProps) {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <Header />
        <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-headline">Settings</h1>
+        <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-headline">Settings</h1>
+            <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/"><Home /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/accounts"><Users /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/transactions"><List /></Link>
+                </Button>
+            </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
