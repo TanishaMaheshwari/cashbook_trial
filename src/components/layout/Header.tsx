@@ -73,10 +73,12 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                 </Button>
               </div>
 
-              <Button onClick={() => setAddTxSheetOpen(true)} className="hidden md:inline-flex">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Transaction
-              </Button>
+              {!isDashboard && (
+                <Button onClick={() => setAddTxSheetOpen(true)} className="hidden md:inline-flex">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Transaction
+                </Button>
+              )}
 
               {/* Mobile Menu */}
               <div className="md:hidden">
