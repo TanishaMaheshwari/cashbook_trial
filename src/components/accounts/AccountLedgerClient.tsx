@@ -109,11 +109,32 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   const handleShare = (format: 'pdf' | 'image') => {
     startSharingTransition(async () => {
         if (!ledgerRef.current) return;
+        
+        // 1. Create a clone of the ledger content for export
+        const exportElement = ledgerRef.current.cloneNode(true) as HTMLElement;
+        
+        // 2. Remove unwanted elements from the clone
+        exportElement.querySelector('[data-id="category-card"]')?.remove();
+        exportElement.querySelector('[data-id="ledger-entries-header"]')?.remove();
+        
+        // Add a title to the clone
+        const titleElement = document.createElement('div');
+        titleElement.innerHTML = `
+            <h1 class="text-2xl font-bold text-center">${account.name} - Ledger</h1>
+            <h2 class="text-lg text-muted-foreground text-center mb-4">${activeBook?.name || ''}</h2>
+        `;
+        exportElement.insertBefore(titleElement, exportElement.firstChild);
 
-        const canvas = await html2canvas(ledgerRef.current, {
+        // Temporarily append the clone to the body off-screen to render it
+        document.body.appendChild(exportElement);
+        
+        const canvas = await html2canvas(exportElement, {
             scale: 2,
             useCORS: true,
         });
+
+        // Clean up by removing the clone
+        document.body.removeChild(exportElement);
 
         if (format === 'image') {
             const imgData = canvas.toDataURL('image/png');
@@ -128,18 +149,8 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                 unit: 'px',
                 format: [canvas.width, canvas.height]
             });
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            
-            // Add title
-            pdf.setFontSize(20);
-            pdf.text(`${account.name} - Ledger`, pdfWidth / 2, 40, { align: 'center' });
-            if (activeBook) {
-              pdf.setFontSize(14);
-              pdf.text(activeBook.name, pdfWidth / 2, 60, { align: 'center' });
-            }
 
-            pdf.addImage(imgData, 'PNG', 0, 80, canvas.width, canvas.height);
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
             pdf.save(`${account.name}_Ledger.pdf`);
         }
     });
@@ -232,7 +243,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
         <div className="lg:col-span-2 space-y-6">
             <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
                 <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
-                <Card>
+                <Card data-id="category-card">
                     <CardHeader className="pb-2">
                         <CardDescription>Category</CardDescription>
                         <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
@@ -260,7 +271,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
 
 
                 <Card>
-                <CardHeader>
+                <CardHeader data-id="ledger-entries-header">
                     <CardTitle>Ledger Entries</CardTitle>
                     <CardDescription>Transactions for the selected period.</CardDescription>
                 </CardHeader>
