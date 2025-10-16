@@ -408,30 +408,39 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                         <p><span className="text-red-600 font-semibold">{transactionView === 'dr_cr' ? 'Cr:' : 'From:'}</span> {tx.entries.filter(e => e.type === 'credit').map(e => getAccountName(e.accountId)).join(', ')}</p>
                     </div>
                     {isTransactionsPage && (
-                        <div className="flex items-center justify-end gap-2 border-t pt-3 mt-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(tx)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this transaction.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={() => handleDelete(tx.id)}
-                                    disabled={isPending}
-                                    className="bg-destructive hover:bg-destructive/90"
-                                >
-                                    {isPending ? 'Deleting...' : 'Delete'}
-                                </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
+                        <div className="flex items-center justify-end gap-1 border-t pt-3 mt-2" style={{ opacity: isHighlightPending ? 0.5 : 1 }}>
+                          <Button variant="outline" size="icon" className={cn("h-8 w-8 border-yellow-400 text-yellow-500", tx.highlight === 'yellow' && 'bg-yellow-200')} onClick={() => handleHighlight(tx.id, 'yellow', tx.highlight)} disabled={isHighlightPending}>
+                              <span className="font-bold text-xs">1</span>
+                          </Button>
+                          <Button variant="outline" size="icon" className={cn("h-8 w-8 border-blue-400 text-blue-500", tx.highlight === 'blue' && 'bg-blue-200')} onClick={() => handleHighlight(tx.id, 'blue', tx.highlight)} disabled={isHighlightPending}>
+                              <span className="font-bold text-xs">2</span>
+                          </Button>
+                          <Button variant="outline" size="icon" className={cn("h-8 w-8 border-green-400 text-green-500", tx.highlight === 'green' && 'bg-green-200')} onClick={() => handleHighlight(tx.id, 'green', tx.highlight)} disabled={isHighlightPending}>
+                              <span className="font-bold text-xs">3</span>
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(tx)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
+                          <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete this transaction.
+                                  </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                      onClick={() => handleDelete(tx.id)}
+                                      disabled={isPending}
+                                      className="bg-destructive hover:bg-destructive/90"
+                                  >
+                                      {isPending ? 'Deleting...' : 'Delete'}
+                                  </AlertDialogAction>
+                                  </AlertDialogFooter>
+                              </AlertDialogContent>
                             </AlertDialog>
                         </div>
                     )}
