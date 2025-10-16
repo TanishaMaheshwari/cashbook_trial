@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical, Scale, ArrowLeftRight } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical, Scale, ArrowLeftRight, Folder, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -175,6 +175,12 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                 </Button>
                  <Button variant="outline" size="icon" asChild>
                     <Link href="/transactions"><ArrowLeftRight /></Link>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/categories"><Folder /></Link>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/settings"><Settings /></Link>
                 </Button>
             </div>
         </div>
@@ -474,5 +480,6 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   );
 
     
+
 
 
