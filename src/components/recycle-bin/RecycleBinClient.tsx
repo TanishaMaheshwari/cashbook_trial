@@ -14,6 +14,9 @@ import { restoreItemAction, deletePermanentlyAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { formatCurrency } from '@/lib/utils';
+import type { Category, Transaction, Account } from '@/lib/types';
+
 
 type RecycledItem = {
   type: 'transaction' | 'account' | 'category' | 'book';
@@ -27,8 +30,8 @@ type RecycleBinClientProps = {
 };
 
 const iconMap = {
-  transaction: <Trash2 className="h-5 w-5" />,
-  account: <Trash2 className="h-5 w-5" />,
+  transaction: <List className="h-5 w-5" />,
+  account: <Users className="h-5 w-5" />,
   category: <Folder className="h-5 w-5" />,
   book: <Book className="h-5 w-5" />,
 };
@@ -46,7 +49,42 @@ const getTitle = (item: RecycledItem) => {
   }
 };
 
-export default function RecycleBinClient({ initialItems }: RecycleBinClientProps) {
+const ItemDetails = ({ item }: { item: RecycledItem }) => {
+    let details: React.ReactNode = null;
+
+    switch (item.type) {
+        case 'transaction':
+            const amount = (item as Transaction).entries.find(e => e.type === 'debit')?.amount || 0;
+            details = (
+                <span className="text-sm text-muted-foreground">
+                    Amount: <span className="font-semibold text-foreground">{formatCurrency(amount)}</span>
+                </span>
+            );
+            break;
+        case 'account':
+             if (item.categoryName) {
+                details = (
+                    <span className="text-sm text-muted-foreground">
+                        Category: <span className="font-semibold text-foreground">{item.categoryName}</span>
+                    </span>
+                );
+            }
+            break;
+        default:
+            break;
+    }
+
+    return (
+        <div className="flex items-center gap-4 mt-1">
+            <p className="text-sm text-muted-foreground">
+                Deleted: {format(new Date(item.deletedAt), 'PPP')}
+            </p>
+            {details}
+        </div>
+    );
+}
+
+export default function RecycleBinClient({ initialItems: rawItems }: RecycleBinClientProps) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -54,6 +92,28 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
   const [sortDescriptor, setSortDescriptor] = useState('deletedAt-desc');
 
   const getItemKey = (item: RecycledItem) => `${item.type}-${item.id}-${item.deletedAt}`;
+  
+  // A bit of a hack to get category names for deleted accounts
+  const allCategories = useMemo(() => {
+    const categories: Category[] = [];
+    rawItems.forEach(item => {
+      if (item.type === 'category') {
+        categories.push(item as Category);
+      }
+    });
+    return categories;
+  }, [rawItems]);
+
+  const initialItems = useMemo(() => {
+    return rawItems.map(item => {
+      if (item.type === 'account') {
+        const category = allCategories.find(c => c.id === (item as Account).categoryId);
+        return { ...item, categoryName: category?.name || 'Unknown' };
+      }
+      return item;
+    })
+  }, [rawItems, allCategories]);
+
 
   const filteredAndSortedItems = useMemo(() => {
     let items = [...initialItems];
@@ -262,19 +322,20 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
                       const itemKey = getItemKey(item);
                       return (
                         <li key={itemKey} className="flex items-center justify-between p-4 data-[state=selected]:bg-muted/50" data-state={selectedItems.includes(itemKey) ? 'selected' : 'unselected'}>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-start gap-4">
                             <Checkbox 
                                     checked={selectedItems.includes(itemKey)}
                                     onCheckedChange={(checked) => handleSelect(itemKey, !!checked)}
+                                    className="mt-1"
                                 />
-                            <div className="text-muted-foreground">{iconMap[item.type]}</div>
+                            <div className="text-muted-foreground mt-1">{iconMap[item.type]}</div>
                             <div>
-                                <p className="font-semibold">{getTitle(item)}</p>
-                                <p className="text-sm text-muted-foreground">
-                                Deleted on {format(new Date(item.deletedAt), 'PPP')}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="font-semibold">{getTitle(item)}</p>
+                                    <Badge variant="secondary" className="capitalize">{item.type}</Badge>
+                                </div>
+                                <ItemDetails item={item} />
                             </div>
-                            <Badge variant="secondary" className="capitalize">{item.type}</Badge>
                             </div>
                             <div className="flex items-center gap-2">
                             <AlertDialog>
