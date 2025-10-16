@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Book, Folder, RotateCcw, Trash2 } from 'lucide-react';
@@ -12,6 +12,8 @@ import { Checkbox } from '../ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { restoreItemAction, deletePermanentlyAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type RecycledItem = {
   type: 'transaction' | 'account' | 'category' | 'book';
@@ -48,6 +50,47 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortDescriptor, setSortDescriptor] = useState('deletedAt-desc');
+
+  const filteredAndSortedItems = useMemo(() => {
+    let items = [...initialItems];
+
+    if (searchTerm) {
+      items = items.filter(item =>
+        getTitle(item).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    const [sortField, sortDirection] = sortDescriptor.split('-');
+
+    items.sort((a, b) => {
+      let aValue: any, bValue: any;
+
+      switch (sortField) {
+        case 'title':
+          aValue = getTitle(a);
+          bValue = getTitle(b);
+          break;
+        case 'type':
+          aValue = a.type;
+          bValue = b.type;
+          break;
+        default: // deletedAt
+          aValue = new Date(a.deletedAt).getTime();
+          bValue = new Date(b.deletedAt).getTime();
+      }
+
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+    });
+
+    return items;
+  }, [initialItems, searchTerm, sortDescriptor]);
 
   const handleSelect = (itemId: string, checked: boolean) => {
     if (checked) {
@@ -59,7 +102,7 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(initialItems.map(item => item.id));
+      setSelectedItems(filteredAndSortedItems.map(item => item.id));
     } else {
       setSelectedItems([]);
     }
@@ -108,11 +151,35 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
           </Link>
         </Button>
       </div>
+      
+       <Card>
+        <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <Input
+                placeholder="Search by name or type..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full md:w-64 lg:w-80"
+            />
+            <Select value={sortDescriptor} onValueChange={setSortDescriptor}>
+                <SelectTrigger className="w-full md:w-[220px]">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="deletedAt-desc">Deleted: Newest First</SelectItem>
+                    <SelectItem value="deletedAt-asc">Deleted: Oldest First</SelectItem>
+                    <SelectItem value="title-asc">Name (A-Z)</SelectItem>
+                    <SelectItem value="title-desc">Name (Z-A)</SelectItem>
+                    <SelectItem value="type-asc">Type (A-Z)</SelectItem>
+                </SelectContent>
+            </Select>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader className="flex-row items-center justify-between">
            <div>
-            <CardTitle>Deleted Items</CardTitle>
+            <CardTitle>Deleted Items ({filteredAndSortedItems.length})</CardTitle>
             <CardDescription>
                 Items deleted in the last 30 days are shown here.
             </CardDescription>
@@ -159,64 +226,71 @@ export default function RecycleBinClient({ initialItems }: RecycleBinClientProps
               <p>The recycle bin is empty.</p>
             </div>
           ) : (
-            <ScrollArea className="h-[60vh]">
+            <ScrollArea className="h-[60vh] border rounded-md">
               <div className="flex items-center border-b p-4">
                  <Checkbox 
                     id="select-all"
-                    checked={selectedItems.length === initialItems.length && initialItems.length > 0}
+                    checked={selectedItems.length === filteredAndSortedItems.length && filteredAndSortedItems.length > 0}
                     onCheckedChange={(checked) => handleSelectAll(!!checked)}
                     className="mr-4"
                 />
-                <label htmlFor="select-all" className="text-sm font-medium">Select All</label>
+                <label htmlFor="select-all" className="text-sm font-medium">Select All ({selectedItems.length} selected)</label>
               </div>
-              <ul className="space-y-3 p-4">
-                {initialItems.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between rounded-lg border p-4 data-[state=selected]:bg-muted/50" data-state={selectedItems.includes(item.id) ? 'selected' : 'unselected'}>
-                    <div className="flex items-center gap-4">
-                       <Checkbox 
-                            checked={selectedItems.includes(item.id)}
-                            onCheckedChange={(checked) => handleSelect(item.id, !!checked)}
-                        />
-                      <div className="text-muted-foreground">{iconMap[item.type]}</div>
-                      <div>
-                        <p className="font-semibold">{getTitle(item)}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Deleted on {format(new Date(item.deletedAt), 'PPP')}
-                        </p>
-                      </div>
-                       <Badge variant="secondary" className="capitalize">{item.type}</Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <AlertDialog>
-                          <AlertDialogTrigger asChild><Button variant="ghost" size="sm"><RotateCcw className="mr-2 h-4 w-4" /> Restore</Button></AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>Restore this item?</AlertDialogTitle>
-                                  <AlertDialogDescription>Are you sure you want to restore this {item.type}?</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleAction('restore', [item])} disabled={isPending}>{isPending ? 'Restoring...' : 'Restore'}</AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                       </AlertDialog>
+              
+              {filteredAndSortedItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-48">
+                    <p>No items match your search.</p>
+                </div>
+              ) : (
+                <ul className="divide-y">
+                    {filteredAndSortedItems.map((item) => (
+                    <li key={item.id} className="flex items-center justify-between p-4 data-[state=selected]:bg-muted/50" data-state={selectedItems.includes(item.id) ? 'selected' : 'unselected'}>
+                        <div className="flex items-center gap-4">
+                        <Checkbox 
+                                checked={selectedItems.includes(item.id)}
+                                onCheckedChange={(checked) => handleSelect(item.id, !!checked)}
+                            />
+                        <div className="text-muted-foreground">{iconMap[item.type]}</div>
+                        <div>
+                            <p className="font-semibold">{getTitle(item)}</p>
+                            <p className="text-sm text-muted-foreground">
+                            Deleted on {format(new Date(item.deletedAt), 'PPP')}
+                            </p>
+                        </div>
+                        <Badge variant="secondary" className="capitalize">{item.type}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
                         <AlertDialog>
-                          <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button></AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>Permanently delete this item?</AlertDialogTitle>
-                                  <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleAction('delete', [item])} className="bg-destructive hover:bg-destructive/90" disabled={isPending}>{isPending ? 'Deleting...' : 'Delete Permanently'}</AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                       </AlertDialog>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="sm"><RotateCcw className="mr-2 h-4 w-4" /> Restore</Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Restore this item?</AlertDialogTitle>
+                                    <AlertDialogDescription>Are you sure you want to restore this {item.type}?</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleAction('restore', [item])} disabled={isPending}>{isPending ? 'Restoring...' : 'Restore'}</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                            <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="text-destructive hover:text-destructive"><Trash2 className="mr-2 h-4 w-4"/> Delete</Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Permanently delete this item?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleAction('delete', [item])} className="bg-destructive hover:bg-destructive/90" disabled={isPending}>{isPending ? 'Deleting...' : 'Delete Permanently'}</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        </div>
+                    </li>
+                    ))}
+                </ul>
+              )}
             </ScrollArea>
           )}
         </CardContent>
