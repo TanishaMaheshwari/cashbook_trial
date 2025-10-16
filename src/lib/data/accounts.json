@@ -102,5 +102,13 @@
     "bookId": "book_default",
     "name": "LAB",
     "categoryId": "cat_1760484573125"
+  },
+  {
+    "id": "acc_1760599914987",
+    "bookId": "book_default",
+    "name": "MGA",
+    "categoryId": "cat_1760599855378",
+    "openingBalance": 21000,
+    "openingBalanceType": "debit"
   }
 ]

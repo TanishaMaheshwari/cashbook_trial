@@ -48,5 +48,10 @@
     "id": "cat_1760484573125",
     "name": "VC",
     "bookId": "book_default"
+  },
+  {
+    "id": "cat_1760599855378",
+    "name": "OTHER",
+    "bookId": "book_default"
   }
 ]

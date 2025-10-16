@@ -14,7 +14,7 @@ import {
 import { formatCurrency, cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical, Folder, Settings } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -253,6 +253,12 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </Button>
                    <Button variant="outline" size="icon" asChild>
                       <Link href="/accounts"><Users /></Link>
+                  </Button>
+                  <Button variant="outline" size="icon" asChild>
+                      <Link href="/categories"><Folder /></Link>
+                  </Button>
+                  <Button variant="outline" size="icon" asChild>
+                      <Link href="/settings"><Settings /></Link>
                   </Button>
               </div>
           </div>
@@ -589,3 +595,5 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     </>
   );
 }
+
+    

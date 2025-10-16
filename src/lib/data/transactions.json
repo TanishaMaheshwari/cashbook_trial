@@ -1,5 +1,47 @@
 [
   {
+    "description": "PAYMENT REC OF EVENT PAID BY SALMA ADVANCE",
+    "date": "2025-10-14T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 21000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760599914987",
+        "type": "credit",
+        "amount": 21000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760599975751",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-16T07:33:37.133Z",
+    "description": "Cash rec from MGA",
+    "entries": [
+      {
+        "accountId": "acc_1760599914987",
+        "type": "debit",
+        "amount": 21000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "type": "credit",
+        "amount": 21000,
+        "description": ""
+      }
+    ],
+    "id": "txn_1760599914994",
+    "bookId": "book_default",
+    "useSeparateNarration": false
+  },
+  {
     "description": "Cash paid to Ankit ji",
     "date": "2025-10-14T23:48:21.463Z",
     "entries": [
@@ -40,7 +82,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1760485196572",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "yellow"
   },
   {
     "date": "2025-10-14T23:36:49.144Z",
