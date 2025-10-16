@@ -2,7 +2,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions, restoreItem, deletePermanently } from '@/lib/data';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions, restoreItem, deletePermanently, updateCategory } from '@/lib/data';
 import type { Transaction, Account } from '@/lib/types';
 
 export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
@@ -56,6 +56,23 @@ export async function createCategoryAction(bookId: string, name: string) {
         return { success: false, message: `Failed to create category: ${errorMessage}` };
     }
 }
+
+export async function updateCategoryAction(bookId: string, categoryId: string, name: string) {
+    if (!name || name.trim().length === 0) {
+        return { success: false, message: "Category name cannot be empty." };
+    }
+    try {
+        await updateCategory(bookId, categoryId, name);
+        revalidatePath('/');
+        revalidatePath('/accounts');
+        revalidatePath('/categories');
+        return { success: true, message: 'Category updated successfully.' };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, message: `Failed to update category: ${errorMessage}` };
+    }
+}
+
 
 export async function deleteCategoryAction(bookId: string, categoryId: string) {
     try {

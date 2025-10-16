@@ -280,6 +280,20 @@ await writeData<Category>(categoriesFilePath, allCategories);
   return newCategory;
 };
 
+export const updateCategory = async (bookId: string, id: string, name: string): Promise<Category> => {
+    const allCategories = await readData<Category>(categoriesFilePath);
+    const index = allCategories.findIndex(c => c.id === id && c.bookId === bookId);
+    if (index === -1) {
+        throw new Error('Category not found in this book.');
+    }
+    if (allCategories.find(c => c.name.toLowerCase() === name.toLowerCase() && c.bookId === bookId && c.id !== id)) {
+        throw new Error(`A category named "${name}" already exists in this book.`);
+    }
+    allCategories[index].name = name;
+    await writeData<Category>(categoriesFilePath, allCategories);
+    return allCategories[index];
+};
+
 export const deleteCategory = async (bookId: string, id: string): Promise<void> => {
     const accounts = await getAccounts(bookId);
     if (id.startsWith('cat_equity_')) {
@@ -300,7 +314,7 @@ export const deleteCategory = async (bookId: string, id: string): Promise<void> 
     await addToRecycleBin({ ...categoryToDelete, type: 'category' });
 
     const remainingCategories = allCategories.filter(c => c.id !== id);
-    await writeData<Category>(remainingCategories, categoriesFilePath);
+    await writeData<Category>(categoriesFilePath, remainingCategories);
 };
 
 export const deleteTransaction = async (bookId: string, id: string): Promise<void> => {

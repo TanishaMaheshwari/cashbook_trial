@@ -3,17 +3,20 @@
 import type { Account, Category } from '@/lib/types';
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
+import { Edit, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, cn } from '@/lib/utils';
 import Link from 'next/link';
 import ManageCategories from '@/components/dashboard/ManageCategories';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { deleteCategoryAction } from '@/app/actions';
+import { deleteCategoryAction, updateCategoryAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
 import Header from '../layout/Header';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -40,16 +43,37 @@ export default function CategoriesClient({ categories, allCategories }: Categori
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { activeBook } = useBooks();
+  
+  const [editingCategory, setEditingCategory] = useState<CategoryWithDetails | null>(null);
+  const [categoryName, setCategoryName] = useState('');
 
   const handleDelete = (categoryId: string) => {
     if (!activeBook) return;
     startTransition(async () => {
       const result = await deleteCategoryAction(activeBook.id, categoryId);
       if (result.success) {
-        // toast({ title: "Success", description: result.message });
+        toast({ title: "Success", description: result.message });
       } else {
         toast({ title: "Error", description: result.message, variant: "destructive" });
       }
+    });
+  };
+
+  const handleEditOpen = (category: CategoryWithDetails) => {
+    setEditingCategory(category);
+    setCategoryName(category.name);
+  };
+  
+  const handleUpdateCategory = () => {
+    if (!editingCategory || !activeBook) return;
+    startTransition(async () => {
+        const result = await updateCategoryAction(activeBook.id, editingCategory.id, categoryName);
+         if (result.success) {
+            toast({ title: "Success", description: result.message });
+            setEditingCategory(null);
+        } else {
+            toast({ title: "Error", description: result.message, variant: "destructive" });
+        }
     });
   };
 
@@ -80,7 +104,8 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled>
+                        <DropdownMenuItem onSelect={() => handleEditOpen(category)}>
+                            <Edit className="mr-2 h-4 w-4" />
                             Edit Category
                         </DropdownMenuItem>
                          <AlertDialog>
@@ -104,7 +129,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={() => handleDelete(category.id)}
-                                        disabled={isPending}
+                                        disabled={isPending || category.accounts.length > 0}
                                         className="bg-destructive hover:bg-destructive/90"
                                     >
                                         {isPending ? 'Deleting...' : 'Delete'}
@@ -138,6 +163,23 @@ export default function CategoriesClient({ categories, allCategories }: Categori
           </Card>
         ))}
       </div>
+       <Dialog open={!!editingCategory} onOpenChange={() => setEditingCategory(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Edit Category Name</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+                <Label htmlFor="category-name">Category Name</Label>
+                <Input id="category-name" value={categoryName} onChange={e => setCategoryName(e.target.value)} />
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setEditingCategory(null)}>Cancel</Button>
+                <Button onClick={handleUpdateCategory} disabled={isPending}>
+                    {isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
