@@ -22,21 +22,27 @@ export default function Notes() {
   const [isFocused, setIsFocused] = useState(false);
   const { activeBook } = useBooks();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const storageKey = activeBook ? `dashboard_notes_${activeBook.id}` : 'dashboard_notes_default';
+  const storageKey = activeBook ? `dashboard_notes_${activeBook.id}` : null;
 
   useEffect(() => {
-    const savedNotes = localStorage.getItem(storageKey);
-    if (savedNotes) {
-      setNotes(JSON.parse(savedNotes));
-    } else {
-      setNotes([]);
+    if (storageKey) {
+      const savedNotes = localStorage.getItem(storageKey);
+      if (savedNotes) {
+        setNotes(JSON.parse(savedNotes));
+      } else {
+        setNotes([]);
+      }
+      setIsLoaded(true);
     }
   }, [storageKey]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(notes));
-  }, [notes, storageKey]);
+    if (isLoaded && storageKey) {
+      localStorage.setItem(storageKey, JSON.stringify(notes));
+    }
+  }, [notes, storageKey, isLoaded]);
 
   const handleAddNote = () => {
     if (newNoteText.trim()) {
