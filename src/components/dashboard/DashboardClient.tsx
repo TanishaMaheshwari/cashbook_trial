@@ -17,6 +17,7 @@ import Header from '../layout/Header';
 import { Input } from '../ui/input';
 import { useRouter } from 'next/navigation';
 import { Combobox } from '../ui/combobox';
+import Notes from './Notes';
 
 type DashboardClientProps = {
   initialTransactions: Transaction[];
@@ -94,6 +95,8 @@ export default function DashboardClient({ initialTransactions, accounts, categor
                     notFoundPlaceholder="No account found."
                 />
           </div>
+          
+          <Notes />
           
            {selectedCategoryName && stats.accountsInSelectedCategory && (
             <CategoryAccounts
