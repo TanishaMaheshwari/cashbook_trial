@@ -30,7 +30,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import AccountNotes from './AccountNotes';
+import AccountNotesDisplay from './AccountNotesDisplay';
 
 type LedgerEntry = {
   transactionId: string;
@@ -239,94 +239,88 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
           </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-            <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
-                <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
-                <Card data-id="category-card">
-                    <CardHeader className="pb-2">
-                        <CardDescription>Category</CardDescription>
-                        <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
-                    </CardHeader>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardDescription>Opening Balance</CardDescription>
-                        <CardTitle className="text-base">
-                            {formatCurrency(Math.abs(openingBalance))}
-                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                        </CardTitle>
-                    </CardHeader>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardDescription>Balance as of {dateRange?.to ? formatDate(dateRange.to) : 'Today'}</CardDescription>
-                        <CardTitle className="text-base font-bold">
-                            {formatCurrency(Math.abs(finalBalance))}
-                            <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
-                        </CardTitle>
-                    </CardHeader>
-                </Card>
-                </div>
-
-
-                <Card>
-                <CardHeader data-id="ledger-entries-header">
-                    <CardTitle>Ledger Entries</CardTitle>
-                    <CardDescription>Transactions for the selected period.</CardDescription>
+        <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
+            <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
+            <Card data-id="category-card">
+                <CardHeader className="pb-2">
+                    <CardDescription>Category</CardDescription>
+                    <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Debit</TableHead>
-                        <TableHead className="text-right">Credit</TableHead>
-                        <TableHead className="text-right">Balance</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow>
-                        <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
-                        <TableCell className="text-right font-bold">
-                            {formatCurrency(Math.abs(openingBalance))}
-                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                        </TableCell>
-                        </TableRow>
-
-                        {displayEntries.slice().reverse().map((entry, index) => (
-                        <TableRow key={`${entry.transactionId}-${index}`}>
-                            <TableCell>{formatDate(entry.date)}</TableCell>
-                            <TableCell>{entry.description}</TableCell>
-                            <TableCell className="text-right text-green-600">
-                            {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
-                            </TableCell>
-                            <TableCell className="text-right text-red-600">
-                            {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
-                            </TableCell>
-                            <TableCell className="text-right">
-                            {formatCurrency(Math.abs(entry.balance))}
-                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
-                            </TableCell>
-                        </TableRow>
-                        ))}
-                        {displayEntries.length === 0 && (
-                        <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
-                        </TableRow>
-                        )}
-                    </TableBody>
-                    </Table>
-                </CardContent>
-                </Card>
+            </Card>
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardDescription>Opening Balance</CardDescription>
+                    <CardTitle className="text-base">
+                        {formatCurrency(Math.abs(openingBalance))}
+                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                    </CardTitle>
+                </CardHeader>
+            </Card>
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardDescription>Balance as of {dateRange?.to ? formatDate(dateRange.to) : 'Today'}</CardDescription>
+                    <CardTitle className="text-base font-bold">
+                        {formatCurrency(Math.abs(finalBalance))}
+                        <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
+                    </CardTitle>
+                </CardHeader>
+            </Card>
             </div>
+
+            <AccountNotesDisplay accountId={account.id} />
+
+            <Card className="mt-6">
+            <CardHeader data-id="ledger-entries-header">
+                <CardTitle>Ledger Entries</CardTitle>
+                <CardDescription>Transactions for the selected period.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Debit</TableHead>
+                    <TableHead className="text-right">Credit</TableHead>
+                    <TableHead className="text-right">Balance</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow>
+                    <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
+                    <TableCell className="text-right font-bold">
+                        {formatCurrency(Math.abs(openingBalance))}
+                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                    </TableCell>
+                    </TableRow>
+
+                    {displayEntries.slice().reverse().map((entry, index) => (
+                    <TableRow key={`${entry.transactionId}-${index}`}>
+                        <TableCell>{formatDate(entry.date)}</TableCell>
+                        <TableCell>{entry.description}</TableCell>
+                        <TableCell className="text-right text-green-600">
+                        {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-red-600">
+                        {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                        {formatCurrency(Math.abs(entry.balance))}
+                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                    {displayEntries.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
+                    </TableRow>
+                    )}
+                </TableBody>
+                </Table>
+            </CardContent>
+            </Card>
         </div>
 
-        <div className="lg:col-span-1">
-            <AccountNotes accountId={account.id} />
-        </div>
-      </div>
     </div>
   );
 }
