@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Account, Category } from '@/lib/types';
@@ -35,6 +36,10 @@ const categoryColors = [
   'bg-violet-100 border-violet-200 dark:bg-violet-900/20 dark:border-violet-800/30',
   'bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30',
 ];
+
+// Define which categories normally have a debit balance
+const DEBIT_BALANCE_CATEGORIES = ['parties', 'cash', 'vc', 'other', 'assets'];
+
 
 export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
   const [isPending, startTransition] = useTransition();
@@ -91,6 +96,12 @@ export default function CategoriesClient({ categories, allCategories }: Categori
       }
     });
   };
+  
+  const isDebitCategory = (categoryName: string) => {
+    const lowerCategoryName = categoryName.toLowerCase();
+    return DEBIT_BALANCE_CATEGORIES.some(debitCat => lowerCategoryName.includes(debitCat));
+  };
+
 
   return (
     <>
@@ -146,13 +157,18 @@ export default function CategoriesClient({ categories, allCategories }: Categori
       </div>
 
       <div className="md:columns-2 gap-6 space-y-6">
-        {categories.map((category, index) => (
+        {categories.map((category, index) => {
+          const normallyDebit = isDebitCategory(category.name);
+          const displayTotal = normallyDebit ? category.totalBalance : category.totalBalance * -1;
+          
+          return (
           <Card key={category.id} className={cn("break-inside-avoid-column", categoryColors[index % categoryColors.length])}>
             <CardHeader className="flex flex-row justify-between items-start">
               <div>
                 <CardTitle className="font-bold text-lg">{category.name}</CardTitle>
                 <CardDescription className="text-sm">
-                  {category.accounts.length} accounts &bull; Total: {formatCurrency(category.totalBalance)}
+                  {category.accounts.length} accounts &bull; Total: {formatCurrency(Math.abs(displayTotal))}
+                   <span className="text-xs ml-1">{displayTotal >= 0 ? 'Dr' : 'Cr'}</span>
                 </CardDescription>
               </div>
                <DropdownMenu>
@@ -201,19 +217,19 @@ export default function CategoriesClient({ categories, allCategories }: Categori
             <CardContent>
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
-                  {category.accounts.map((account) => (
+                  {category.accounts.map((account) => {
+                    const displayBalance = normallyDebit ? account.balance : account.balance * -1;
+                    return (
                      <li key={account.id} className="flex justify-between items-center bg-background/50 p-3 rounded-md">
                         <Link href={`/accounts/${account.id}`} className="font-medium hover:underline">
                             {account.name}
                         </Link>
-                        <span className={cn(
-                          "font-semibold",
-                          account.balance >= 0 ? "text-green-700" : "text-red-700"
-                        )}>
-                            {formatCurrency(account.balance)}
+                        <span className={cn("font-semibold text-sm", displayBalance >= 0 ? 'text-green-700' : 'text-red-700')}>
+                          {formatCurrency(Math.abs(displayBalance))}
+                          <span className="text-xs text-muted-foreground ml-1">{displayBalance >= 0 ? 'Dr' : 'Cr'}</span>
                         </span>
                     </li>
-                  ))}
+                  )})}
                 </ul>
               ) : (
                 <div className="flex items-center justify-center text-center">
@@ -224,7 +240,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
               )}
             </CardContent>
           </Card>
-        ))}
+        )})}
       </div>
        <Dialog open={!!editingCategory} onOpenChange={() => setEditingCategory(null)}>
         <DialogContent>

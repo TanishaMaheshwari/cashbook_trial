@@ -1,3 +1,4 @@
+
 import { getAccounts, getCategories, getTransactions } from '@/lib/data';
 import type { Account, Transaction, Category } from '@/lib/types';
 import CategoriesClient from '@/components/categories/CategoriesClient';
@@ -26,20 +27,14 @@ export default async function CategoriesPage() {
       const totalDebit = accountEntries.filter((e) => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
       const totalCredit = accountEntries.filter((e) => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
 
-      let balance = 0;
-      const accountCategory = categories.find(c => c.id === account.categoryId)
-      const debitBalanceCategories = ['asset', 'expense'];
-      const normallyDebit = accountCategory ? debitBalanceCategories.some(t => accountCategory.name.toLowerCase().includes(t)) : false;
-
-      if (normallyDebit) {
-        balance = totalDebit - totalCredit;
-      } else {
-        balance = totalCredit - totalDebit;
-      }
+      // Raw balance is always Debit - Credit
+      const balance = totalDebit - totalCredit;
 
       return { ...account, balance };
     });
 
+    // The total balance of a category should respect the nature of the accounts within it.
+    // However, for display simplicity, we can sum the raw balances. The UI will handle presentation.
     const totalBalance = accountsWithBalances.reduce((sum, acc) => sum + acc.balance, 0);
 
     return {
