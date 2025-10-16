@@ -1,23 +1,5 @@
 [
   {
-    "id": "acc_bg_cash",
-    "name": "BG Main Cash",
-    "categoryId": "cat_bg_cash",
-    "bookId": "book_1760481482686"
-  },
-  {
-    "id": "acc_bg_capital",
-    "name": "BG Capital",
-    "categoryId": "cat_bg_main",
-    "bookId": "book_1760481482686"
-  },
-  {
-    "id": "acc_bg_client_a",
-    "name": "Client A",
-    "categoryId": "cat_bg_clients",
-    "bookId": "book_1760481482686"
-  },
-  {
     "id": "acc_1760484492379",
     "bookId": "book_default",
     "name": "Cash",

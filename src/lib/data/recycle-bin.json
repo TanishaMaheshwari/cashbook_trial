@@ -1,5 +1,69 @@
 [
   {
+    "id": "acc_bg_client_a",
+    "name": "Client A",
+    "categoryId": "cat_bg_clients",
+    "bookId": "book_1760481482686",
+    "type": "account",
+    "deletedAt": "2025-10-16T07:08:56.419Z"
+  },
+  {
+    "id": "acc_bg_capital",
+    "name": "BG Capital",
+    "categoryId": "cat_bg_main",
+    "bookId": "book_1760481482686",
+    "type": "account",
+    "deletedAt": "2025-10-16T07:08:56.418Z"
+  },
+  {
+    "id": "acc_bg_cash",
+    "name": "BG Main Cash",
+    "categoryId": "cat_bg_cash",
+    "bookId": "book_1760481482686",
+    "type": "account",
+    "deletedAt": "2025-10-16T07:08:56.416Z"
+  },
+  {
+    "id": "txn_bg_1",
+    "date": "2025-10-01T09:00:00Z",
+    "description": "Initial capital for BG Book",
+    "bookId": "book_1760481482686",
+    "entries": [
+      {
+        "accountId": "acc_bg_cash",
+        "type": "debit",
+        "amount": 1000000
+      },
+      {
+        "accountId": "acc_bg_capital",
+        "type": "credit",
+        "amount": 1000000
+      }
+    ],
+    "type": "transaction",
+    "deletedAt": "2025-10-16T07:08:45.947Z"
+  },
+  {
+    "id": "txn_bg_2",
+    "date": "2025-10-05T12:00:00Z",
+    "description": "Advance from Client A",
+    "bookId": "book_1760481482686",
+    "entries": [
+      {
+        "accountId": "acc_bg_cash",
+        "type": "debit",
+        "amount": 250000
+      },
+      {
+        "accountId": "acc_bg_client_a",
+        "type": "credit",
+        "amount": 250000
+      }
+    ],
+    "type": "transaction",
+    "deletedAt": "2025-10-16T07:08:45.947Z"
+  },
+  {
     "description": "",
     "date": "2025-10-15T00:35:44.507Z",
     "entries": [

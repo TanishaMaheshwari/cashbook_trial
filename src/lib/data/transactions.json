@@ -18,7 +18,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1760485732530",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "yellow"
   },
   {
     "description": "Cash paid to hm",
@@ -132,7 +133,8 @@
     ],
     "id": "txn_1760484836876",
     "bookId": "book_default",
-    "useSeparateNarration": false
+    "useSeparateNarration": false,
+    "highlight": "yellow"
   },
   {
     "date": "2025-10-14T23:33:38.342Z",
@@ -187,41 +189,5 @@
     ],
     "id": "txn_1760484492402",
     "bookId": "book_default"
-  },
-  {
-    "id": "txn_bg_1",
-    "date": "2025-10-01T09:00:00Z",
-    "description": "Initial capital for BG Book",
-    "bookId": "book_1760481482686",
-    "entries": [
-      {
-        "accountId": "acc_bg_cash",
-        "type": "debit",
-        "amount": 1000000
-      },
-      {
-        "accountId": "acc_bg_capital",
-        "type": "credit",
-        "amount": 1000000
-      }
-    ]
-  },
-  {
-    "id": "txn_bg_2",
-    "date": "2025-10-05T12:00:00Z",
-    "description": "Advance from Client A",
-    "bookId": "book_1760481482686",
-    "entries": [
-      {
-        "accountId": "acc_bg_cash",
-        "type": "debit",
-        "amount": 250000
-      },
-      {
-        "accountId": "acc_bg_client_a",
-        "type": "credit",
-        "amount": 250000
-      }
-    ]
   }
 ]
