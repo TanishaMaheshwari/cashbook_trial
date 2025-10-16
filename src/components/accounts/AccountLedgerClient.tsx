@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share, FileImage, FileText, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account } from '@/lib/types';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import { useBooks } from '@/context/BookContext';
 import Header from '../layout/Header';
@@ -168,9 +168,9 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dateRange?.from ? (
                     dateRange.to ? (
-                      <>{format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}</>
+                      <>{format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}</>
                     ) : (
-                      format(dateRange.from, "LLL dd, y")
+                      format(dateRange.from, "dd/MM/yyyy")
                     )
                   ) : (
                     <span>Pick a date range</span>
@@ -222,7 +222,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
           </Card>
            <Card>
               <CardHeader className="pb-2">
-                  <CardDescription>Balance as of {dateRange?.to ? format(dateRange.to, 'PPP') : 'Today'}</CardDescription>
+                  <CardDescription>Balance as of {dateRange?.to ? formatDate(dateRange.to) : 'Today'}</CardDescription>
                   <CardTitle className="text-base font-bold">
                       {formatCurrency(Math.abs(finalBalance))}
                       <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
@@ -259,7 +259,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
 
                 {displayEntries.slice().reverse().map((entry, index) => (
                   <TableRow key={`${entry.transactionId}-${index}`}>
-                    <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{formatDate(entry.date)}</TableCell>
                     <TableCell>{entry.description}</TableCell>
                      <TableCell className="text-right text-green-600">
                       {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}

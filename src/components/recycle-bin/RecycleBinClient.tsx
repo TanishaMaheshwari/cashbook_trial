@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Book, Folder, RotateCcw, Trash2, Home, Users, List } from 'lucide-react';
 import Link from 'next/link';
-import { format } from 'date-fns';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
 import { Checkbox } from '../ui/checkbox';
@@ -14,7 +13,7 @@ import { restoreItemAction, deletePermanentlyAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Category, Transaction, Account } from '@/lib/types';
 
 
@@ -77,7 +76,7 @@ const ItemDetails = ({ item }: { item: RecycledItem }) => {
     return (
         <div className="flex items-center gap-4 mt-1">
             <p className="text-sm text-muted-foreground">
-                Deleted: {format(new Date(item.deletedAt), 'PPP')}
+                Deleted: {formatDate(item.deletedAt)}
             </p>
             {details}
         </div>

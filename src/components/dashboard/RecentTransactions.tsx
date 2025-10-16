@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical, Folder, Settings } from 'lucide-react';
@@ -317,11 +317,11 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                           {customDateRange?.from ? (
                           customDateRange.to ? (
                               <>
-                              {format(customDateRange.from, "LLL dd, y")} -{" "}
-                              {format(customDateRange.to, "LLL dd, y")}
+                              {format(customDateRange.from, "dd/MM/yyyy")} -{" "}
+                              {format(customDateRange.to, "dd/MM/yyyy")}
                               </>
                           ) : (
-                              format(customDateRange.from, "LLL dd, y")
+                              format(customDateRange.from, "dd/MM/yyyy")
                           )
                           ) : (
                           <span>Pick a date</span>
@@ -399,7 +399,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                     <div className="flex justify-between items-start">
                         <div>
                         <p className="font-semibold">{tx.description}</p>
-                        <p className="text-sm text-muted-foreground">{new Date(tx.date).toLocaleDateString()}</p>
+                        <p className="text-sm text-muted-foreground">{formatDate(tx.date)}</p>
                         </div>
                         <p className="font-semibold text-lg">{formatCurrency(tx.entries.find(e => e.type === 'debit')?.amount || 0)}</p>
                     </div>
@@ -475,7 +475,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                         />
                       </TableCell>
                     )}
-                    <TableCell className="w-28">{new Date(tx.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="w-28">{formatDate(tx.date)}</TableCell>
                     <TableCell>
                       <div className="font-medium">{tx.description}</div>
                       <div className="text-xs text-muted-foreground">
@@ -595,5 +595,3 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     </>
   );
 }
-
-    

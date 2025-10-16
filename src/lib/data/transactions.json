@@ -1,5 +1,23 @@
 [
   {
+    "date": "2025-10-16T18:58:43.335Z",
+    "description": "Opening Balance for KAMAL",
+    "entries": [
+      {
+        "accountId": "acc_1760641123333",
+        "amount": 2099400,
+        "type": "credit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 2099400,
+        "type": "debit"
+      }
+    ],
+    "id": "txn_1760641123338",
+    "bookId": "book_default"
+  },
+  {
     "description": "PAYMENT REC OF EVENT PAID BY SALMA ADVANCE",
     "date": "2025-10-14T18:30:00.000Z",
     "entries": [

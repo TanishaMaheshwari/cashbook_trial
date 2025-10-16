@@ -183,7 +183,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button variant="outline" className={cn('w-full sm:w-[240px] pl-3 text-left font-normal bg-background', !field.value && 'text-muted-foreground')}>
-                          {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                          {field.value ? format(field.value, 'dd/MM/yyyy') : <span>Pick a date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
