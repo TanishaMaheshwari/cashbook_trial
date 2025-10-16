@@ -82,31 +82,27 @@ export default function DashboardClient({ initialTransactions, accounts, categor
             stats={stats}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Button onClick={() => setAddTxSheetOpen(true)} size="lg" className="w-full">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Transaction
-              </Button>
-               <Combobox
-                    options={accountOptions}
-                    onChange={handleAccountSearchSelect}
-                    placeholder="Search an account..."
-                    searchPlaceholder="Search account..."
-                    notFoundPlaceholder="No account found."
+          <Button onClick={() => setAddTxSheetOpen(true)} size="lg" className="w-full">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="space-y-8">
+              <Notes />
+            </div>
+            <div className="space-y-8">
+               {selectedCategoryName && stats.accountsInSelectedCategory && (
+                <CategoryAccounts
+                    categoryName={selectedCategoryName}
+                    accounts={stats.accountsInSelectedCategory}
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onCategoryChange={setSelectedCategoryId}
                 />
+               )}
+            </div>
           </div>
-          
-          <Notes />
-          
-           {selectedCategoryName && stats.accountsInSelectedCategory && (
-            <CategoryAccounts
-                categoryName={selectedCategoryName}
-                accounts={stats.accountsInSelectedCategory}
-                categories={categories}
-                selectedCategoryId={selectedCategoryId}
-                onCategoryChange={setSelectedCategoryId}
-            />
-           )}
           
           <RecentTransactions transactions={initialTransactions} accounts={accounts} categories={categories} />
         </div>
