@@ -78,9 +78,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:px-8">
         <div className="space-y-8">
-          <StatCards 
-            stats={stats}
-          />
 
           <Button onClick={() => setAddTxSheetOpen(true)} size="lg" className="w-full">
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -88,9 +85,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
           </Button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <div className="space-y-8">
-              <Notes />
-            </div>
             <div className="space-y-8">
                {selectedCategoryName && stats.accountsInSelectedCategory && (
                 <CategoryAccounts
@@ -101,6 +95,9 @@ export default function DashboardClient({ initialTransactions, accounts, categor
                     onCategoryChange={setSelectedCategoryId}
                 />
                )}
+            </div>
+            <div className="space-y-8">
+              <Notes />
             </div>
           </div>
           
