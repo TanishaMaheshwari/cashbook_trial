@@ -2,7 +2,6 @@ import { getAccounts, getCategories, getTransactions } from '@/lib/data';
 import type { Account, Transaction, Category } from '@/lib/types';
 import CategoriesClient from '@/components/categories/CategoriesClient';
 import { cookies } from 'next/headers';
-import Header from '@/components/layout/Header';
 
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
@@ -52,7 +51,6 @@ export default async function CategoriesPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      <Header />
       <CategoriesClient 
           categories={categoriesWithDetails} 
           allCategories={categories}
