@@ -75,8 +75,6 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-
       <main className="flex-grow container mx-auto p-4 sm:p-6 lg:px-8">
         <div className="space-y-8">
           <StatCards 
