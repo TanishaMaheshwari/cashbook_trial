@@ -15,11 +15,6 @@
     "bookId": "book_default"
   },
   {
-    "id": "cat_expense",
-    "name": "Expenses",
-    "bookId": "book_default"
-  },
-  {
     "id": "cat_revenue",
     "name": "Revenue",
     "bookId": "book_default"

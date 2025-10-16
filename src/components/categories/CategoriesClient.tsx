@@ -7,13 +7,11 @@ import { Edit, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, cn } from '@/lib/utils';
 import Link from 'next/link';
-import ManageCategories from '@/components/dashboard/ManageCategories';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { deleteCategoryAction, updateCategoryAction } from '@/app/actions';
+import { deleteCategoryAction, updateCategoryAction, createCategoryAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useBooks } from '@/context/BookContext';
-import Header from '../layout/Header';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -39,13 +37,16 @@ const categoryColors = [
 ];
 
 export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
-  const [openManageCategories, setOpenManageCategories] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { activeBook } = useBooks();
   
   const [editingCategory, setEditingCategory] = useState<CategoryWithDetails | null>(null);
-  const [categoryName, setCategoryName] = useState('');
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
 
   const handleDelete = (categoryId: string) => {
     if (!activeBook) return;
@@ -61,13 +62,13 @@ export default function CategoriesClient({ categories, allCategories }: Categori
 
   const handleEditOpen = (category: CategoryWithDetails) => {
     setEditingCategory(category);
-    setCategoryName(category.name);
+    setEditingCategoryName(category.name);
   };
   
   const handleUpdateCategory = () => {
     if (!editingCategory || !activeBook) return;
     startTransition(async () => {
-        const result = await updateCategoryAction(activeBook.id, editingCategory.id, categoryName);
+        const result = await updateCategoryAction(activeBook.id, editingCategory.id, editingCategoryName);
          if (result.success) {
             toast({ title: "Success", description: result.message });
             setEditingCategory(null);
@@ -77,14 +78,55 @@ export default function CategoriesClient({ categories, allCategories }: Categori
     });
   };
 
+  const handleAddCategory = () => {
+    if (!activeBook) return;
+    startTransition(async () => {
+      const result = await createCategoryAction(activeBook.id, newCategoryName);
+      if (result.success) {
+        setNewCategoryName("");
+        setIsAddDialogOpen(false);
+        toast({ title: "Success", description: result.message });
+      } else {
+        toast({ title: "Error", description: result.message, variant: "destructive" });
+      }
+    });
+  };
+
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      <Header />
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-headline">Categories</h1>
-        <div className="flex items-center gap-2">
-            <ManageCategories categories={allCategories} />
-        </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Category
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                <DialogTitle className="font-headline text-2xl">Add New Category</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name" className="text-right">
+                    Category Name
+                    </Label>
+                    <Input
+                    id="name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="e.g., Long-term Assets"
+                    />
+                </div>
+                </div>
+                <DialogFooter>
+                <Button onClick={handleAddCategory} disabled={isPending || !newCategoryName.trim()}>
+                    {isPending ? "Adding..." : "Add Category"}
+                </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -170,7 +212,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
             </DialogHeader>
             <div className="space-y-2 py-4">
                 <Label htmlFor="category-name">Category Name</Label>
-                <Input id="category-name" value={categoryName} onChange={e => setCategoryName(e.target.value)} />
+                <Input id="category-name" value={editingCategoryName} onChange={e => setEditingCategoryName(e.target.value)} />
             </div>
             <DialogFooter>
                 <Button variant="outline" onClick={() => setEditingCategory(null)}>Cancel</Button>

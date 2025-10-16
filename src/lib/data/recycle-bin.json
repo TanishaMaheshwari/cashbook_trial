@@ -4,6 +4,13 @@
     "name": "Expenses",
     "bookId": "book_default",
     "type": "category",
+    "deletedAt": "2025-10-16T17:56:08.086Z"
+  },
+  {
+    "id": "cat_expense",
+    "name": "Expenses",
+    "bookId": "book_default",
+    "type": "category",
     "deletedAt": "2025-10-16T17:53:48.441Z"
   },
   {

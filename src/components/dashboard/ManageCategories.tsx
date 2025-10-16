@@ -17,12 +17,14 @@ import { useState, useTransition } from "react";
 import { createCategoryAction } from "@/app/actions";
 import type { Category } from "@/lib/types";
 import { useBooks } from "@/context/BookContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ManageCategories({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isPending, startTransition] = useTransition();
   const { activeBook } = useBooks();
+  const { toast } = useToast();
 
   const handleAddCategory = () => {
     if (!activeBook) return;
@@ -31,8 +33,9 @@ export default function ManageCategories({ categories }: { categories: Category[
       if (result.success) {
         setNewCategoryName("");
         setOpen(false);
+        toast({ title: 'Success', description: `Category '${newCategoryName}' created.` });
       } else {
-        console.error(result.message);
+        toast({ title: 'Error', description: result.message, variant: 'destructive' });
       }
     });
   };
@@ -42,28 +45,20 @@ export default function ManageCategories({ categories }: { categories: Category[
       <DialogTrigger asChild>
         <Button variant="outline">
           <FolderPlus className="mr-2 h-4 w-4" />
-          Manage Categories
+          Add Category
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">Manage Categories</DialogTitle>
+          <DialogTitle className="font-headline text-2xl">Add New Category</DialogTitle>
           <DialogDescription>
-            View existing categories and add new ones to organize your accounts for the current book.
+            Create a new category to organize your accounts.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div>
-            <h4 className="font-semibold mb-2">Existing Categories</h4>
-            <div className="flex flex-wrap gap-2">
-                {categories.map(cat => (
-                    <span key={cat.id} className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-md">{cat.name}</span>
-                ))}
-            </div>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="name" className="text-right">
-              New Category Name
+              Category Name
             </Label>
             <Input
               id="name"
