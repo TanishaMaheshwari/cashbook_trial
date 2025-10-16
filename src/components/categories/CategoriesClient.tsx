@@ -38,7 +38,7 @@ const categoryColors = [
 ];
 
 // Define which categories normally have a debit balance
-const DEBIT_BALANCE_CATEGORIES = ['parties', 'cash', 'vc', 'other', 'assets'];
+const DEBIT_BALANCE_CATEGORIES = ['parties', 'cash', 'assets', 'expense'];
 
 
 export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
@@ -218,14 +218,18 @@ export default function CategoriesClient({ categories, allCategories }: Categori
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
                   {category.accounts.map((account) => {
-                    const displayBalance = normallyDebit ? account.balance : account.balance * -1;
+                    // Raw balance is always debit - credit.
+                    // If the category is normally credit, we expect a negative balance.
+                    // If it's normally debit, we expect a positive balance.
+                    // The displayBalance will be positive for debits, negative for credits.
+                    const displayBalance = normallyDebit ? account.balance : -account.balance;
                     return (
                      <li key={account.id} className="flex justify-between items-center bg-background/50 p-3 rounded-md">
                         <Link href={`/accounts/${account.id}`} className="font-medium hover:underline">
                             {account.name}
                         </Link>
                         <span className={cn("font-semibold text-sm", displayBalance >= 0 ? 'text-green-700' : 'text-red-700')}>
-                          {formatCurrency(Math.abs(displayBalance))}
+                          {formatCurrency(Math.abs(account.balance))}
                           <span className="text-xs text-muted-foreground ml-1">{displayBalance >= 0 ? 'Dr' : 'Cr'}</span>
                         </span>
                     </li>
