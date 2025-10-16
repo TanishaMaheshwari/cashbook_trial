@@ -3,7 +3,7 @@
 import type { Account, Category } from '@/lib/types';
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit, MoreVertical, PlusCircle, Trash2 } from 'lucide-react';
+import { Edit, MoreVertical, PlusCircle, Trash2, Home, Users, List, Settings } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -95,7 +95,23 @@ export default function CategoriesClient({ categories, allCategories }: Categori
   return (
     <>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-headline">Categories</h1>
+        <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-headline">Categories</h1>
+             <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/"><Home /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/accounts"><Users /></Link>
+                </Button>
+                 <Button variant="outline" size="icon" asChild>
+                    <Link href="/transactions"><List /></Link>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                    <Link href="/settings"><Settings /></Link>
+                </Button>
+            </div>
+        </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
                 <Button>
