@@ -129,9 +129,9 @@ export default function CategoriesClient({ categories, allCategories }: Categori
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {categories.map((category, index) => (
-          <Card key={category.id} className={cn(categoryColors[index % categoryColors.length])}>
+          <Card key={category.id} className={cn("flex flex-col", categoryColors[index % categoryColors.length])}>
             <CardHeader className="flex flex-row justify-between items-start">
               <div>
                 <CardTitle className="font-bold text-lg">{category.name}</CardTitle>
@@ -182,7 +182,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                     </DropdownMenuContent>
                 </DropdownMenu>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
                   {category.accounts.map((account) => (
@@ -197,9 +197,11 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No accounts in this category.
-                </p>
+                <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                        No accounts in this category.
+                    </p>
+                </div>
               )}
             </CardContent>
           </Card>
