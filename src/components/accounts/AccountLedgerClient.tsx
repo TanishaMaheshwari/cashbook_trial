@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Share, FileImage, FileText, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { ArrowLeft, Share, FileImage, FileText, Calendar as CalendarIcon, Loader2, Home, Users, List, Folder, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account } from '@/lib/types';
 import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import { useBooks } from '@/context/BookContext';
-import Header from '../layout/Header';
+import Link from 'next/link';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import AccountNotes from './AccountNotes';
 
 type LedgerEntry = {
   transactionId: string;
@@ -153,18 +154,42 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      <Header backHref="/accounts" />
        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
+             <Button variant="outline" size="icon" asChild className="hidden sm:inline-flex">
+                <Link href="/accounts">
+                    <ArrowLeft />
+                    <span className="sr-only">Back to Accounts</span>
+                </Link>
+            </Button>
             <div>
-                <h1 className="text-3xl font-headline">{account.name}</h1>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-headline">{account.name}</h1>
+                    <div className="hidden sm:flex items-center gap-2">
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/"><Home /></Link>
+                        </Button>
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/transactions"><List /></Link>
+                        </Button>
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/accounts"><Users /></Link>
+                        </Button>
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/categories"><Folder /></Link>
+                        </Button>
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/settings"><Settings /></Link>
+                        </Button>
+                    </div>
+                </div>
                 <p className="text-muted-foreground">Account Ledger</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full sm:w-auto items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button id="date" variant="outline" className={cn("w-[260px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
+                <Button id="date" variant="outline" className={cn("w-full flex-1 sm:w-[260px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dateRange?.from ? (
                     dateRange.to ? (
@@ -186,7 +211,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" disabled={isSharing}>
                         {isSharing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Share className="mr-2 h-4 w-4" />}
-                        {isSharing ? 'Generating...' : 'Share'}
+                        <span className="hidden sm:inline">{isSharing ? 'Generating...' : 'Share'}</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -203,85 +228,93 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
           </div>
       </div>
       
-      <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
-        <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
-          <Card>
-              <CardHeader className="pb-2">
-                  <CardDescription>Category</CardDescription>
-                  <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
-              </CardHeader>
-          </Card>
-           <Card>
-              <CardHeader className="pb-2">
-                  <CardDescription>Opening Balance</CardDescription>
-                  <CardTitle className="text-base">
-                      {formatCurrency(Math.abs(openingBalance))}
-                      <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                  </CardTitle>
-              </CardHeader>
-          </Card>
-           <Card>
-              <CardHeader className="pb-2">
-                  <CardDescription>Balance as of {dateRange?.to ? formatDate(dateRange.to) : 'Today'}</CardDescription>
-                  <CardTitle className="text-base font-bold">
-                      {formatCurrency(Math.abs(finalBalance))}
-                      <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
-                  </CardTitle>
-              </CardHeader>
-          </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+            <div ref={ledgerRef} className="bg-background p-4 rounded-lg">
+                <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardDescription>Category</CardDescription>
+                        <CardTitle className="text-base"><Badge variant="secondary" className="capitalize">{categoryName}</Badge></CardTitle>
+                    </CardHeader>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardDescription>Opening Balance</CardDescription>
+                        <CardTitle className="text-base">
+                            {formatCurrency(Math.abs(openingBalance))}
+                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                        </CardTitle>
+                    </CardHeader>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardDescription>Balance as of {dateRange?.to ? formatDate(dateRange.to) : 'Today'}</CardDescription>
+                        <CardTitle className="text-base font-bold">
+                            {formatCurrency(Math.abs(finalBalance))}
+                            <span className="text-xs text-muted-foreground ml-1">{isFinalBalanceDebit ? 'Dr' : 'Cr'}</span>
+                        </CardTitle>
+                    </CardHeader>
+                </Card>
+                </div>
+
+
+                <Card>
+                <CardHeader>
+                    <CardTitle>Ledger Entries</CardTitle>
+                    <CardDescription>Transactions for the selected period.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Debit</TableHead>
+                        <TableHead className="text-right">Credit</TableHead>
+                        <TableHead className="text-right">Balance</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow>
+                        <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
+                        <TableCell className="text-right font-bold">
+                            {formatCurrency(Math.abs(openingBalance))}
+                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                        </TableCell>
+                        </TableRow>
+
+                        {displayEntries.slice().reverse().map((entry, index) => (
+                        <TableRow key={`${entry.transactionId}-${index}`}>
+                            <TableCell>{formatDate(entry.date)}</TableCell>
+                            <TableCell>{entry.description}</TableCell>
+                            <TableCell className="text-right text-green-600">
+                            {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                            </TableCell>
+                            <TableCell className="text-right text-red-600">
+                            {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                            {formatCurrency(Math.abs(entry.balance))}
+                            <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                        {displayEntries.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
+                        </TableRow>
+                        )}
+                    </TableBody>
+                    </Table>
+                </CardContent>
+                </Card>
+            </div>
         </div>
 
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Ledger Entries</CardTitle>
-            <CardDescription>Transactions for the selected period.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Debit</TableHead>
-                  <TableHead className="text-right">Credit</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
-                  <TableCell className="text-right font-bold">
-                     {formatCurrency(Math.abs(openingBalance))}
-                     <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
-                  </TableCell>
-                </TableRow>
-
-                {displayEntries.slice().reverse().map((entry, index) => (
-                  <TableRow key={`${entry.transactionId}-${index}`}>
-                    <TableCell>{formatDate(entry.date)}</TableCell>
-                    <TableCell>{entry.description}</TableCell>
-                     <TableCell className="text-right text-green-600">
-                      {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
-                    </TableCell>
-                    <TableCell className="text-right text-red-600">
-                      {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(Math.abs(entry.balance))}
-                       <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {displayEntries.length === 0 && (
-                  <TableRow>
-                      <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-1">
+            <AccountNotes accountId={account.id} />
+        </div>
       </div>
     </div>
   );
