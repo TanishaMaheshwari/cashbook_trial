@@ -110,5 +110,11 @@
     "categoryId": "cat_1760599855378",
     "openingBalance": 21000,
     "openingBalanceType": "debit"
+  },
+  {
+    "id": "acc_1760638091956",
+    "bookId": "book_default",
+    "name": "ABHI",
+    "categoryId": "cat_revenue"
   }
 ]
