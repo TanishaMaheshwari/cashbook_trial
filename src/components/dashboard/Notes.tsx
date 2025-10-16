@@ -71,9 +71,10 @@ export default function Notes() {
   };
   
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    const currentTarget = e.currentTarget;
     // We use a timeout to allow click events on buttons inside the card to register
     setTimeout(() => {
-      if (!e.currentTarget.contains(document.activeElement)) {
+      if (!currentTarget.contains(document.activeElement)) {
         setIsFocused(false);
         if(newNoteText.trim()) {
             handleAddNote();
