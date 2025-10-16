@@ -28,7 +28,11 @@ export default async function CategoriesPage() {
       const totalCredit = accountEntries.filter((e) => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
 
       let balance = 0;
-      if (account.type === 'asset' || account.type === 'expense') {
+      const accountCategory = categories.find(c => c.id === account.categoryId)
+      const debitBalanceCategories = ['asset', 'expense'];
+      const normallyDebit = accountCategory ? debitBalanceCategories.some(t => accountCategory.name.toLowerCase().includes(t)) : false;
+
+      if (normallyDebit) {
         balance = totalDebit - totalCredit;
       } else {
         balance = totalCredit - totalDebit;
@@ -47,12 +51,12 @@ export default async function CategoriesPage() {
   });
 
   return (
-    <>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <Header />
       <CategoriesClient 
           categories={categoriesWithDetails} 
           allCategories={categories}
       />
-    </>
+    </div>
   );
 }

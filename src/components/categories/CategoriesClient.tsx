@@ -93,7 +93,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <>
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-headline">Categories</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -197,7 +197,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                   ))}
                 </ul>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-full min-h-[5rem]">
                     <p className="text-sm text-muted-foreground text-center py-4">
                         No accounts in this category.
                     </p>
@@ -224,6 +224,6 @@ export default function CategoriesClient({ categories, allCategories }: Categori
             </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
