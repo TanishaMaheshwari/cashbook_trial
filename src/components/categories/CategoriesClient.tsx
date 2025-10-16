@@ -28,12 +28,12 @@ type CategoriesClientProps = {
 };
 
 const categoryColors = [
-  'bg-violet-100 border-violet-200',
-  'bg-blue-100 border-blue-200',
-  'bg-green-100 border-green-200',
-  'bg-gray-100 border-gray-200',
-  'bg-red-100 border-red-200',
-  'bg-yellow-100 border-yellow-200',
+  'bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800/30',
+  'bg-gray-100 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800/30',
+  'bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800/30',
+  'bg-yellow-100 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800/30',
+  'bg-violet-100 border-violet-200 dark:bg-violet-900/20 dark:border-violet-800/30',
+  'bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30',
 ];
 
 export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
@@ -129,9 +129,9 @@ export default function CategoriesClient({ categories, allCategories }: Categori
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      <div className="md:columns-2 gap-6 space-y-6">
         {categories.map((category, index) => (
-          <Card key={category.id} className={cn("flex flex-col", categoryColors[index % categoryColors.length])}>
+          <Card key={category.id} className={cn("break-inside-avoid-column", categoryColors[index % categoryColors.length])}>
             <CardHeader className="flex flex-row justify-between items-start">
               <div>
                 <CardTitle className="font-bold text-lg">{category.name}</CardTitle>
@@ -182,7 +182,7 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                     </DropdownMenuContent>
                 </DropdownMenu>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent>
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
                   {category.accounts.map((account) => (
@@ -190,15 +190,18 @@ export default function CategoriesClient({ categories, allCategories }: Categori
                         <Link href={`/accounts/${account.id}`} className="font-medium hover:underline">
                             {account.name}
                         </Link>
-                        <span className="font-semibold text-green-700">
+                        <span className={cn(
+                          "font-semibold",
+                          account.balance >= 0 ? "text-green-700" : "text-red-700"
+                        )}>
                             {formatCurrency(account.balance)}
                         </span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="flex items-center justify-center h-full min-h-[5rem]">
-                    <p className="text-sm text-muted-foreground text-center py-4">
+                <div className="flex items-center justify-center text-center">
+                    <p className="text-sm text-muted-foreground p-4">
                         No accounts in this category.
                     </p>
                 </div>
