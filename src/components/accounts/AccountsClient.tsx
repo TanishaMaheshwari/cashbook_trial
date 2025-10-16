@@ -39,8 +39,12 @@ import { useBooks } from '@/context/BookContext';
 import EditAccountForm from './EditAccountForm';
 
 
-type AccountWithBalance = Account & { balance: number };
-type InitialAccount = AccountWithBalance & { openingBalanceTransaction?: Transaction | null };
+type AccountWithDetails = Account & {
+    balance: number;
+    lastTransactionDate: string | null;
+};
+
+type InitialAccount = AccountWithDetails & { openingBalanceTransaction?: Transaction | null };
 
 
 type AccountsClientProps = {
@@ -54,7 +58,7 @@ type AccountsClientProps = {
 
 export default function AccountsClient({ initialAccounts, categories, totals }: AccountsClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortDescriptor, setSortDescriptor] = useState('name-asc');
+  const [sortDescriptor, setSortDescriptor] = useState('recent-desc');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [filter, setFilter] = useState('all');
   const { activeBook } = useBooks();
@@ -118,7 +122,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       );
     }
     
-    const [sortField, sortDirection] = sortDescriptor.split('-') as ['name' | 'balance' | 'category', 'asc' | 'desc'];
+    const [sortField, sortDirection] = sortDescriptor.split('-') as ['name' | 'balance' | 'category' | 'recent', 'asc' | 'desc'];
 
 
     accounts.sort((a, b) => {
@@ -133,10 +137,17 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
           aValue = Math.abs(a.balance);
           bValue = Math.abs(b.balance);
           break;
+        case 'recent':
+            aValue = a.lastTransactionDate ? new Date(a.lastTransactionDate).getTime() : 0;
+            bValue = b.lastTransactionDate ? new Date(b.lastTransactionDate).getTime() : 0;
+            break;
         default: // name
           aValue = a.name;
           bValue = b.name;
       }
+
+      if (aValue === null || aValue === 0) aValue = sortDirection === 'asc' ? Infinity : -Infinity;
+      if (bValue === null || bValue === 0) bValue = sortDirection === 'asc' ? Infinity : -Infinity;
 
       if (typeof aValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
@@ -233,6 +244,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="recent-desc">Recent Activity</SelectItem>
                         <SelectItem value="name-asc">Name (A-Z)</SelectItem>
                         <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                         <SelectItem value="balance-desc">Balance (Highest First)</SelectItem>
@@ -480,6 +492,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   );
 
     
+
 
 
 

@@ -20,14 +20,21 @@ export default async function AllAccountsPage() {
 
     const balance = totalDebit - totalCredit;
     
+    const accountTransactions = transactions.filter(t => t.entries.some(e => e.accountId === account.id));
+    
     // Find the opening balance transaction
-    const openingBalanceTransaction = transactions.find(
+    const openingBalanceTransaction = accountTransactions.find(
       (t) =>
         t.description === `Opening Balance for ${account.name}` &&
         t.entries.some((e) => e.accountId === account.id)
     );
 
-    return { ...account, balance, openingBalanceTransaction: openingBalanceTransaction || null };
+    // Find the most recent transaction date
+    const lastTransactionDate = accountTransactions.length > 0
+        ? accountTransactions.reduce((latest, tx) => new Date(tx.date) > new Date(latest.date) ? tx : latest).date
+        : null;
+
+    return { ...account, balance, openingBalanceTransaction: openingBalanceTransaction || null, lastTransactionDate };
   });
 
   const totalDebitBalance = accountsWithDetails
