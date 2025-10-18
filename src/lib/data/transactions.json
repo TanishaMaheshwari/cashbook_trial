@@ -102,8 +102,7 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1760599975751",
-    "bookId": "book_default",
-    "highlight": "green"
+    "bookId": "book_default"
   },
   {
     "date": "2025-10-16T07:33:37.133Z",
@@ -204,8 +203,7 @@
       }
     ],
     "id": "txn_1760484993181",
-    "bookId": "book_default",
-    "highlight": "green"
+    "bookId": "book_default"
   },
   {
     "date": "2025-10-14T23:36:14.367Z",
@@ -223,8 +221,7 @@
       }
     ],
     "id": "txn_1760484974373",
-    "bookId": "book_default",
-    "highlight": "green"
+    "bookId": "book_default"
   },
   {
     "date": "2025-10-14T23:34:22.850Z",

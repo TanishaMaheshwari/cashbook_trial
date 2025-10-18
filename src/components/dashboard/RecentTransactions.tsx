@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -142,8 +141,19 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     }
   }
 
-  const transactions = useMemo(() => {
-    let filtered = [...initialTransactions];
+  const { transactions, openingBalanceTransactions } = useMemo(() => {
+    const regular: Transaction[] = [];
+    const opening: Transaction[] = [];
+
+    initialTransactions.forEach(tx => {
+      if (tx.description.startsWith('Opening Balance for')) {
+        opening.push(tx);
+      } else {
+        regular.push(tx);
+      }
+    });
+    
+    let filtered = [...regular];
 
     if (isTransactionsPage) {
         if (searchTerm) {
@@ -205,9 +215,9 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     });
 
     if (!isTransactionsPage) {
-        return sorted.slice(0, 5);
+        return { transactions: sorted.slice(0, 5), openingBalanceTransactions: [] };
     }
-    return sorted;
+    return { transactions: sorted, openingBalanceTransactions: opening };
   }, [initialTransactions, isTransactionsPage, searchTerm, sortDescriptor, dateRangePreset, customDateRange]);
 
   const handleSelect = (transactionId: string, checked: boolean) => {
@@ -586,6 +596,49 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         </CardFooter>
       )}
     </Card>
+
+    {isTransactionsPage && openingBalanceTransactions.length > 0 && (
+        <Card className="mt-6">
+            <CardHeader>
+                <CardTitle>Opening Balance Entries</CardTitle>
+                <CardDescription>These are initial balance transactions created automatically for your accounts.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Account</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                            <TableHead>Type</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {openingBalanceTransactions.map(tx => {
+                            const mainEntry = tx.entries.find(e => !e.accountId.startsWith('acc_opening_balance_equity_'));
+                            if (!mainEntry) return null;
+
+                            return (
+                                <TableRow key={tx.id}>
+                                    <TableCell>{formatDate(tx.date)}</TableCell>
+                                    <TableCell className="font-medium">{getAccountName(mainEntry.accountId)}</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(mainEntry.amount)}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={mainEntry.type === 'debit' ? 'outline' : 'secondary'} className={cn(
+                                            mainEntry.type === 'debit' ? 'text-green-600 border-green-600' : 'text-red-600 border-red-600'
+                                        )}>
+                                            {mainEntry.type === 'debit' ? 'Dr' : 'Cr'}
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    )}
+
 
     <Dialog open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <DialogContent className="sm:max-w-3xl w-full overflow-y-auto max-h-[90vh]">
