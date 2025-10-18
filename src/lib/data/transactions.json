@@ -1,5 +1,23 @@
 [
   {
+    "date": "2025-10-18T03:46:19.926Z",
+    "description": "Opening Balance for HMTA(NM)",
+    "entries": [
+      {
+        "accountId": "acc_1760759179925",
+        "amount": 5285881,
+        "type": "credit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 5285881,
+        "type": "debit"
+      }
+    ],
+    "id": "txn_1760759179927",
+    "bookId": "book_default"
+  },
+  {
     "description": "",
     "date": "2025-10-16T18:30:00.000Z",
     "entries": [

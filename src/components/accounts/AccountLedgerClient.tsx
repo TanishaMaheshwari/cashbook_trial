@@ -61,50 +61,59 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   }, []);
 
   const { displayEntries, finalBalance, openingBalance } = useMemo(() => {
-    let runningBalance = 0;
-    
-    // Calculate opening balance: sum of all transactions *before* the start date
-    const openingEntries = dateRange?.from 
-      ? allLedgerEntries.filter(entry => new Date(entry.date) < new Date(dateRange.from!))
-      : [];
-      
-    let ob = 0;
-    if (openingEntries.length > 0) {
-        ob = openingEntries[openingEntries.length - 1].balance;
-    }
-    runningBalance = ob;
+    // Exclude the specific "Opening Balance for..." transaction from the main list.
+    const regularEntries = allLedgerEntries.filter(entry => !entry.description.startsWith('Opening Balance for'));
 
-    // Filter entries based on the date range
-    const filteredEntries = allLedgerEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      if (dateRange?.from && entryDate < new Date(dateRange.from)) return false;
-      if (dateRange?.to && entryDate > new Date(dateRange.to)) return false;
-      return true;
+    // Find the opening balance transaction if it exists.
+    const openingBalanceTx = allLedgerEntries.find(entry => entry.description.startsWith('Opening Balance for'));
+    
+    // The initial balance is from the opening balance transaction, or 0.
+    const initialBookBalance = openingBalanceTx 
+        ? normallyDebit 
+            ? openingBalanceTx.debit - openingBalanceTx.credit 
+            : openingBalanceTx.credit - openingBalanceTx.debit
+        : 0;
+    
+    // Find transactions that occurred before the start of the selected date range.
+    const entriesBeforeDateRange = dateRange?.from
+        ? regularEntries.filter(entry => new Date(entry.date) < new Date(dateRange.from!))
+        : [];
+
+    // Calculate the opening balance for the period.
+    const balanceBeforePeriod = entriesBeforeDateRange.reduce((acc, entry) => {
+        const debit = entry.debit;
+        const credit = entry.credit;
+        return normallyDebit ? acc + debit - credit : acc + credit - debit;
+    }, initialBookBalance);
+
+    const openingBalance = balanceBeforePeriod;
+    let runningBalance = openingBalance;
+
+    // Filter entries to be within the selected date range.
+    const filteredEntries = regularEntries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        if (dateRange?.from && entryDate < new Date(dateRange.from)) return false;
+        if (dateRange?.to && entryDate > new Date(dateRange.to)) return false;
+        return true;
     });
 
-    // Recalculate running balance for the filtered period
+    // Recalculate running balance for the filtered period.
     const ledgerForDisplay = filteredEntries.map(tx => {
-      const debit = tx.debit;
-      const credit = tx.credit;
+        const debit = tx.debit;
+        const credit = tx.credit;
 
-      if (normallyDebit) {
-          runningBalance += debit - credit;
-      } else {
-          runningBalance += credit - debit;
-      }
-      
-      return {
-        ...tx,
-        balance: runningBalance,
-      };
+        runningBalance = normallyDebit ? runningBalance + debit - credit : runningBalance + credit - debit;
+        
+        return { ...tx, balance: runningBalance };
     });
 
     return {
-      displayEntries: ledgerForDisplay.slice().reverse(), // Most recent first
-      finalBalance: runningBalance,
-      openingBalance: ob,
+        displayEntries: ledgerForDisplay, // Already sorted by date ascending from server
+        finalBalance: runningBalance,
+        openingBalance: openingBalance,
     };
   }, [allLedgerEntries, dateRange, normallyDebit]);
+
 
   const handleShare = (format: 'pdf' | 'image') => {
     startSharingTransition(async () => {
@@ -116,14 +125,27 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
         // 2. Remove unwanted elements from the clone
         exportElement.querySelector('[data-id="category-card"]')?.remove();
         exportElement.querySelector('[data-id="ledger-entries-header"]')?.remove();
+        exportElement.querySelector('[data-id="account-notes"]')?.remove();
         
         // Add a title to the clone
         const titleElement = document.createElement('div');
         titleElement.innerHTML = `
-            <h1 class="text-2xl font-bold text-center">${account.name} - Ledger</h1>
+            <h1 class="text-2xl font-bold text-center mb-1">${account.name} - Ledger</h1>
             <h2 class="text-lg text-muted-foreground text-center mb-4">${activeBook?.name || ''}</h2>
         `;
         exportElement.insertBefore(titleElement, exportElement.firstChild);
+        
+        // Fix grid layout for export by wrapping remaining cards
+        const summaryCards = exportElement.querySelectorAll<HTMLElement>('.grid > .lucide-university, .grid > .scale, .grid > .calendar-clock');
+        const summaryGrid = exportElement.querySelector<HTMLElement>('.grid.md\\:grid-cols-3');
+        if (summaryGrid) {
+            Array.from(summaryGrid.children).forEach(child => {
+                if (!child.hasAttribute('data-id')) { // Keep only balance cards
+                    child.classList.add('col-span-1');
+                }
+            });
+        }
+
 
         // Temporarily append the clone to the body off-screen to render it
         document.body.appendChild(exportElement);
@@ -162,6 +184,8 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   }
   
   const isFinalBalanceDebit = normallyDebit ? finalBalance >= 0 : finalBalance < 0;
+  const isOpeningBalanceDebit = normallyDebit ? openingBalance >= 0 : openingBalance < 0;
+
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -252,7 +276,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                     <CardDescription>Opening Balance</CardDescription>
                     <CardTitle className="text-base">
                         {formatCurrency(Math.abs(openingBalance))}
-                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                        <span className="text-xs text-muted-foreground ml-1">{isOpeningBalanceDebit ? 'Dr' : 'Cr'}</span>
                     </CardTitle>
                 </CardHeader>
             </Card>
@@ -267,7 +291,10 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
             </Card>
             </div>
 
-            <AccountNotesDisplay accountId={account.id} />
+            <div data-id="account-notes">
+              <AccountNotesDisplay accountId={account.id} />
+            </div>
+
 
             <Card className="mt-6">
             <CardHeader data-id="ledger-entries-header">
@@ -288,13 +315,13 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                 <TableBody>
                     <TableRow>
                     <TableCell colSpan={4} className="font-bold">Opening Balance</TableCell>
-                    <TableCell className="text-right font-bold">
+                    <TableCell className={cn("text-right font-bold", isOpeningBalanceDebit ? 'text-green-600' : 'text-red-600')}>
                         {formatCurrency(Math.abs(openingBalance))}
-                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (openingBalance >= 0 ? 'Dr' : 'Cr') : (openingBalance >= 0 ? 'Cr' : 'Dr')}</span>
+                        <span className="text-xs text-muted-foreground ml-1">{isOpeningBalanceDebit ? 'Dr' : 'Cr'}</span>
                     </TableCell>
                     </TableRow>
 
-                    {displayEntries.slice().reverse().map((entry, index) => {
+                    {displayEntries.map((entry, index) => {
                       const isDebitBalance = normallyDebit ? entry.balance >= 0 : entry.balance < 0;
                       return (
                         <TableRow key={`${entry.transactionId}-${index}`}>
@@ -327,5 +354,3 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     </div>
   );
 }
-
-    
