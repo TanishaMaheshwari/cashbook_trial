@@ -39,6 +39,7 @@ import { DateRange } from 'react-day-picker';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useBooks } from '@/context/BookContext';
 import { Checkbox } from '../ui/checkbox';
+import { Badge } from '../ui/badge';
 
 
 type RecentTransactionsProps = {
