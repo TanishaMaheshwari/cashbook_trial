@@ -294,22 +294,25 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
                     </TableCell>
                     </TableRow>
 
-                    {displayEntries.slice().reverse().map((entry, index) => (
-                    <TableRow key={`${entry.transactionId}-${index}`}>
-                        <TableCell>{formatDate(entry.date)}</TableCell>
-                        <TableCell>{entry.description}</TableCell>
-                        <TableCell className="text-right text-green-600">
-                        {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right text-red-600">
-                        {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                        {formatCurrency(Math.abs(entry.balance))}
-                        <span className="text-xs text-muted-foreground ml-1">{normallyDebit ? (entry.balance >= 0 ? 'Dr' : 'Cr') : (entry.balance >= 0 ? 'Cr' : 'Dr')}</span>
-                        </TableCell>
-                    </TableRow>
-                    ))}
+                    {displayEntries.slice().reverse().map((entry, index) => {
+                      const isDebitBalance = normallyDebit ? entry.balance >= 0 : entry.balance < 0;
+                      return (
+                        <TableRow key={`${entry.transactionId}-${index}`}>
+                            <TableCell>{formatDate(entry.date)}</TableCell>
+                            <TableCell>{entry.description}</TableCell>
+                            <TableCell className="text-right text-green-600">
+                            {entry.debit > 0 ? formatCurrency(entry.debit) : '-'}
+                            </TableCell>
+                            <TableCell className="text-right text-red-600">
+                            {entry.credit > 0 ? formatCurrency(entry.credit) : '-'}
+                            </TableCell>
+                            <TableCell className={cn("text-right font-semibold", isDebitBalance ? 'text-green-600' : 'text-red-600')}>
+                                {formatCurrency(Math.abs(entry.balance))}
+                                <span className="text-xs text-muted-foreground ml-1">{isDebitBalance ? 'Dr' : 'Cr'}</span>
+                            </TableCell>
+                        </TableRow>
+                      );
+                    })}
                     {displayEntries.length === 0 && (
                     <TableRow>
                         <TableCell colSpan={5} className="text-center h-24">No transactions found in this period.</TableCell>
@@ -324,3 +327,5 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     </div>
   );
 }
+
+    

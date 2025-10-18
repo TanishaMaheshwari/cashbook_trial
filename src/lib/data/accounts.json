@@ -4,7 +4,7 @@
     "bookId": "book_default",
     "name": "Cash",
     "categoryId": "cat_cash",
-    "openingBalance": 1128710,
+    "openingBalance": 6128710,
     "openingBalanceType": "debit"
   },
   {
@@ -127,6 +127,24 @@
     "id": "acc_1760641123333",
     "bookId": "book_default",
     "name": "KAMAL",
+    "categoryId": "cat_1760637847923"
+  },
+  {
+    "id": "acc_1760699692920",
+    "bookId": "book_default",
+    "name": "LKD",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1760699799533",
+    "bookId": "book_default",
+    "name": "Profit",
+    "categoryId": "cat_1760637820112"
+  },
+  {
+    "id": "acc_1760758698028",
+    "bookId": "book_default",
+    "name": "BHU",
     "categoryId": "cat_1760637847923"
   }
 ]

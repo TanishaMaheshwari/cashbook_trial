@@ -1,5 +1,53 @@
 [
   {
+    "description": "",
+    "date": "2025-10-16T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760758698028",
+        "type": "debit",
+        "amount": 5000000,
+        "description": "CASH DIYE"
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 5000000,
+        "description": "CASH PAID TO BHU"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1760758788748",
+    "bookId": "book_default"
+  },
+  {
+    "description": "",
+    "date": "2025-10-17T11:14:36.628Z",
+    "entries": [
+      {
+        "accountId": "acc_1760699692920",
+        "type": "debit",
+        "amount": 1325500,
+        "description": "Gold sold"
+      },
+      {
+        "accountId": "acc_1760641123333",
+        "type": "credit",
+        "amount": 1320000,
+        "description": "Gold buy"
+      },
+      {
+        "accountId": "acc_1760699799533",
+        "type": "credit",
+        "amount": 5500,
+        "description": "Profit"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1760699835422",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-16T18:58:43.335Z",
     "description": "Opening Balance for KAMAL",
     "entries": [
@@ -36,7 +84,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1760599975751",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "green"
   },
   {
     "date": "2025-10-16T07:33:37.133Z",
@@ -137,7 +186,8 @@
       }
     ],
     "id": "txn_1760484993181",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "green"
   },
   {
     "date": "2025-10-14T23:36:14.367Z",
@@ -155,7 +205,8 @@
       }
     ],
     "id": "txn_1760484974373",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "green"
   },
   {
     "date": "2025-10-14T23:34:22.850Z",
@@ -233,17 +284,17 @@
     "bookId": "book_default"
   },
   {
-    "date": "2025-10-14T23:35:46.008Z",
+    "date": "2025-10-18T03:40:23.026Z",
     "description": "Opening Balance for Cash",
     "entries": [
       {
         "accountId": "acc_1760484492379",
-        "amount": 1128710,
+        "amount": 6128710,
         "type": "debit"
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
-        "amount": 1128710,
+        "amount": 6128710,
         "type": "credit"
       }
     ],
