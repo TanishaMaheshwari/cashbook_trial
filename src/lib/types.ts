@@ -34,3 +34,11 @@ export type Book = {
     id: string;
     name: string;
 };
+
+export type Note = {
+  id: string;
+  bookId: string;
+  text: string;
+  isCompleted: boolean;
+  createdAt: string; // ISO string
+};

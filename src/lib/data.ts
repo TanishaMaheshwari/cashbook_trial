@@ -1,5 +1,5 @@
 
-import type { Account, Category, Transaction, Book } from '@/lib/types';
+import type { Account, Category, Transaction, Book, Note } from '@/lib/types';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -13,6 +13,7 @@ const categoriesFilePath = path.join(dataDir, 'categories.json');
 const accountsFilePath = path.join(dataDir, 'accounts.json');
 const transactionsFilePath = path.join(dataDir, 'transactions.json');
 const recycleBinFilePath = path.join(dataDir, 'recycle-bin.json');
+const notesFilePath = path.join(dataDir, 'notes.json');
 
 
 const readData = async <T>(filePath: string): Promise<T[]> => {
@@ -513,4 +514,44 @@ export const deleteMultipleAccounts = async (bookId: string, accountIds: string[
     
     const remainingAccounts = allAccounts.filter(acc => !accountIds.includes(acc.id) || acc.bookId !== bookId);
     await writeData<Account>(accountsFilePath, remainingAccounts);
+};
+
+// --- Note Functions ---
+
+export const getNotes = async (bookId: string): Promise<Note[]> => {
+    const allNotes = await readData<Note>(notesFilePath);
+    const bookNotes = allNotes.filter(note => note.bookId === bookId);
+    return bookNotes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+};
+
+export const addNote = async (bookId: string, text: string): Promise<Note> => {
+    const allNotes = await readData<Note>(notesFilePath);
+    const newNote: Note = {
+        id: `note_${Date.now()}`,
+        bookId,
+        text,
+        isCompleted: false,
+        createdAt: new Date().toISOString(),
+    };
+    allNotes.unshift(newNote);
+    await writeData<Note>(notesFilePath, allNotes);
+    return newNote;
+};
+
+export const updateNote = async (bookId: string, id: string, data: Partial<Omit<Note, 'id' | 'bookId'>>): Promise<Note> => {
+    const allNotes = await readData<Note>(notesFilePath);
+    const index = allNotes.findIndex(note => note.id === id && note.bookId === bookId);
+    if (index === -1) {
+        throw new Error('Note not found.');
+    }
+    const updatedNote = { ...allNotes[index], ...data };
+    allNotes[index] = updatedNote;
+    await writeData<Note>(notesFilePath, allNotes);
+    return updatedNote;
+};
+
+export const deleteNote = async (bookId: string, id: string): Promise<void> => {
+    let allNotes = await readData<Note>(notesFilePath);
+    const remainingNotes = allNotes.filter(note => note.id !== id || note.bookId !== bookId);
+    await writeData<Note>(notesFilePath, remainingNotes);
 };

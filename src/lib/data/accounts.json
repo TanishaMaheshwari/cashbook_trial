@@ -25,7 +25,9 @@
     "id": "acc_1760484541813",
     "bookId": "book_default",
     "name": "Mahesh",
-    "categoryId": "cat_party"
+    "categoryId": "cat_party",
+    "openingBalance": 9116662,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760484818334",
@@ -101,7 +103,9 @@
     "id": "acc_1760488673265",
     "bookId": "book_default",
     "name": "LAB",
-    "categoryId": "cat_1760484573125"
+    "categoryId": "cat_1760484573125",
+    "openingBalance": 121100,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760599914987",
@@ -151,6 +155,22 @@
     "id": "acc_1760759179925",
     "bookId": "book_default",
     "name": "HMTA(NM)",
+    "categoryId": "cat_1760637847923",
+    "openingBalance": 5285881,
+    "openingBalanceType": "debit"
+  },
+  {
+    "id": "acc_1760759903192",
+    "bookId": "book_default",
+    "name": "RR",
     "categoryId": "cat_1760637847923"
+  },
+  {
+    "id": "acc_1760797593804",
+    "bookId": "book_default",
+    "name": "POOJA",
+    "categoryId": "cat_1760637820112",
+    "openingBalance": 169390,
+    "openingBalanceType": "debit"
   }
 ]

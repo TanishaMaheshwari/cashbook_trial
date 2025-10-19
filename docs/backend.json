@@ -177,6 +177,36 @@
         "bookId",
         "name"
       ]
+    },
+    "Note": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Note",
+      "type": "object",
+      "description": "Represents a single note or to-do item for a book.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the note."
+        },
+        "bookId": {
+          "type": "string",
+          "description": "Reference to Book. (Relationship: Book 1:N Note)"
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the note."
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Whether the note is completed (for checklists)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the note was created."
+        }
+      },
+      "required": ["id", "bookId", "text", "isCompleted", "createdAt"]
     }
   },
   "auth": {
@@ -322,8 +352,32 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/books/{bookId}/notes/{noteId}",
+        "definition": {
+            "entityName": "Note",
+            "schema": {
+                "$ref": "#/backend/entities/Note"
+            },
+            "description": "Stores notes for a specific book. Authorization is based on `request.auth.uid == userId`.",
+            "params": [
+                {
+                    "name": "userId",
+                    "description": "The unique identifier for the user."
+                },
+                {
+                    "name": "bookId",
+                    "description": "The unique identifier for the book."
+                },
+                {
+                    "name": "noteId",
+                    "description": "The unique identifier for the note."
+                }
+            ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support a double-entry accounting application (LedgerBalance) with a focus on user-owned data and clear authorization. User data is stored under `/users/{userId}`.  Books, which represent ledgers, are stored under `/users/{userId}/books/{bookId}`, establishing a clear ownership hierarchy. Transactions, Accounts, TransactionEntries and Categories all follow a similar hierarchical structure, residing as subcollections of `/users/{userId}/books/{bookId}`. This structure enables path-based security rules based on user ID. This provides Authorization Independence as access control is implied by the document path. QAPs are supported through structural segregation based on user ownership."
+    "reasoning": "The Firestore structure is designed to support a double-entry accounting application (LedgerBalance) with a focus on user-owned data and clear authorization. User data is stored under `/users/{userId}`.  Books, which represent ledgers, are stored under `/users/{userId}/books/{bookId}`, establishing a clear ownership hierarchy. Transactions, Accounts, TransactionEntries and Categories all follow a similar hierarchical structure, residing as subcollections of `/users/{userId}/books/{bookId}`. A new `notes` collection has been added under books to store user-specific notes that can sync across devices. This structure enables path-based security rules based on user ID. This provides Authorization Independence as access control is implied by the document path. QAPs are supported through structural segregation based on user ownership."
   }
 }

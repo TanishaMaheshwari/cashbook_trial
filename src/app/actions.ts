@@ -2,8 +2,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions, restoreItem, deletePermanently, updateCategory } from '@/lib/data';
-import type { Transaction, Account } from '@/lib/types';
+import { addTransaction, addCategory, deleteTransaction, addAccount, deleteAccount, updateTransaction, updateTransactionHighlight, deleteMultipleAccounts, getBooks, addBook, updateBook, deleteBook, deleteCategory, updateAccount, deleteMultipleTransactions, restoreItem, deletePermanently, updateCategory, getNotes, addNote, updateNote, deleteNote } from '@/lib/data';
+import type { Transaction, Account, Note } from '@/lib/types';
 
 export async function createTransactionAction(bookId: string, data: Omit<Transaction, 'id' | 'date' | 'bookId'> & { date: Date }) {
   try {
@@ -182,9 +182,9 @@ export async function updateTransactionHighlightAction(bookId: string, transacti
 // --- Book Actions ---
 export async function addBookAction(name: string) {
   try {
-    await addBook(name);
+    const newBook = await addBook(name);
     revalidatePath('/settings');
-    return { success: true, message: `Book '${name}' created.` };
+    return { success: true, message: `Book '${name}' created.`, book: newBook };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return { success: false, message: `Failed to create book: ${errorMessage}` };
@@ -239,4 +239,26 @@ export async function deletePermanentlyAction(item: any) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, message: `Failed to delete permanently: ${errorMessage}` };
     }
+}
+
+// --- Note Actions ---
+export async function getNotesAction(bookId: string): Promise<Note[]> {
+    return getNotes(bookId);
+}
+
+export async function addNoteAction(bookId: string, text: string): Promise<Note> {
+    const newNote = await addNote(bookId, text);
+    revalidatePath('/');
+    return newNote;
+}
+
+export async function updateNoteAction(bookId: string, id: string, data: Partial<Omit<Note, 'id' | 'bookId'>>): Promise<Note> {
+    const updatedNote = await updateNote(bookId, id, data);
+    revalidatePath('/');
+    return updatedNote;
+}
+
+export async function deleteNoteAction(bookId: string, id: string): Promise<void> {
+    await deleteNote(bookId, id);
+    revalidatePath('/');
 }

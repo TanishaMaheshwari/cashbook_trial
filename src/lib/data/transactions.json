@@ -1,17 +1,290 @@
 [
   {
-    "date": "2025-10-18T03:46:19.926Z",
+    "description": "Cash paid to nexa fir ignias",
+    "date": "2025-10-19T11:06:10.727Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484514093",
+        "type": "debit",
+        "amount": 38000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 38000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760872009379",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash rec 29m5 +26",
+    "date": "2025-10-19T11:05:25.483Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 5550000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484541813",
+        "type": "credit",
+        "amount": 5550000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760871951699",
+    "bookId": "book_default"
+  },
+  {
+    "description": "",
+    "date": "2025-10-18T14:49:12.382Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484541813",
+        "type": "debit",
+        "amount": 667600,
+        "description": "GOLD SOLD 10-10 COINS"
+      },
+      {
+        "accountId": "acc_1760641123333",
+        "type": "credit",
+        "amount": 660000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760699799533",
+        "type": "credit",
+        "amount": 7600,
+        "description": "PROFIR MAHESH"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1760799103201",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-18T14:37:47.882Z",
+    "description": "Opening Balance for LAB",
+    "entries": [
+      {
+        "accountId": "acc_1760488673265",
+        "amount": 121100,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 121100,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760798267883",
+    "bookId": "book_default"
+  },
+  {
+    "description": "PAID ONLINE AT SORBO",
+    "date": "2025-10-12T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 3500,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760797593804",
+        "type": "credit",
+        "amount": 3500,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760797762982",
+    "bookId": "book_default"
+  },
+  {
+    "description": "CASH GIVEN TO MADHU",
+    "date": "2025-10-18T14:26:44.166Z",
+    "entries": [
+      {
+        "accountId": "acc_1760797593804",
+        "type": "debit",
+        "amount": 20000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 20000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760797645893",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-18T14:27:40.071Z",
+    "description": "Opening Balance for POOJA",
+    "entries": [
+      {
+        "accountId": "acc_1760797593804",
+        "amount": 169390,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 169390,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1760797593806",
+    "bookId": "book_default"
+  },
+  {
+    "description": "LABRADOG AGAINST GVC ",
+    "date": "2025-10-18T10:48:48.471Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 100000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760488673265",
+        "type": "credit",
+        "amount": 100000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760784563361",
+    "bookId": "book_default"
+  },
+  {
+    "description": "CASH REC FROM LAB",
+    "date": "2025-10-18T10:47:59.468Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 300000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760485009135",
+        "type": "credit",
+        "amount": 300000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760784518495",
+    "bookId": "book_default"
+  },
+  {
+    "description": "",
+    "date": "2025-10-15T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760641123333",
+        "type": "debit",
+        "amount": 2000000,
+        "description": "REC FRPM RM @BHU"
+      },
+      {
+        "accountId": "acc_1760758698028",
+        "type": "credit",
+        "amount": 2000000,
+        "description": "old rensfer"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1760761577992",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash paid to rr@Bhu",
+    "date": "2025-10-18T03:58:06.683Z",
+    "entries": [
+      {
+        "accountId": "acc_1760759903192",
+        "type": "debit",
+        "amount": 10000000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 10000000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760759927296",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash rec from hm",
+    "date": "2025-10-16T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 7500000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484514093",
+        "type": "credit",
+        "amount": 7500000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760759880671",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash from Hmta rec",
+    "date": "2025-10-16T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 2500000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760759179925",
+        "type": "credit",
+        "amount": 2500000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1760759812516",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-18T04:24:19.149Z",
     "description": "Opening Balance for HMTA(NM)",
     "entries": [
       {
         "accountId": "acc_1760759179925",
         "amount": 5285881,
-        "type": "credit"
+        "type": "debit"
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
         "amount": 5285881,
-        "type": "debit"
+        "type": "credit"
       }
     ],
     "id": "txn_1760759179927",
@@ -46,19 +319,19 @@
         "accountId": "acc_1760699692920",
         "type": "debit",
         "amount": 1325500,
-        "description": "Gold sold"
+        "description": "Gold sold 995 10 GM @HM"
       },
       {
         "accountId": "acc_1760641123333",
         "type": "credit",
-        "amount": 1320000,
-        "description": "Gold buy"
+        "amount": 1326600,
+        "description": "Gold buy 999"
       },
       {
         "accountId": "acc_1760699799533",
-        "type": "credit",
-        "amount": 5500,
-        "description": "Profit"
+        "type": "debit",
+        "amount": 1100,
+        "description": "LOSS OF 995 TO 999"
       }
     ],
     "useSeparateNarration": true,
@@ -281,17 +554,17 @@
     "bookId": "book_default"
   },
   {
-    "date": "2025-10-14T23:29:01.816Z",
+    "date": "2025-10-19T11:04:31.722Z",
     "description": "Opening Balance for Mahesh",
     "entries": [
       {
         "accountId": "acc_1760484541813",
-        "amount": 2549000,
+        "amount": 9116662,
         "type": "debit"
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
-        "amount": 2549000,
+        "amount": 9116662,
         "type": "credit"
       }
     ],
