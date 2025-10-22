@@ -1,5 +1,26 @@
 [
   {
+    "description": "GVC AMOUNT",
+    "date": "2025-09-30T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760488663682",
+        "type": "debit",
+        "amount": 60550,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760488594039",
+        "type": "credit",
+        "amount": 60550,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761172391240",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-22T12:35:38.101Z",
     "description": "Opening Balance for Pintu Mama Plot",
     "entries": [

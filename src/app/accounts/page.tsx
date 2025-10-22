@@ -12,8 +12,12 @@ export default async function AllAccountsPage() {
     getCategories(activeBookId),
     getTransactions(activeBookId),
   ]);
+  
+  // Filter out the Opening Balance Equity account
+  const visibleAccounts = accounts.filter(account => !account.id.startsWith('acc_opening_balance_equity_'));
 
-  const accountsWithDetails = accounts.map((account) => {
+
+  const accountsWithDetails = visibleAccounts.map((account) => {
     const accountEntries = transactions.flatMap(t => t.entries).filter(e => e.accountId === account.id);
     const totalDebit = accountEntries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
     const totalCredit = accountEntries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
