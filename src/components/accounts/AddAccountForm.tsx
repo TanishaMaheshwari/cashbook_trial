@@ -12,6 +12,7 @@ import type { Category } from '@/lib/types';
 import { useTransition } from 'react';
 import { createAccountAction } from '@/app/actions';
 import { useBooks } from '@/context/BookContext';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Account name is required.').max(100),
@@ -29,6 +30,7 @@ type AddAccountFormProps = {
 export default function AddAccountForm({ categories, onFinished }: AddAccountFormProps) {
   const [isPending, startTransition] = useTransition();
   const { activeBook } = useBooks();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,11 +47,22 @@ export default function AddAccountForm({ categories, onFinished }: AddAccountFor
     startTransition(async () => {
       const result = await createAccountAction(activeBook.id, values);
       if (result.success) {
+        toast({
+            title: 'Success',
+            description: result.message,
+        });
         onFinished();
         form.reset();
       } else {
-        // Silently fail on error, maybe log it
-        console.error(result.message);
+        if (result.message?.toLowerCase().includes('already exists')) {
+            form.setError('name', { type: 'manual', message: result.message });
+        } else {
+            toast({
+                title: 'Error',
+                description: result.message,
+                variant: 'destructive',
+            });
+        }
       }
     });
   };

@@ -1,5 +1,23 @@
 [
   {
+    "date": "2025-10-22T12:18:33.938Z",
+    "description": "Opening Balance for Subhash ji",
+    "entries": [
+      {
+        "accountId": "acc_1761135513936",
+        "amount": 556500,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 556500,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761135513940",
+    "bookId": "book_default"
+  },
+  {
     "description": "Cash paid to nexa fir ignias",
     "date": "2025-10-19T11:06:10.727Z",
     "entries": [

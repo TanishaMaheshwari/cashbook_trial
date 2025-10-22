@@ -51,13 +51,21 @@ export default function EditAccountForm({ account, categories, onFinished, openi
     startTransition(async () => {
       const result = await updateAccountAction(activeBook.id, account.id, values);
       if (result.success) {
+        toast({
+          title: 'Success',
+          description: result.message,
+        });
         onFinished();
       } else {
-        toast({
-          title: 'Error',
-          description: result.message,
-          variant: 'destructive',
-        });
+        if (result.message?.toLowerCase().includes('already exists')) {
+          form.setError('name', { type: 'manual', message: result.message });
+        } else {
+          toast({
+            title: 'Error',
+            description: result.message,
+            variant: 'destructive',
+          });
+        }
       }
     });
   };

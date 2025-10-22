@@ -172,5 +172,11 @@
     "categoryId": "cat_1760637820112",
     "openingBalance": 169390,
     "openingBalanceType": "debit"
+  },
+  {
+    "id": "acc_1761135513936",
+    "bookId": "book_default",
+    "name": "Subhash ji",
+    "categoryId": "cat_party"
   }
 ]
