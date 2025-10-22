@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import type { Account, Category } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Folder, PlusCircle, Settings, List, Users, MoreVertical, ArrowLeft, ArrowLeftRight } from 'lucide-react';
+import { Folder, PlusCircle, Settings, List, Users, MoreVertical, ArrowLeft, LogOut } from 'lucide-react';
 import { Logo } from '@/components/icons/Logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AddTransactionForm from '@/components/transactions/AddTransactionForm';
 import Link from 'next/link';
 import { useBooks } from '@/context/BookContext';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useUser } from '@/firebase';
 
 type HeaderProps = {
   accounts?: Account[];
@@ -23,6 +27,13 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
   const pathname = usePathname();
   const isDashboard = pathname === '/';
+  const auth = useAuth();
+  const { user } = useUser();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    // The AuthWrapper will handle the redirect to the login page.
+  };
 
   return (
     <>
@@ -79,60 +90,30 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                   Add Transaction
                 </Button>
               )}
-
-              {/* Mobile Menu */}
-              <div className="md:hidden">
-                 {isDashboard ? (
-                    <div className="flex items-center gap-1">
-                         <Button variant="ghost" size="icon" asChild>
-                            <Link href="/transactions"><List /></Link>
-                        </Button>
-                         <Button variant="ghost" size="icon" asChild>
-                            <Link href="/accounts"><Users /></Link>
-                        </Button>
-                         <Button variant="ghost" size="icon" asChild>
-                            <Link href="/categories"><Folder /></Link>
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                            <Link href="/settings"><Settings /></Link>
-                        </Button>
-                    </div>
-                ) : (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical />
-                          <span className="sr-only">More options</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                         <DropdownMenuItem onClick={() => setAddTxSheetOpen(true)}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/transactions">
-                            <List className="mr-2 h-4 w-4" /> All Transactions
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/accounts">
-                            <Users className="mr-2 h-4 w-4" /> All Accounts
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/categories">
-                            <Folder className="mr-2 h-4 w-4" /> All Categories
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/settings">
+              
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                       <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
+                        <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href="/settings">
                             <Settings className="mr-2 h-4 w-4" /> Settings
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
-              </div>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                     <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
             </div>
           </div>
         </div>

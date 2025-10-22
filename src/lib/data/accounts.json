@@ -33,7 +33,9 @@
     "id": "acc_1760484818334",
     "bookId": "book_default",
     "name": "Pintu mama",
-    "categoryId": "cat_party"
+    "categoryId": "cat_party",
+    "openingBalance": 954500,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760484836865",
@@ -176,7 +178,27 @@
   {
     "id": "acc_1761135513936",
     "bookId": "book_default",
-    "name": "Subhash ji",
+    "name": "SUB",
+    "categoryId": "cat_party",
+    "openingBalance": 556500,
+    "openingBalanceType": "debit"
+  },
+  {
+    "id": "acc_1761135759679",
+    "bookId": "book_default",
+    "name": "BG",
+    "categoryId": "cat_1760599855378"
+  },
+  {
+    "id": "acc_1761136137802",
+    "bookId": "book_default",
+    "name": "Personal",
+    "categoryId": "cat_revenue"
+  },
+  {
+    "id": "acc_1761136538099",
+    "bookId": "book_default",
+    "name": "Pintu Mama Plot",
     "categoryId": "cat_party"
   }
 ]

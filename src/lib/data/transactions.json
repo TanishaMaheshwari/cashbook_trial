@@ -1,7 +1,172 @@
 [
   {
+    "date": "2025-10-22T12:35:38.101Z",
+    "description": "Opening Balance for Pintu Mama Plot",
+    "entries": [
+      {
+        "accountId": "acc_1761136538099",
+        "amount": 525000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 525000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761136538101",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Diwali bonus moti mansingh",
+    "date": "2025-10-20T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761135759679",
+        "type": "debit",
+        "amount": 2000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 2000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761136204596",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Diwali phatake",
+    "date": "2025-10-19T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761136137802",
+        "type": "debit",
+        "amount": 10000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 10000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761136166883",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Online to prakash hand cut",
+    "date": "2025-10-19T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761135759679",
+        "type": "debit",
+        "amount": 15000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760797593804",
+        "type": "credit",
+        "amount": 15000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761136064291",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Diesel in all cars ",
+    "date": "2025-10-19T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761135759679",
+        "type": "debit",
+        "amount": 12300,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 12300,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761136010400",
+    "bookId": "book_default"
+  },
+  {
+    "description": "MAHESH SE REC",
+    "date": "2025-10-20T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 1000000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484541813",
+        "type": "credit",
+        "amount": 1000000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761135808283",
+    "bookId": "book_default"
+  },
+  {
+    "description": "MOTI KO DIYE FROM VD",
+    "date": "2025-10-18T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761135759679",
+        "type": "debit",
+        "amount": 50000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 50000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761135771892",
+    "bookId": "book_default"
+  },
+  {
+    "description": "SUBAHSH JI KO DIYE",
+    "date": "2025-10-19T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761135513936",
+        "type": "debit",
+        "amount": 50000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 50000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761135714376",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-22T12:18:33.938Z",
-    "description": "Opening Balance for Subhash ji",
+    "description": "Opening Balance for SUB",
     "entries": [
       {
         "accountId": "acc_1761135513936",
@@ -554,17 +719,17 @@
     "useSeparateNarration": false
   },
   {
-    "date": "2025-10-14T23:33:38.342Z",
+    "date": "2025-10-22T12:35:14.852Z",
     "description": "Opening Balance for Pintu mama",
     "entries": [
       {
         "accountId": "acc_1760484818334",
-        "amount": 250000,
+        "amount": 954500,
         "type": "debit"
       },
       {
         "accountId": "acc_opening_balance_equity_book_default",
-        "amount": 250000,
+        "amount": 954500,
         "type": "credit"
       }
     ],
