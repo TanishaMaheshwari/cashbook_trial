@@ -13,7 +13,7 @@ import {
 import { formatCurrency, cn, formatDate } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical, Folder, Settings } from 'lucide-react';
+import { ArrowUpDown, Pencil, Trash2, ArrowRight, PlusCircle, ArrowLeftRight, Calendar as CalendarIcon, Scale, Users, MoreVertical, Folder, Settings, CheckSquare, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,6 +70,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDescriptor, setSortDescriptor] = useState('date-desc');
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -106,6 +107,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         const result = await deleteMultipleTransactionsAction(activeBook.id, selectedTransactions);
         if(result.success) {
             setSelectedTransactions([]);
+            setIsSelectMode(false);
         } else {
             console.error(result.message);
         }
@@ -236,6 +238,13 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       setSelectedTransactions([]);
     }
   }
+  
+  const toggleSelectMode = () => {
+    if (isSelectMode) {
+      setSelectedTransactions([]);
+    }
+    setIsSelectMode(!isSelectMode);
+  }
 
   if (!isMounted) {
     return (
@@ -358,7 +367,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     <Card>
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          {selectedTransactions.length > 0 && isTransactionsPage ? (
+          {isSelectMode && selectedTransactions.length > 0 && isTransactionsPage ? (
               <AlertDialog>
                   <AlertDialogTrigger asChild>
                   <Button variant="destructive">
@@ -382,10 +391,18 @@ export default function RecentTransactions({ transactions: initialTransactions, 
                   </AlertDialogContent>
               </AlertDialog>
           ) : (
+            <>
              <CardTitle className={cn(isTransactionsPage && 'sr-only')}>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
+             {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
+            </>
           )}
-          {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
         </div>
+        {isTransactionsPage && (
+          <Button variant="outline" size="sm" onClick={toggleSelectMode}>
+            {isSelectMode ? <X className="mr-2 h-4 w-4" /> : <CheckSquare className="mr-2 h-4 w-4" />}
+            {isSelectMode ? 'Cancel' : 'Select'}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
       {transactions.length === 0 ? (
@@ -399,7 +416,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
             {transactions.map(tx => (
               <Card key={tx.id} className={cn('w-full', tx.highlight && highlightClasses[tx.highlight])}>
                 <CardContent className="p-4 flex gap-3">
-                  {isTransactionsPage && (
+                  {isSelectMode && isTransactionsPage && (
                     <Checkbox
                         checked={selectedTransactions.includes(tx.id)}
                         onCheckedChange={(checked) => handleSelect(tx.id, !!checked)}
@@ -466,7 +483,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
             <Table>
               <TableHeader>
                 <TableRow>
-                   {isTransactionsPage && (
+                   {isTransactionsPage && isSelectMode && (
                     <TableHead className="w-12">
                       <Checkbox
                         checked={selectedTransactions.length === transactions.length && transactions.length > 0}
@@ -487,7 +504,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               <TableBody>
                 {transactions.map(tx => (
                   <TableRow key={tx.id} className={cn(tx.highlight && highlightClasses[tx.highlight])} data-state={selectedTransactions.includes(tx.id) ? 'selected' : undefined}>
-                    {isTransactionsPage && (
+                    {isTransactionsPage && isSelectMode && (
                       <TableCell>
                         <Checkbox
                           checked={selectedTransactions.includes(tx.id)}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -12,7 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical, Scale, ArrowLeftRight, Folder, Settings } from 'lucide-react';
+import { ArrowLeft, Edit, PlusCircle, Trash2, ArrowUpDown, MoreVertical, Scale, ArrowLeftRight, Folder, Settings, CheckSquare, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Account, Category, Transaction } from '@/lib/types';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -62,6 +61,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [filter, setFilter] = useState('all');
   const { activeBook } = useBooks();
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   const getCategoryName = (categoryId?: string) => {
     if (!categoryId) return 'Uncategorized';
@@ -91,6 +91,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       if (result.success) {
         // toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
         setSelectedAccounts([]);
+        setIsSelectMode(false);
       } else {
         // toast({ title: "Error", description: result.message, variant: "destructive" });
       }
@@ -173,6 +174,13 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     } else {
       setSelectedAccounts([]);
     }
+  }
+
+  const toggleSelectMode = () => {
+    if (isSelectMode) {
+      setSelectedAccounts([]);
+    }
+    setIsSelectMode(!isSelectMode);
   }
 
   return (
@@ -259,7 +267,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
             <div className="flex items-center gap-4">
-                {selectedAccounts.length > 0 ? (
+                {isSelectMode && selectedAccounts.length > 0 ? (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">
@@ -286,29 +294,39 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                     <CardTitle className="text-lg">All Accounts ({filteredAndSortedAccounts.length} of {initialAccounts.length})</CardTitle>
                 )}
             </div>
-            <div className="text-sm hidden md:block">
-                <span className="text-green-600 mr-4">Total Dr: {formatCurrency(totals.debit)}</span>
-                <span className="text-red-600">Total Cr: {formatCurrency(totals.credit)}</span>
+            <div className="flex items-center gap-4">
+                <div className="text-sm hidden md:block">
+                    <span className="text-green-600 mr-4">Total Dr: {formatCurrency(totals.debit)}</span>
+                    <span className="text-red-600">Total Cr: {formatCurrency(totals.credit)}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={toggleSelectMode}>
+                  {isSelectMode ? <X className="mr-2 h-4 w-4" /> : <CheckSquare className="mr-2 h-4 w-4" />}
+                  {isSelectMode ? 'Cancel' : 'Select'}
+                </Button>
             </div>
         </CardHeader>
         <CardContent className="p-0">
           {/* Mobile Card View */}
           <div className="md:hidden">
-            <div className="flex items-center px-4 py-2 border-b">
-                <Checkbox 
-                    checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
-                    onCheckedChange={(checked) => handleSelectAll(!!checked)}
-                    className="mr-4"
-                />
-                <span className="text-sm text-muted-foreground">Select All</span>
-            </div>
+             {isSelectMode && (
+              <div className="flex items-center px-4 py-2 border-b">
+                  <Checkbox 
+                      checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
+                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                      className="mr-4"
+                  />
+                  <span className="text-sm text-muted-foreground">Select All</span>
+              </div>
+            )}
              {filteredAndSortedAccounts.map((account) => (
                 <div key={account.id} className="flex items-start gap-4 p-4 border-b last:border-b-0" data-state={selectedAccounts.includes(account.id) ? 'selected' : undefined}>
-                    <Checkbox 
-                        checked={selectedAccounts.includes(account.id)}
-                        onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
-                        className="mt-1"
-                    />
+                    {isSelectMode && (
+                      <Checkbox 
+                          checked={selectedAccounts.includes(account.id)}
+                          onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
+                          className="mt-1"
+                      />
+                    )}
                     <div className="flex-1">
                         <Link href={`/accounts/${account.id}`} className="block">
                             <p className="font-semibold text-primary hover:underline">{account.name}</p>
@@ -373,12 +391,14 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
               <Table>
                   <TableHeader>
                       <TableRow>
-                          <TableHead className="w-12">
-                             <Checkbox 
-                                  checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
-                                  onCheckedChange={(checked) => handleSelectAll(!!checked)}
-                             />
-                          </TableHead>
+                          {isSelectMode && (
+                            <TableHead className="w-12">
+                               <Checkbox 
+                                    checked={selectedAccounts.length === filteredAndSortedAccounts.length && filteredAndSortedAccounts.length > 0}
+                                    onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                               />
+                            </TableHead>
+                          )}
                           <TableHead>Account</TableHead>
                           <TableHead>Category</TableHead>
                           <TableHead className="text-right">Debit</TableHead>
@@ -389,12 +409,14 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                   <TableBody>
                       {filteredAndSortedAccounts.map((account) => (
                       <TableRow key={account.id} data-state={selectedAccounts.includes(account.id) ? 'selected' : undefined}>
-                          <TableCell>
-                             <Checkbox 
-                                  checked={selectedAccounts.includes(account.id)}
-                                  onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
-                             />
-                          </TableCell>
+                          {isSelectMode && (
+                            <TableCell>
+                               <Checkbox 
+                                    checked={selectedAccounts.includes(account.id)}
+                                    onCheckedChange={(checked) => handleSelect(account.id, !!checked)}
+                               />
+                            </TableCell>
+                          )}
                           <TableCell className="font-semibold">
                               <Link href={`/accounts/${account.id}`} className="text-primary hover:underline">
                                   {account.name}
@@ -461,7 +483,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
                   ))}
                    {filteredAndSortedAccounts.length === 0 && (
                        <TableRow>
-                          <TableCell colSpan={6} className="h-24 text-center">
+                          <TableCell colSpan={isSelectMode ? 7 : 6} className="h-24 text-center">
                               No accounts found.
                           </TableCell>
                        </TableRow>
@@ -492,6 +514,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   );
 
     
+
 
 
 
