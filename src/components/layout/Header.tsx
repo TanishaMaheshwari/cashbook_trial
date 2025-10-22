@@ -80,6 +80,48 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                   Add Transaction
                 </Button>
               )}
+              
+               {/* Mobile Menu */}
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isDashboard && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/transactions">
+                            <List className="mr-2 h-4 w-4" />
+                            <span>All Transactions</span>
+                          </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                          <Link href="/accounts">
+                            <Users className="mr-2 h-4 w-4" />
+                            <span>All Accounts</span>
+                          </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                          <Link href="/categories">
+                            <Folder className="mr-2 h-4 w-4" />
+                             <span>All Categories</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuItem asChild>
+                       <Link href="/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
