@@ -1,7 +1,6 @@
 import { getAccounts, getCategories, getTransactions, getBooks } from '@/lib/data';
 import DashboardClient from '@/components/dashboard/DashboardClient';
 import { cookies } from 'next/headers';
-import Header from '@/components/layout/Header';
 
 export default async function Home() {
   const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
@@ -13,13 +12,10 @@ export default async function Home() {
   ]);
 
   return (
-    <>
-      <Header />
       <DashboardClient
         initialTransactions={initialTransactions}
         accounts={accounts}
         categories={categories}
       />
-    </>
   );
 }

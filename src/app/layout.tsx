@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getBooks } from '@/lib/data';
 import { BookProvider } from '@/context/BookContext';
-import { FirebaseClientProvider } from '@/firebase';
-import { AuthWrapper } from '@/components/layout/AuthWrapper';
+import Header from '@/components/layout/Header';
+
 
 export const metadata: Metadata = {
   title: 'LedgerBalance',
@@ -26,14 +26,11 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <FirebaseClientProvider>
-          <AuthWrapper>
             <BookProvider initialBooks={initialBooks}>
+              <Header />
               {children}
             </BookProvider>
             <Toaster />
-          </AuthWrapper>
-        </FirebaseClientProvider>
       </body>
     </html>
   );

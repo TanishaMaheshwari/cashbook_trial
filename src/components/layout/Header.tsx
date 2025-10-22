@@ -11,10 +11,7 @@ import Link from 'next/link';
 import { useBooks } from '@/context/BookContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useUser } from '@/firebase';
 
 type HeaderProps = {
   accounts?: Account[];
@@ -27,13 +24,6 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
   const [isAddTxSheetOpen, setAddTxSheetOpen] = useState(false);
   const pathname = usePathname();
   const isDashboard = pathname === '/';
-  const auth = useAuth();
-  const { user } = useUser();
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    // The AuthWrapper will handle the redirect to the login page.
-  };
 
   return (
     <>
@@ -90,30 +80,6 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
                   Add Transaction
                 </Button>
               )}
-              
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
-                        <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link href="/settings">
-                            <Settings className="mr-2 h-4 w-4" /> Settings
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                     <DropdownMenuItem onClick={handleSignOut}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
             </div>
           </div>
         </div>
