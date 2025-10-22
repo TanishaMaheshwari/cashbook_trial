@@ -27,7 +27,6 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased">
             <BookProvider initialBooks={initialBooks}>
-              <Header />
               {children}
             </BookProvider>
             <Toaster />

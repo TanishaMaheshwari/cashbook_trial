@@ -61,25 +61,19 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
   }, []);
 
   const { displayEntries, finalBalance, openingBalance } = useMemo(() => {
-    // Exclude the specific "Opening Balance for..." transaction from the main list.
     const regularEntries = allLedgerEntries.filter(entry => !entry.description.startsWith('Opening Balance for'));
-
-    // Find the opening balance transaction if it exists.
     const openingBalanceTx = allLedgerEntries.find(entry => entry.description.startsWith('Opening Balance for'));
     
-    // The initial balance is from the opening balance transaction, or 0.
     const initialBookBalance = openingBalanceTx 
         ? normallyDebit 
             ? openingBalanceTx.debit - openingBalanceTx.credit 
             : openingBalanceTx.credit - openingBalanceTx.debit
         : 0;
     
-    // Find transactions that occurred before the start of the selected date range.
     const entriesBeforeDateRange = dateRange?.from
         ? regularEntries.filter(entry => new Date(entry.date) < new Date(dateRange.from!))
         : [];
 
-    // Calculate the opening balance for the period.
     const balanceBeforePeriod = entriesBeforeDateRange.reduce((acc, entry) => {
         const debit = entry.debit;
         const credit = entry.credit;
@@ -89,7 +83,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     const openingBalance = balanceBeforePeriod;
     let runningBalance = openingBalance;
 
-    // Filter entries to be within the selected date range.
     const filteredEntries = regularEntries.filter(entry => {
         const entryDate = new Date(entry.date);
         if (dateRange?.from && entryDate < new Date(dateRange.from)) return false;
@@ -97,7 +90,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
         return true;
     });
 
-    // Recalculate running balance for the filtered period.
     const ledgerForDisplay = filteredEntries.map(tx => {
         const debit = tx.debit;
         const credit = tx.credit;
@@ -108,7 +100,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     });
 
     return {
-        displayEntries: ledgerForDisplay, // Already sorted by date ascending from server
+        displayEntries: ledgerForDisplay,
         finalBalance: runningBalance,
         openingBalance: openingBalance,
     };
@@ -119,15 +111,12 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     startSharingTransition(async () => {
         if (!ledgerRef.current) return;
         
-        // 1. Create a clone of the ledger content for export
         const exportElement = ledgerRef.current.cloneNode(true) as HTMLElement;
         
-        // 2. Remove unwanted elements from the clone
         exportElement.querySelector('[data-id="category-card"]')?.remove();
         exportElement.querySelector('[data-id="ledger-entries-header"]')?.remove();
         exportElement.querySelector('[data-id="account-notes"]')?.remove();
         
-        // Add a title to the clone
         const titleElement = document.createElement('div');
         titleElement.innerHTML = `
             <h1 class="text-2xl font-bold text-center mb-1">${account.name} - Ledger</h1>
@@ -135,7 +124,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
         `;
         exportElement.insertBefore(titleElement, exportElement.firstChild);
         
-        // Fix grid layout for export by wrapping remaining cards
         const summaryCards = exportElement.querySelectorAll<HTMLElement>('.grid > .lucide-university, .grid > .scale, .grid > .calendar-clock');
         const summaryGrid = exportElement.querySelector<HTMLElement>('.grid.md\\:grid-cols-3');
         if (summaryGrid) {
@@ -147,7 +135,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
         }
 
 
-        // Temporarily append the clone to the body off-screen to render it
         document.body.appendChild(exportElement);
         
         const canvas = await html2canvas(exportElement, {
@@ -155,7 +142,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
             useCORS: true,
         });
 
-        // Clean up by removing the clone
         document.body.removeChild(exportElement);
 
         if (format === 'image') {
@@ -180,7 +166,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
 
 
   if (!isMounted) {
-    return null; // Or a loading skeleton
+    return null; 
   }
   
   const isFinalBalanceDebit = normallyDebit ? finalBalance >= 0 : finalBalance < 0;
@@ -191,7 +177,7 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             <Button variant="outline" size="icon" asChild className="hidden sm:inline-flex">
+             <Button variant="outline" size="icon" asChild>
                 <Link href="/accounts">
                     <ArrowLeft />
                     <span className="sr-only">Back to Accounts</span>
@@ -200,23 +186,6 @@ export default function AccountLedgerClient({ account, allLedgerEntries, categor
             <div>
                 <div className="flex items-center gap-2">
                     <h1 className="text-3xl font-headline">{account.name}</h1>
-                    <div className="hidden sm:flex items-center gap-2">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/"><Home /></Link>
-                        </Button>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/transactions"><List /></Link>
-                        </Button>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/accounts"><Users /></Link>
-                        </Button>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/categories"><Folder /></Link>
-                        </Button>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link href="/settings"><Settings /></Link>
-                        </Button>
-                    </div>
                 </div>
                 <p className="text-muted-foreground">Account Ledger</p>
             </div>
