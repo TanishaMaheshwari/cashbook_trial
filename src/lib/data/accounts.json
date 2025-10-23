@@ -252,5 +252,11 @@
     "bookId": "book_default",
     "name": "GOLD STOCK",
     "categoryId": "cat_1760637820112"
+  },
+  {
+    "id": "acc_1761227443314",
+    "bookId": "book_default",
+    "name": "DJ",
+    "categoryId": "cat_1760637847923"
   }
 ]

@@ -1,5 +1,137 @@
 [
   {
+    "description": "",
+    "date": "2025-10-23T14:02:18.551Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 100000,
+        "description": "CASH REC FROM VICKY"
+      },
+      {
+        "accountId": "acc_1760638196154",
+        "type": "credit",
+        "amount": 200000,
+        "description": "CASH JAMMA NAME REC 1 P 1 MT"
+      },
+      {
+        "accountId": "acc_1761179833281",
+        "type": "debit",
+        "amount": 100000,
+        "description": "CASG PAID TO MT FROM VICKY"
+      }
+    ],
+    "useSeparateNarration": true,
+    "id": "txn_1761228170516",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Dj rec cash against 019",
+    "date": "2025-10-23T13:49:40.461Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 650000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1761227443314",
+        "type": "credit",
+        "amount": 650000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761227456387",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash paid",
+    "date": "2025-10-23T13:49:17.673Z",
+    "entries": [
+      {
+        "accountId": "acc_1760485093510",
+        "type": "debit",
+        "amount": 1600000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 1600000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761227374321",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Gold 995 to 999",
+    "date": "2025-10-23T13:48:39.572Z",
+    "entries": [
+      {
+        "accountId": "acc_1761226898210",
+        "type": "debit",
+        "amount": 3000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760485093510",
+        "type": "credit",
+        "amount": 3000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761227342403",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Gold buy 50 gm 995",
+    "date": "2025-10-21T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1761226898210",
+        "type": "debit",
+        "amount": 627500,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760485093510",
+        "type": "credit",
+        "amount": 627500,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761227254380",
+    "bookId": "book_default"
+  },
+  {
+    "description": "GOLD BUY",
+    "date": "2025-10-23T13:44:02.219Z",
+    "entries": [
+      {
+        "accountId": "acc_1761226898210",
+        "type": "debit",
+        "amount": 1270000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760485093510",
+        "type": "credit",
+        "amount": 1270000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761227075422",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-23T01:08:17.069Z",
     "description": "Opening Balance for Sunil Lions",
     "entries": [

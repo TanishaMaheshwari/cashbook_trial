@@ -26,6 +26,7 @@ type CategoryWithDetails = Category & {
 type CategoriesClientProps = {
   categories: CategoryWithDetails[];
   allCategories: Category[];
+  isDebitCategory: (categoryName: string) => boolean;
 };
 
 const categoryColors = [
@@ -37,11 +38,7 @@ const categoryColors = [
   'bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30',
 ];
 
-// Define which categories normally have a debit balance
-const DEBIT_BALANCE_CATEGORIES = ['parties', 'cash', 'assets', 'expense'];
-
-
-export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
+export default function CategoriesClient({ categories, allCategories, isDebitCategory }: CategoriesClientProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { activeBook } = useBooks();
@@ -95,11 +92,6 @@ export default function CategoriesClient({ categories, allCategories }: Categori
         toast({ title: "Error", description: result.message, variant: "destructive" });
       }
     });
-  };
-  
-  const isDebitCategory = (categoryName: string) => {
-    const lowerCategoryName = categoryName.toLowerCase();
-    return DEBIT_BALANCE_CATEGORIES.some(debitCat => lowerCategoryName.includes(debitCat));
   };
 
 
@@ -159,16 +151,16 @@ export default function CategoriesClient({ categories, allCategories }: Categori
       <div className="md:columns-2 gap-6 space-y-6">
         {categories.map((category, index) => {
           const normallyDebit = isDebitCategory(category.name);
-          const displayTotal = normallyDebit ? category.totalBalance : category.totalBalance * -1;
-          
+          const totalIsDebit = normallyDebit ? category.totalBalance >= 0 : category.totalBalance < 0;
+
           return (
           <Card key={category.id} className={cn("break-inside-avoid-column", categoryColors[index % categoryColors.length])}>
             <CardHeader className="flex flex-row justify-between items-start">
               <div>
                 <CardTitle className="font-bold text-lg">{category.name}</CardTitle>
                 <CardDescription className="text-sm">
-                  {category.accounts.length} accounts &bull; Total: {formatCurrency(Math.abs(displayTotal))}
-                   <span className="text-xs ml-1">{displayTotal >= 0 ? 'Dr' : 'Cr'}</span>
+                  {category.accounts.length} accounts &bull; Total: {formatCurrency(Math.abs(category.totalBalance))}
+                   <span className="text-xs ml-1">{totalIsDebit ? 'Dr' : 'Cr'}</span>
                 </CardDescription>
               </div>
                <DropdownMenu>
@@ -218,19 +210,15 @@ export default function CategoriesClient({ categories, allCategories }: Categori
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
                   {category.accounts.map((account) => {
-                    // Raw balance is always debit - credit.
-                    // If the category is normally credit, we expect a negative balance.
-                    // If it's normally debit, we expect a positive balance.
-                    // The displayBalance will be positive for debits, negative for credits.
-                    const displayBalance = normallyDebit ? account.balance : -account.balance;
+                    const isDebit = normallyDebit ? account.balance >= 0 : account.balance < 0;
                     return (
                      <li key={account.id} className="flex justify-between items-center bg-background/50 p-3 rounded-md">
                         <Link href={`/accounts/${account.id}`} className="font-medium hover:underline">
                             {account.name}
                         </Link>
-                        <span className={cn("font-semibold text-sm", displayBalance >= 0 ? 'text-green-700' : 'text-red-700')}>
+                        <span className={cn("font-semibold text-sm", isDebit ? 'text-green-700' : 'text-red-700')}>
                           {formatCurrency(Math.abs(account.balance))}
-                          <span className="text-xs text-muted-foreground ml-1">{displayBalance >= 0 ? 'Dr' : 'Cr'}</span>
+                          <span className="text-xs text-muted-foreground ml-1">{isDebit ? 'Dr' : 'Cr'}</span>
                         </span>
                     </li>
                   )})}
