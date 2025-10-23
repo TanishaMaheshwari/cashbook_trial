@@ -160,7 +160,18 @@ export default function RecentTransactions({ transactions: initialTransactions, 
 
     if (isTransactionsPage) {
         if (searchTerm) {
-          filtered = filtered.filter(tx => tx.description.toLowerCase().includes(searchTerm.toLowerCase()));
+          const lowercasedFilter = searchTerm.toLowerCase();
+          filtered = filtered.filter(tx => {
+            const amount = tx.entries.find(e => e.type === 'debit')?.amount || 0;
+            return (
+              tx.description.toLowerCase().includes(lowercasedFilter) ||
+              tx.entries.some(entry =>
+                getAccountName(entry.accountId).toLowerCase().includes(lowercasedFilter) ||
+                (entry.description && entry.description.toLowerCase().includes(lowercasedFilter))
+              ) ||
+              amount.toString().includes(lowercasedFilter)
+            );
+          });
         }
 
         let dateFilterRange: DateRange | undefined = customDateRange;
@@ -290,7 +301,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Input
-                placeholder="Filter by description..."
+                placeholder="Search anything..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full md:w-auto"

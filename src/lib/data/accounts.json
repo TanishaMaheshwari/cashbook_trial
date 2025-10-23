@@ -246,5 +246,11 @@
     "bookId": "book_default",
     "name": "Sunil Lions",
     "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1761226898210",
+    "bookId": "book_default",
+    "name": "GOLD STOCK",
+    "categoryId": "cat_1760637820112"
   }
 ]
