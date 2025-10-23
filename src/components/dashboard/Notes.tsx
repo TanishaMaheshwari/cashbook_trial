@@ -21,6 +21,8 @@ export default function Notes() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isNoteActionPending, startNoteActionTransition] = useTransition();
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
 
   useEffect(() => {
     if (activeBook) {
@@ -42,6 +44,39 @@ export default function Notes() {
         });
     }
   };
+  
+  const handleEditNote = (note: NoteItem) => {
+    setEditingNoteId(note.id);
+    setEditingText(note.text);
+  };
+  
+  const handleUpdateNote = (id: string) => {
+    if (!activeBook || editingText.trim() === '') return;
+    
+    const originalNote = notes.find(n => n.id === id);
+    if (originalNote && originalNote.text === editingText) {
+        setEditingNoteId(null);
+        return;
+    }
+
+    startNoteActionTransition(async () => {
+      await updateNoteAction(activeBook.id, id, { text: editingText.trim() });
+      setNotes(notes.map(note =>
+        note.id === id ? { ...note, text: editingText.trim() } : note
+      ));
+      setEditingNoteId(null);
+    });
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
+    if (e.key === 'Enter') {
+      handleUpdateNote(id);
+    }
+    if (e.key === 'Escape') {
+      setEditingNoteId(null);
+    }
+  };
+
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -86,6 +121,45 @@ export default function Notes() {
   const completedNotes = notes.filter(n => n.isCompleted);
   const activeNotes = notes.filter(n => !n.isCompleted);
 
+  const renderNoteItem = (note: NoteItem) => {
+     const isEditing = editingNoteId === note.id;
+     
+     return (
+        <div key={note.id} className="flex items-center gap-3 group" style={{ opacity: isNoteActionPending ? 0.5 : 1 }}>
+            <Checkbox
+              id={note.id}
+              checked={note.isCompleted}
+              onCheckedChange={() => handleToggleComplete(note.id, note.isCompleted)}
+              disabled={isNoteActionPending || isEditing}
+            />
+            {isEditing ? (
+                 <Input
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onBlur={() => handleUpdateNote(note.id)}
+                    onKeyDown={(e) => handleEditKeyDown(e, note.id)}
+                    autoFocus
+                    className="h-8 text-sm flex-grow"
+                 />
+            ) : (
+                <label
+                    htmlFor={note.id}
+                    className={cn(
+                        "flex-grow text-sm cursor-pointer",
+                        note.isCompleted && "line-through text-muted-foreground"
+                    )}
+                    onClick={() => handleEditNote(note)}
+                >
+                    {note.text}
+                </label>
+            )}
+            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteNote(note.id)} disabled={isNoteActionPending}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+        </div>
+     );
+  }
+
 
   return (
     <Card 
@@ -120,28 +194,7 @@ export default function Notes() {
           <>
             {activeNotes.length > 0 && (
               <div className="mt-4 space-y-2">
-                {activeNotes.map(note => (
-                  <div key={note.id} className="flex items-center gap-3 group" style={{ opacity: isNoteActionPending ? 0.5 : 1 }}>
-                    <Checkbox
-                      id={note.id}
-                      checked={note.isCompleted}
-                      onCheckedChange={() => handleToggleComplete(note.id, note.isCompleted)}
-                      disabled={isNoteActionPending}
-                    />
-                    <label
-                      htmlFor={note.id}
-                      className={cn(
-                        "flex-grow text-sm cursor-pointer",
-                        note.isCompleted && "line-through text-muted-foreground"
-                      )}
-                    >
-                      {note.text}
-                    </label>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteNote(note.id)} disabled={isNoteActionPending}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
+                {activeNotes.map(renderNoteItem)}
               </div>
             )}
             
@@ -150,25 +203,7 @@ export default function Notes() {
                     <Separator />
                     <h3 className="text-sm font-semibold my-2 flex items-center gap-2 text-muted-foreground"><ListTodo className="h-4 w-4"/> Completed ({completedNotes.length})</h3>
                     <div className="space-y-2">
-                        {completedNotes.map(note => (
-                           <div key={note.id} className="flex items-center gap-3 group" style={{ opacity: isNoteActionPending ? 0.5 : 1 }}>
-                            <Checkbox
-                              id={note.id}
-                              checked={note.isCompleted}
-                              onCheckedChange={() => handleToggleComplete(note.id, note.isCompleted)}
-                              disabled={isNoteActionPending}
-                            />
-                            <label
-                              htmlFor={note.id}
-                              className="flex-grow text-sm text-muted-foreground line-through cursor-pointer"
-                            >
-                              {note.text}
-                            </label>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteNote(note.id)} disabled={isNoteActionPending}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
+                        {completedNotes.map(renderNoteItem)}
                     </div>
                 </div>
             )}
