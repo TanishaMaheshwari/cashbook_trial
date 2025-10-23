@@ -8,7 +8,7 @@ import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, evaluateMathExpression } from '@/lib/utils';
 
 type TransactionView = 'to_from' | 'dr_cr';
 
@@ -40,6 +40,45 @@ const TransactionEntryCardComponent = ({
   const form = useFormContext();
   const fromLabel = transactionView === 'dr_cr' ? 'Credit Account' : 'From Account';
   const toLabel = transactionView === 'dr_cr' ? 'Debit Account' : 'To Account';
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    field.onChange(value); // Store the raw string value
+
+    if (!isSplit && fieldsLength === 2) {
+      const otherIndex = index === 0 ? 1 : 0;
+      form.setValue(`entries.${otherIndex}.amount`, value, { shouldValidate: true });
+    }
+  };
+
+  const handleAmountBlur = (e: React.FocusEvent<HTMLInputElement>, field: any) => {
+    let value = e.target.value;
+    let calculatedAmount: number | string = value;
+
+    if (typeof value === 'string' && value.startsWith('=')) {
+        const expression = value.substring(1);
+        try {
+            calculatedAmount = evaluateMathExpression(expression);
+            if (isNaN(calculatedAmount)) {
+              form.setError(`entries.${index}.amount`, { type: 'manual', message: 'Invalid expression.' });
+              return;
+            }
+        } catch (error) {
+            form.setError(`entries.${index}.amount`, { type: 'manual', message: 'Invalid expression.' });
+            return;
+        }
+    }
+    
+    // Convert to number for validation and further processing
+    const numericAmount = parseFloat(calculatedAmount as string);
+    field.onChange(numericAmount);
+
+     if (!isSplit && fieldsLength === 2) {
+      const otherIndex = index === 0 ? 1 : 0;
+      form.setValue(`entries.${otherIndex}.amount`, numericAmount, { shouldValidate: true });
+    }
+    form.trigger(`entries.${index}.amount`);
+  };
   
   return (
     <Card className={cn("w-full", type === 'debit' ? 'bg-green-50/50 dark:bg-green-950/20' : 'bg-red-50/50 dark:bg-red-950/20')}>
@@ -75,19 +114,11 @@ const TransactionEntryCardComponent = ({
               <FormLabel>Amount</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
+                  type="text" // Change to text to allow formula input
+                  placeholder="=100+50 or 150"
                   {...field}
-                  onChange={(e) => {
-                      const value = e.target.value;
-                      const amount = value === '' ? '' : parseFloat(value);
-                      field.onChange(amount);
-                      if (!isSplit && fieldsLength === 2) {
-                        const otherIndex = index === 0 ? 1 : 0;
-                        form.setValue(`entries.${otherIndex}.amount`, amount, { shouldValidate: true });
-                      }
-                  }}
+                  onChange={(e) => handleAmountChange(e, field)}
+                  onBlur={(e) => handleAmountBlur(e, field)}
                   className="bg-background"
                 />
               </FormControl>

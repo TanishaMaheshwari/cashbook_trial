@@ -24,7 +24,14 @@ import { TransactionEntryCard } from './TransactionEntryCard';
 const transactionEntrySchema = z.object({
   accountId: z.string().min(1, 'Account is required.'),
   type: z.enum(['debit', 'credit']),
-  amount: z.coerce.number({invalid_type_error: "Amount is required."}).positive('Amount must be positive.'),
+  amount: z.any().transform(val => {
+    // If it's an empty string or null/undefined from a cleared field, treat as 0
+    if (val === '' || val == null) return 0;
+    // Keep as string if it starts with '=' for later processing
+    if (typeof val === 'string' && val.startsWith('=')) return val;
+    // Otherwise, convert to number
+    return parseFloat(val);
+  }).pipe(z.number({ invalid_type_error: "Amount is required." }).positive('Amount must be positive.')),
   description: z.string().optional(),
 });
 
@@ -107,7 +114,7 @@ export default function AddTransactionForm({ accounts, categories, onFinished, i
       form.reset({
         ...initialData,
         date: new Date(initialData.date),
-        entries: initialData.entries.map(e => ({...e, description: e.description || ''})),
+        entries: initialData.entries.map(e => ({...e, amount: e.amount || ('' as any), description: e.description || ''})),
         useSeparateNarration: initialData.entries.some(e => e.description)
       });
       if (initialData.entries.length > 2) {

@@ -127,7 +127,9 @@
     "id": "acc_1760638196154",
     "bookId": "book_default",
     "name": "VICKY",
-    "categoryId": "cat_1760599855378"
+    "categoryId": "cat_party",
+    "openingBalance": 23492,
+    "openingBalanceType": "debit"
   },
   {
     "id": "acc_1760641123333",
@@ -165,7 +167,9 @@
     "id": "acc_1760759903192",
     "bookId": "book_default",
     "name": "RR",
-    "categoryId": "cat_1760637847923"
+    "categoryId": "cat_1760637847923",
+    "openingBalance": 10000000,
+    "openingBalanceType": "credit"
   },
   {
     "id": "acc_1760797593804",
@@ -205,6 +209,24 @@
     "id": "acc_1761175532808",
     "bookId": "book_default",
     "name": "PRASHANT",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1761177044812",
+    "bookId": "book_default",
+    "name": "Ab Piyush",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1761179502400",
+    "bookId": "book_default",
+    "name": "INTREST",
+    "categoryId": "cat_party"
+  },
+  {
+    "id": "acc_1761179833281",
+    "bookId": "book_default",
+    "name": "Vicky Manoj Telicom",
     "categoryId": "cat_party"
   }
 ]

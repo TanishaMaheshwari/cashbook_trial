@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "acc_1761179212120",
+    "bookId": "book_default",
+    "name": "Intrest ",
+    "categoryId": "cat_equity_book_default",
+    "openingBalance": 0,
+    "openingBalanceType": "debit",
+    "type": "account",
+    "deletedAt": "2025-10-23T00:31:27.315Z"
+  }
+]
