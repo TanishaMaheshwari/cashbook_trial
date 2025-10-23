@@ -1,5 +1,80 @@
 [
   {
+    "date": "2025-10-23T01:08:17.069Z",
+    "description": "Opening Balance for Sunil Lions",
+    "entries": [
+      {
+        "accountId": "acc_1761181697067",
+        "amount": 55000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 55000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761181697072",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-23T01:07:58.185Z",
+    "description": "Opening Balance for Minesh Suresh ji",
+    "entries": [
+      {
+        "accountId": "acc_1761181678183",
+        "amount": 69640,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 69640,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761181678188",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-23T01:04:40.511Z",
+    "description": "Opening Balance for Sumit Surya",
+    "entries": [
+      {
+        "accountId": "acc_1761181480507",
+        "amount": 20000,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 20000,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761181480512",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Gold ka paisa lena",
+    "date": "2025-10-20T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484514093",
+        "type": "debit",
+        "amount": 1325500,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760699692920",
+        "type": "credit",
+        "amount": 1325500,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761181406889",
+    "bookId": "book_default"
+  },
+  {
     "date": "2025-10-23T00:43:58.052Z",
     "description": "Opening Balance for RR",
     "entries": [
@@ -273,7 +348,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1761136064291",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "yellow"
   },
   {
     "description": "Diesel in all cars ",
@@ -336,7 +412,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1761135771892",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "yellow"
   },
   {
     "description": "SUBAHSH JI KO DIYE",
@@ -714,7 +791,8 @@
     ],
     "useSeparateNarration": true,
     "id": "txn_1760699835422",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "yellow"
   },
   {
     "date": "2025-10-16T18:58:43.335Z",

@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Account, Category } from '@/lib/types';
@@ -25,7 +26,6 @@ type CategoryAccountsProps = {
 };
 
 export default function CategoryAccounts({ categoryName, accounts, categories, selectedCategoryId, onCategoryChange }: CategoryAccountsProps) {
-  const isDebitAccount = (type: Account['type']) => ['asset', 'expense'].includes(type);
 
   if (!accounts) {
     return (
@@ -53,8 +53,8 @@ export default function CategoryAccounts({ categoryName, accounts, categories, s
     );
   }
   
-  const totalDebit = accounts.filter(a => isDebitAccount(a.type)).reduce((sum, a) => sum + a.balance, 0);
-  const totalCredit = accounts.filter(a => !isDebitAccount(a.type)).reduce((sum, a) => sum + a.balance, 0);
+  const totalDebit = accounts.filter(a => a.balance >= 0).reduce((sum, a) => sum + a.balance, 0);
+  const totalCredit = accounts.filter(a => a.balance < 0).reduce((sum, a) => sum + Math.abs(a.balance), 0);
 
 
   return (
@@ -84,7 +84,9 @@ export default function CategoryAccounts({ categoryName, accounts, categories, s
             </TableRow>
           </TableHeader>
           <TableBody>
-            {accounts.map((account) => (
+            {accounts.map((account) => {
+              const isDebit = account.balance >= 0;
+              return (
               <TableRow key={account.id}>
                 <TableCell className="py-2">
                   <Link href={`/accounts/${account.id}`} className="font-medium text-primary hover:underline">
@@ -92,14 +94,14 @@ export default function CategoryAccounts({ categoryName, accounts, categories, s
                   </Link>
                 </TableCell>
                 <TableCell className={cn(
-                    "text-right py-2",
-                    isDebitAccount(account.type) ? "text-green-600" : "text-red-600"
+                    "text-right py-2 font-semibold",
+                    isDebit ? "text-green-600" : "text-red-600"
                 )}>
-                  {formatCurrency(account.balance)}
-                  <span className="text-xs text-muted-foreground ml-1">{isDebitAccount(account.type) ? 'Dr' : 'Cr'}</span>
+                  {formatCurrency(Math.abs(account.balance))}
+                  <span className="text-xs text-muted-foreground ml-1">{isDebit ? 'Dr' : 'Cr'}</span>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </CardContent>
