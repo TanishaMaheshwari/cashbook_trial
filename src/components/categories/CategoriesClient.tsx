@@ -26,7 +26,6 @@ type CategoryWithDetails = Category & {
 type CategoriesClientProps = {
   categories: CategoryWithDetails[];
   allCategories: Category[];
-  isDebitCategory: (categoryName: string) => boolean;
 };
 
 const categoryColors = [
@@ -38,7 +37,16 @@ const categoryColors = [
   'bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/30',
 ];
 
-export default function CategoriesClient({ categories, allCategories, isDebitCategory }: CategoriesClientProps) {
+// Define which categories normally have a debit balance
+const DEBIT_BALANCE_CATEGORY_NAMES = ['asset', 'expense', 'parties', 'cash', 'gold and silver', 'vc', 'other', 'rr'];
+
+const isDebitCategory = (categoryName: string) => {
+    const lowerCategoryName = categoryName.toLowerCase();
+    return DEBIT_BALANCE_CATEGORY_NAMES.some(debitCat => lowerCategoryName.includes(debitCat));
+};
+
+
+export default function CategoriesClient({ categories, allCategories }: CategoriesClientProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { activeBook } = useBooks();
@@ -151,6 +159,9 @@ export default function CategoriesClient({ categories, allCategories, isDebitCat
       <div className="md:columns-2 gap-6 space-y-6">
         {categories.map((category, index) => {
           const normallyDebit = isDebitCategory(category.name);
+          // The raw totalBalance is Debit - Credit.
+          // If it's a "normally debit" category, a positive balance is debit.
+          // If it's a "normally credit" category, a negative balance is credit.
           const totalIsDebit = normallyDebit ? category.totalBalance >= 0 : category.totalBalance < 0;
 
           return (
@@ -210,6 +221,9 @@ export default function CategoriesClient({ categories, allCategories, isDebitCat
               {category.accounts.length > 0 ? (
                 <ul className="space-y-2">
                   {category.accounts.map((account) => {
+                    // Raw balance is Debit - Credit
+                    // If it's a "normally debit" category, a positive balance is a debit balance.
+                    // If it's a "normally credit" category, a negative balance is a credit balance.
                     const isDebit = normallyDebit ? account.balance >= 0 : account.balance < 0;
                     return (
                      <li key={account.id} className="flex justify-between items-center bg-background/50 p-3 rounded-md">
