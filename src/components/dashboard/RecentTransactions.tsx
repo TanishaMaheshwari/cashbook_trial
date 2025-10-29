@@ -41,6 +41,7 @@ import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } fro
 import { useBooks } from '@/context/BookContext';
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 
 type RecentTransactionsProps = {
@@ -67,6 +68,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   const [isPending, startTransition] = useTransition();
   const [isHighlightPending, startHighlightTransition] = useTransition();
   const { activeBook } = useBooks();
+  const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDescriptor, setSortDescriptor] = useState('date-desc');
@@ -97,7 +99,11 @@ export default function RecentTransactions({ transactions: initialTransactions, 
     startTransition(async () => {
       const result = await deleteTransactionAction(activeBook.id, transactionId);
       if (!result.success) {
-        console.error(result.message);
+        toast({
+            title: 'Error Deleting Transaction',
+            description: result.message,
+            variant: 'destructive',
+        });
       }
     });
   };
@@ -109,8 +115,16 @@ export default function RecentTransactions({ transactions: initialTransactions, 
         if(result.success) {
             setSelectedTransactions([]);
             setIsSelectMode(false);
+            toast({
+                title: 'Success',
+                description: `${selectedTransactions.length} transactions deleted.`,
+            });
         } else {
-            console.error(result.message);
+            toast({
+                title: 'Error Deleting Transactions',
+                description: result.message,
+                variant: 'destructive',
+            });
         }
     });
   };

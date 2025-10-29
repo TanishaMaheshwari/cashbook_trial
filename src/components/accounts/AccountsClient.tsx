@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -36,6 +37,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from '../ui/checkbox';
 import { useBooks } from '@/context/BookContext';
 import EditAccountForm from './EditAccountForm';
+import { useToast } from '@/hooks/use-toast';
 
 
 type AccountWithDetails = Account & {
@@ -62,6 +64,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   const [filter, setFilter] = useState('all');
   const { activeBook } = useBooks();
   const [isSelectMode, setIsSelectMode] = useState(false);
+  const { toast } = useToast();
 
   const getCategoryName = (categoryId?: string) => {
     if (!categoryId) return 'Uncategorized';
@@ -77,9 +80,9 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     startTransition(async () => {
       const result = await deleteAccountAction(activeBook.id, accountId);
       if (result.success) {
-        // toast({ title: "Success", description: result.message });
+        toast({ title: "Success", description: result.message });
       } else {
-        // toast({ title: "Error", description: result.message, variant: "destructive" });
+        toast({ title: "Error", description: result.message, variant: "destructive" });
       }
     });
   };
@@ -89,11 +92,11 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
     startTransition(async () => {
       const result = await deleteMultipleAccountsAction(activeBook.id, selectedAccounts);
       if (result.success) {
-        // toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
+        toast({ title: "Success", description: `${selectedAccounts.length} accounts deleted.` });
         setSelectedAccounts([]);
         setIsSelectMode(false);
       } else {
-        // toast({ title: "Error", description: result.message, variant: "destructive" });
+        toast({ title: "Error", description: result.message, variant: "destructive" });
       }
     });
   };
@@ -514,6 +517,7 @@ export default function AccountsClient({ initialAccounts, categories, totals }: 
   );
 
     
+
 
 
 
