@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Book } from '@/lib/types';
@@ -20,31 +21,43 @@ export const BookProvider = ({ children, initialBooks }: { children: ReactNode, 
   const router = useRouter();
 
   useEffect(() => {
+    // This effect runs when `initialBooks` changes (e.g., after a server action)
+    setBooks(initialBooks);
+
     const storedBookId = localStorage.getItem('activeBookId');
-    let bookToActivate = null;
+    let bookToActivate: Book | null = null;
     
-    if (storedBookId) {
+    // Try to find the currently active book within the new list of books
+    if (activeBook) {
+      bookToActivate = initialBooks.find(b => b.id === activeBook.id) || null;
+    }
+
+    // If there's no active book, try to use the stored one
+    if (!bookToActivate && storedBookId) {
         bookToActivate = initialBooks.find(b => b.id === storedBookId) || null;
     }
 
-    // If no stored book or stored book doesn't exist, use the first book.
+    // If still no book, default to the first one in the list
     if (!bookToActivate && initialBooks.length > 0) {
         bookToActivate = initialBooks[0];
     }
     
-    setActiveBookState(bookToActivate);
+    // Only update state if the active book has actually changed
+    if (bookToActivate?.id !== activeBook?.id) {
+        setActiveBookState(bookToActivate);
+    }
     
+    // If there's an active book, ensure its cookie is set
     if (bookToActivate) {
         document.cookie = `activeBookId=${bookToActivate.id}; path=/; max-age=31536000`; // 1 year
         localStorage.setItem('activeBookId', bookToActivate.id);
-    } else {
+    } else if (!bookToActivate && activeBook) {
+        // This handles the case where the active book was deleted
         document.cookie = 'activeBookId=; path=/; max-age=-1';
         localStorage.removeItem('activeBookId');
     }
     
     setIsLoading(false);
-    // Update books state if the initialBooks prop changes (e.g. after adding/deleting a book)
-    setBooks(initialBooks);
 
   }, [initialBooks]);
   
@@ -57,8 +70,8 @@ export const BookProvider = ({ children, initialBooks }: { children: ReactNode, 
       document.cookie = 'activeBookId=; path=/; max-age=-1';
       localStorage.removeItem('activeBookId');
     }
-    // Refresh the page to reload data for the new book
-    router.refresh();
+    // Use window.location.href to force a full-page reload, breaking Next.js cache.
+    window.location.href = '/';
   };
 
   const value = { books, activeBook, setActiveBook, isLoading };

@@ -109,6 +109,8 @@ export const getBooks = async (): Promise<Book[]> => {
   if (books.length === 0) {
       const defaultBook = { id: 'book_default', name: 'CASHBOOK' };
       await writeData<Book>(booksFilePath, [defaultBook]);
+      // Also create default categories for the default book
+      await getCategories('book_default');
       return [defaultBook];
   }
   return books;
@@ -119,9 +121,14 @@ export const addBook = async (name: string): Promise<Book> => {
   if (books.find(b => b.name.toLowerCase() === name.toLowerCase())) {
     throw new Error('A book with this name already exists.');
   }
-  const newBook: Book = { id: `book_${Date.now()}`, name };
+  const newBookId = `book_${Date.now()}`;
+  const newBook: Book = { id: newBookId, name };
   books.push(newBook);
   await writeData<Book>(booksFilePath, books);
+  
+  // Create default categories for the new book
+  await getCategories(newBookId);
+
   return newBook;
 };
 
@@ -181,10 +188,12 @@ const getOpeningBalanceEquityAccount = async(bookId: string): Promise<Account> =
     let obeAccount = allAccounts.find(a => a.id === `acc_opening_balance_equity_${bookId}`);
     
     if (!obeAccount) {
-        // Find or create the equity category
-        const allCategories = await readData<Category>(categoriesFilePath);
-        let equityCategory = allCategories.find(c => c.bookId === bookId && c.name.toLowerCase() === 'equity');
+        // Find or create the equity category for THIS book
+        let equityCategory = (await getCategories(bookId)).find(c => c.name.toLowerCase() === 'equity');
+
         if (!equityCategory) {
+            // This should ideally not happen if getCategories is called first, but as a fallback:
+            const allCategories = await readData<Category>(categoriesFilePath);
             equityCategory = { id: `cat_equity_${bookId}`, name: 'Equity', bookId };
             allCategories.push(equityCategory);
             await writeData<Category>(categoriesFilePath, allCategories);
@@ -203,18 +212,19 @@ const getOpeningBalanceEquityAccount = async(bookId: string): Promise<Account> =
 }
 
 export const getCategories = async (bookId: string): Promise<Category[]> => {
-  const categories = await readData<Category>(categoriesFilePath);
-  const bookCategories = categories.filter(c => c.bookId === bookId);
+  const allCategories = await readData<Category>(categoriesFilePath);
+  const bookCategories = allCategories.filter(c => c.bookId === bookId);
 
-  if (bookCategories.length === 0 && bookId === 'book_default') {
+  if (bookCategories.length === 0) {
+      // If no categories for this book, create the defaults
       const defaultCategories: Category[] = [
-        { id: 'cat_cash_default', name: 'Cash', bookId },
-        { id: 'cat_capital_default', name: 'Capital', bookId },
-        { id: 'cat_party_default', name: 'Parties', bookId },
-        { id: 'cat_expense_default', name: 'Expenses', bookId },
+        { id: `cat_cash_${bookId}`, name: 'Cash & Bank', bookId },
+        { id: `cat_capital_${bookId}`, name: 'Capital', bookId },
+        { id: `cat_party_${bookId}`, name: 'Parties', bookId },
+        { id: `cat_equity_${bookId}`, name: 'Equity', bookId }, // Ensure Equity is created by default
       ];
-      const allCategories = [...categories, ...defaultCategories];
-      await writeData<Category>(categoriesFilePath, allCategories);
+      const newAllCategories = [...allCategories, ...defaultCategories];
+      await writeData<Category>(categoriesFilePath, newAllCategories);
       return defaultCategories;
   }
   return bookCategories;
@@ -222,7 +232,16 @@ export const getCategories = async (bookId: string): Promise<Category[]> => {
 
 export const getAccounts = async (bookId: string): Promise<Account[]> => {
     const allAccounts = await readData<Account>(accountsFilePath);
-    return allAccounts.filter(a => a.bookId === bookId);
+    const bookAccounts = allAccounts.filter(a => a.bookId === bookId);
+    
+    // Ensure Opening Balance Equity account exists for this book
+    if (!bookAccounts.some(a => a.id === `acc_opening_balance_equity_${bookId}`)) {
+        await getOpeningBalanceEquityAccount(bookId);
+        // Re-fetch to include the newly created account
+        const updatedAccounts = await readData<Account>(accountsFilePath);
+        return updatedAccounts.filter(a => a.bookId === bookId);
+    }
+    return bookAccounts;
 };
 
 export const getTransactions = async (bookId: string): Promise<Transaction[]> => {

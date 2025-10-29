@@ -1,5 +1,38 @@
 [
   {
+    "id": "book_1761716524975",
+    "name": "TRY",
+    "type": "book",
+    "deletedAt": "2025-10-29T05:46:32.800Z"
+  },
+  {
+    "id": "book_1760481482686",
+    "name": "BGS",
+    "type": "book",
+    "deletedAt": "2025-10-29T05:46:31.536Z"
+  },
+  {
+    "id": "cat_bg_cash",
+    "name": "BG Cash Accounts",
+    "bookId": "book_1760481482686",
+    "type": "category",
+    "deletedAt": "2025-10-29T05:46:31.536Z"
+  },
+  {
+    "id": "cat_bg_main",
+    "name": "BG Main",
+    "bookId": "book_1760481482686",
+    "type": "category",
+    "deletedAt": "2025-10-29T05:46:31.536Z"
+  },
+  {
+    "id": "cat_bg_clients",
+    "name": "BG Clients",
+    "bookId": "book_1760481482686",
+    "type": "category",
+    "deletedAt": "2025-10-29T05:46:31.536Z"
+  },
+  {
     "description": "Ronak ne diye",
     "date": "2025-10-26T05:53:00.039Z",
     "entries": [

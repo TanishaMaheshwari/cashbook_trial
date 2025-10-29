@@ -184,6 +184,7 @@ export async function addBookAction(name: string) {
   try {
     const newBook = await addBook(name);
     revalidatePath('/settings');
+    revalidatePath('/');
     return { success: true, message: `Book '${name}' created.`, book: newBook };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
