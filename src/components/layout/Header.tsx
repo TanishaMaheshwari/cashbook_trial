@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -77,7 +78,7 @@ export default function Header({ accounts = [], categories = [], backHref }: Hea
               {!isDashboard && (
                 <Button onClick={() => setAddTxSheetOpen(true)} className="hidden md:inline-flex">
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Transaction
+                  Add New
                 </Button>
               )}
               

@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -260,7 +261,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
   if (!isMounted) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-headline">All Transactions</h1>
+        <h1 className="text-3xl font-headline">Transactions</h1>
         <Card>
           <CardContent className="p-6">
             <p>Loading...</p>
@@ -295,7 +296,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
           </div>
           <Button onClick={handleAdd}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Transaction
+              Add New
           </Button>
         </div>
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">

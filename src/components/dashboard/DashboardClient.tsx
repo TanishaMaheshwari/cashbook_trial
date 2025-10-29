@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -81,7 +82,7 @@ export default function DashboardClient({ initialTransactions, accounts, categor
 
           <Button onClick={() => setAddTxSheetOpen(true)} size="lg" className="w-full">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Transaction
+            Add New
           </Button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
