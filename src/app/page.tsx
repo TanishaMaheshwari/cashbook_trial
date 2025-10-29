@@ -1,7 +1,10 @@
+
 import { getAccounts, getCategories, getTransactions, getBooks } from '@/lib/data';
 import DashboardClient from '@/components/dashboard/DashboardClient';
 import { cookies } from 'next/headers';
 import Header from '@/components/layout/Header';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const activeBookId = cookies().get('activeBookId')?.value || 'book_default';

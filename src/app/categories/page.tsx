@@ -4,6 +4,8 @@ import type { Account, Transaction, Category } from '@/lib/types';
 import CategoriesClient from '@/components/categories/CategoriesClient';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 type AccountWithBalance = Account & { balance: number };
 type CategoryWithDetails = Category & {
   accounts: AccountWithBalance[];

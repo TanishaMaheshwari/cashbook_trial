@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import AccountLedgerClient from '@/components/accounts/AccountLedgerClient';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
 
 type LedgerEntry = {
   transactionId: string;

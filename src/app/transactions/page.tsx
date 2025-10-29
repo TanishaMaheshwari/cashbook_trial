@@ -4,6 +4,8 @@ import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import { cookies } from 'next/headers';
 import Header from '@/components/layout/Header';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AllTransactionsPage() {
   const activeBookId = cookies().get('activeBookId')?.value || 'book_default';
 
