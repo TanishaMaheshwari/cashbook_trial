@@ -1,29 +1,104 @@
 [
   {
-    "description": "",
-    "date": "2025-10-25T19:20:50.631Z",
+    "description": "Entry 0",
+    "date": "2025-10-14T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760759903192",
+        "type": "debit",
+        "amount": 1703500,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484862841",
+        "type": "credit",
+        "amount": 1703500,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761674871706",
+    "bookId": "book_default"
+  },
+  {
+    "description": "Cash rec from bhu",
+    "date": "2025-10-28T18:03:02.369Z",
     "entries": [
       {
         "accountId": "acc_1760484492379",
         "type": "debit",
-        "amount": 50000,
-        "description": "REC FROM"
+        "amount": 2000000,
+        "description": ""
       },
       {
         "accountId": "acc_1760758698028",
         "type": "credit",
-        "amount": 100000,
-        "description": "CASH REC"
+        "amount": 2000000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761674607762",
+    "bookId": "book_default"
+  },
+  {
+    "description": "cash nirmal mama rec",
+    "date": "2025-10-25T18:30:00.000Z",
+    "entries": [
+      {
+        "accountId": "acc_1760484492379",
+        "type": "debit",
+        "amount": 500000,
+        "description": ""
       },
+      {
+        "accountId": "acc_1760484993171",
+        "type": "credit",
+        "amount": 500000,
+        "description": ""
+      }
+    ],
+    "useSeparateNarration": false,
+    "id": "txn_1761619313667",
+    "bookId": "book_default"
+  },
+  {
+    "description": "cash paid hm",
+    "date": "2025-10-24T18:30:00.000Z",
+    "entries": [
       {
         "accountId": "acc_1760484514093",
         "type": "debit",
-        "amount": 50000,
-        "description": "BHU SE AYE"
+        "amount": 5000000,
+        "description": ""
+      },
+      {
+        "accountId": "acc_1760484492379",
+        "type": "credit",
+        "amount": 5000000,
+        "description": ""
       }
     ],
-    "useSeparateNarration": true,
-    "id": "txn_1761420123757",
+    "useSeparateNarration": false,
+    "id": "txn_1761619274675",
+    "bookId": "book_default"
+  },
+  {
+    "date": "2025-10-25T19:27:41.859Z",
+    "description": "Opening Balance for RU",
+    "entries": [
+      {
+        "accountId": "acc_1761420461858",
+        "amount": 2500,
+        "type": "debit"
+      },
+      {
+        "accountId": "acc_opening_balance_equity_book_default",
+        "amount": 2500,
+        "type": "credit"
+      }
+    ],
+    "id": "txn_1761420461860",
     "bookId": "book_default"
   },
   {
@@ -51,7 +126,8 @@
     ],
     "useSeparateNarration": true,
     "id": "txn_1761228170516",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "green"
   },
   {
     "description": "Dj rec cash against 019",
@@ -288,7 +364,8 @@
     ],
     "useSeparateNarration": false,
     "id": "txn_1761179634836",
-    "bookId": "book_default"
+    "bookId": "book_default",
+    "highlight": "blue"
   },
   {
     "description": "INT OF REM",

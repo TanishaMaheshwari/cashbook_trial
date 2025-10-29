@@ -258,5 +258,11 @@
     "bookId": "book_default",
     "name": "DJ",
     "categoryId": "cat_1760637847923"
+  },
+  {
+    "id": "acc_1761420461858",
+    "bookId": "book_default",
+    "name": "RU",
+    "categoryId": "cat_party"
   }
 ]

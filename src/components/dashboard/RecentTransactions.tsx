@@ -277,7 +277,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-headline">All Transactions</h1>
+              <h1 className="text-2xl font-headline">Transactions</h1>
               <div className="flex items-center gap-2">
                   <Button variant="outline" size="icon" asChild>
                       <Link href="/"><Scale /></Link>
@@ -403,7 +403,7 @@ export default function RecentTransactions({ transactions: initialTransactions, 
               </AlertDialog>
           ) : (
             <>
-             <CardTitle className={cn(isTransactionsPage && 'sr-only')}>{isTransactionsPage ? "All Transactions" : "Recent Transactions"}</CardTitle>
+             <CardTitle className={cn(isTransactionsPage && 'sr-only')}>Recent Transactions</CardTitle>
              {!isTransactionsPage && <CardDescription>A quick look at your latest financial activities.</CardDescription>}
             </>
           )}
